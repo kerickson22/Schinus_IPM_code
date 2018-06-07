@@ -469,53 +469,72 @@ setwd("/Users/curculion/Dropbox/UM_Dissertation_LaTeX-master/untitled folder/Fig
 
 #(i) Probability of being a reproductive female at time t: 
 
-
+#(a) Model probability of being reproductive (overall)
 mod_repro<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t, family=binomial)
-
 summary(mod_repro)
 #Diameter term is not significant, so remove it: 
 mod_repro<-glm(larges$Rep_tplus1 ~ larges$Height_t, family=binomial)
 
-setwd("/Users/curculion/Dropbox/UM_Dissertation_LaTeX-master/untitled folder/Figures/New_July")
+p.vec_overall[12]<-mod_repro$coeff[1]
+p.vec_E[13]<-mod_repro$coeff[2]
 
+#(b) Model probability of being reproductive (by biotype)
+mod_repro_lineage<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t + larges$Genetic_type, family=binomial)
+summary(mod_repro_lineage)
+#Diameter term is not significant, so remove it: 
+mod_repro_lineage<-glm(larges$Rep_tplus1 ~ larges$Height_t +larges$Genetic_type, family=binomial)
+#Hybrid and Eastern are not different from eachother so collapse them: 
 
-b0<-mod_repro$coefficients[1]
-b1<-mod_repro$coefficients[2]
-y<-((exp(b0+b1*x2seq_larges)/(1+exp(b0+b1*x2seq_larges))))
+lineage4<-rep(0, length(larges$Genetic_type))
+for (i in 1:length(larges$Genetic_type)) {
+  if (larges$Genetic_type[i]=="hybrid" || larges$Genetic_type[i]=="eastern") {lineage3[i]<-"E-H"}
+  else{lineage4[i]<-"Western"}
+}
 
-png(file="reproduction_overall.png", width=10, height=10, units="in", res=300)
-par(ps=24)
-par(mar=c(5, 5, 4, 2))
-plot(x2seq_larges, y, xlab="Height at time t (cm)", ylab="\n \n Probability of Reproducing", lwd=3, type='l', lty=5)
-dev.off()
+larges3<-cbind(larges, lineage4)
 
+mod_repro_lineage2<-glm(larges3$Rep_tplus1~ larges3$Height_t + larges3$lineage4, family=binomial)
+summary(mod_repro_lineage2)
 
+#Eastern and Hybrid have same probabilty of reproducing, but W differs
+
+p.vec_E[12]<-mod_repro_lineage2$coeff[1]
+p.vec_E[13]<-mod_repro_lineage2$coeff[2]
+
+p.vec_H[12]<-mod_repro_lineage2$coeff[1]
+p.vec_H[13]<-mod_repro_lineage2$coeff[2]
+
+p.vec_W[12]<-mod_repro_lineage2$coeff[1]+mod_repro_lineage2$coeff[3]
+p.vec_W[13]<-mod_repro_lineage2$coeff[2]
 
 
 #(ii) Given that an individual is a reproductive female of size[diameter=x, height=y] and genetic type z[known from site], how many fruits do they produce? 
 #Depends on diameter and genetic type only (from biomass allocation chapter)
+###TODO: Make sure this section matches dissertation wrt values uses for 14, especially for overall model 
 
 setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Allometry")
 load("biomass_170315.RData")
 
-setwd("/Users/curculion/Dropbox/UM_Dissertation_LaTeX-master/untitled folder/Figures/New_July")
+#(a) Model fecundity (overall) 
+#This function depends only on diameter at base (because that's how it was calculated in allometry paper) 
+#OR, do I want to model using both diameter and height because the data is available 
 
 LHS$diam_base<-LHS$diam_base*10 #convert from cm to mm
-fruit_mod<-lm(LHS$Fruit_No~LHS$diam_base + LHS$Height)
+fruit_mod<-lm(LHS$Fruit_No~0 + LHS$diam_base)
+#
+fruit_mod<-lm(LHS$Fruit_No~0 + LHS$diam_base + LHS$Height)
 summary(fruit_mod)
-#Only diameter:
-fruit_mod2<-lm(LHS$Fruit_No~0+ LHS$diam_base)
 
+p.vec_overall[14]<-fruit_mod$coeff[1]
+#(b) Model fecundity (by biotype)
 
-b1<-fruit_mod2$coeff[1]
-y<-x1seq_larges*x1seq_larges*b1
+mod_fruit_production<-lm(LHS$Fruit_No ~ 0 + LHS$Height:LHS$Genetic_Type)
+summary(mod_fruit_production)
 
+p.vec_E[14]<-mod_fruit_production$coeff[1]
+p.vec_H[14]<-mod_fruit_production$coeff[2]
+p.vec_W[14]<-mod_fruit_production$coeff[3]
 
-png(file="fecundity_overall.png", width=10, height=10, units="in", res=300)
-par(ps=24)
-par(mar=c(5, 5, 4, 2))
-plot(x1seq_larges, y, xlab="Diameter at time t (mm)", ylab="\n \n Number of Offspring", lwd=3, type='l')
-dev.off()
 
 
 #(iii) Recruitment of seedlings from fruits..... 
