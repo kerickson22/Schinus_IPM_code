@@ -12,15 +12,7 @@ setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation
 setwd("C:/Users/KE2/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data") 
 
 
-#Code to Line 399 saved in demography_170208.RData
-#load("demography_170208.RData")
-#load("demography_170214.RData")
-#load("demography_170220_2.RData")
-#load("170228.RData")
-#load("170316.RData")
-#load("170329.RData")
-#load("170406.RData")
-#Code run until line 1153
+load("demography_overall.RData")
 
 
 demog<-read.csv("demography_15_clean.csv", head=T)
