@@ -315,140 +315,154 @@ p.vec_W[1]<-surv_mod_larges_lineage2$coeff[1]
 p.vec_W[2]<-surv_mod_larges_lineage2$coeff[2]
 p.vec_W[3]<-surv_mod_larges_lineage2$coeff[3]
 
-####GROWTH #####
+##### Modeling growth 
+#Height (as well as diameter) at t+1 is a function of height_t AND diam_t
 
-#Height at t+1 is a function of height_t AND diam_t
-
-
-#Model growth on the D1 domain: 
+#(a) Model growth on the D1 domain (overall): 
 growth_mod_seedlings<-manova(cbind(seedlings$Diameter_tplus1, seedlings$Height_tplus1) ~ seedlings$Diameter_t+seedlings$Height_t)
-
 summary(growth_mod_seedlings)
 
+#Grab parameters associated with future diameter
+p.vec_overall[23]<-growth_mod_seedlings$coeff[1,1]
+p.vec_overall[24]<-growth_mod_seedlings$coeff[2,1]
+p.vec_overall[25]<-growth_mod_seedlings$coeff[3,1]
 
-#Plot diameter tplus1
-b0<-growth_mod_seedlings$coeff[1,1]
-b1<-growth_mod_seedlings$coeff[2,1]
-b2<-growth_mod_seedlings$coeff[3,1]
+#Grab parameters associated with future height
+p.vec_overall[27]<-growth_mod_seedlings$coeff[1,2]
+p.vec_overall[28]<-growth_mod_seedlings$coeff[2,2]
+p.vec_overall[29]<-growth_mod_seedlings$coeff[3,2]
 
-
-z_diam<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0+b1*a + b2*b))
-
-#Plot height tplus1
-b0<-growth_mod_seedlings$coeff[1,2]
-b1<-growth_mod_seedlings$coeff[2,2]
-b2<-growth_mod_seedlings$coeff[3,2]
-
-z_height<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0+b1*a + b2*b))
+#To model variance in D1 growth for diameter and height, use separate linear models and store the variance: 
 
 
-nrz<-nrow(z_diam)
-ncz<-ncol(z_diam)
-nbcol<-100
-jet.colors<-colorRampPalette(c("blue", "green"))
-color_diam<-jet.colors(nbcol)
-zfacet_diam<-z_diam[-1, -1] + z_diam[-1, -ncz] + z_diam[-nrz, -1] + z_diam[-nrz, -ncz]
-facetcol_diam<-cut(zfacet_diam, nbcol)
-
-
-nrz<-nrow(z_height)
-ncz<-ncol(z_height)
-nbcol<-100
-jet.colors<-colorRampPalette(c("blue", "green"))
-color_height<-jet.colors(nbcol)
-zfacet_height<-z_height[-1, -1] + z_height[-1, -ncz] + z_height[-nrz, -1] + z_height[-nrz, -ncz]
-facetcol_height<-cut(zfacet_height, nbcol)
-
-
-png(file="growth_seedlings_overall.png", width=8, height=16, units="in", res=300)
-par(mfrow=c(2, 1), ps=24)
-persp(x1seq_seedlings, x2seq_seedlings, z_diam, theta=-30, xlab="\n Diameter at t (mm)", ylab="\n \n Height at t (cm)",ticktype="detailed", col = color_diam[facetcol_diam], zlab="\n \n Diameter at t + 1", main="(A) Diameter at t + 1", nticks=4) 
-
-persp(x1seq_seedlings, x2seq_seedlings, z_height, theta=-30, xlab="\n Diameter at t (mm)", ylab="\n \n Height at t (cm)", ticktype="detailed",  col= color_height[facetcol_height], zlab="\n \n Height at t + 1", main="(B) Height at t + 1", nticks=4)  
-dev.off()
-
-
-#Model growth of individuals in the D2 domain (overall)
-
-growth_mod_larges<-manova(cbind(larges$Diameter_tplus1, larges$Height_tplus1) ~ larges$Diameter_t+larges$Height_t)
-
-summary(growth_mod_larges)
-
-#Plot diameter tplus1
-b0<-growth_mod_larges$coeff[1,1]
-b1<-growth_mod_larges$coeff[2,1]
-b2<-growth_mod_larges$coeff[3,1]
-
-
-z_diam<-outer(x1seq_larges, x2seq_larges, function(a,b) (b0+b1*a + b2*b))
-
-#Plot height tplus1
-b0<-growth_mod_larges$coeff[1,2]
-b1<-growth_mod_larges$coeff[2,2]
-b2<-growth_mod_larges$coeff[3,2]
-
-z_height<-outer(x1seq_larges, x2seq_larges, function(a,b) (b0+b1*a + b2*b))
-
-
-nrz<-nrow(z_diam)
-ncz<-ncol(z_diam)
-nbcol<-100
-jet.colors<-colorRampPalette(c("blue", "green"))
-color_diam<-jet.colors(nbcol)
-zfacet_diam<-z_diam[-1, -1] + z_diam[-1, -ncz] + z_diam[-nrz, -1] + z_diam[-nrz, -ncz]
-facetcol_diam<-cut(zfacet_diam, nbcol)
-
-
-nrz<-nrow(z_height)
-ncz<-ncol(z_height)
-nbcol<-100
-jet.colors<-colorRampPalette(c("blue", "green"))
-color_height<-jet.colors(nbcol)
-zfacet_height<-z_height[-1, -1] + z_height[-1, -ncz] + z_height[-nrz, -1] + z_height[-nrz, -ncz]
-facetcol_height<-cut(zfacet_height, nbcol)
-
-
-
-png(file="growth_D2_overall.png", width=8, height=16, units="in", res=300)
-par(mfrow=c(2, 1), ps=24)
-persp(x1seq_larges, x2seq_larges, z_diam, theta=-30, xlab="\n Diameter at t (mm)", ylab="\n \n Height at t (cm)",ticktype="detailed", col = color_diam[facetcol_diam], zlab="\n \n Diameter at t + 1", main="(A) Diameter at t + 1", nticks=4) 
-
-persp(x1seq_larges, x2seq_larges, z_height, theta=-30, xlab="\n Diameter at t (mm)", ylab="\n \n Height at t (cm)", ticktype="detailed",  col= color_height[facetcol_height], zlab="\n \n Height at t + 1", main=" (B) Height at t + 1", nticks=4)  
-dev.off()
-
-
-#Capture variance in growth for modeling size distribution in D2 at time t+1:
+#First, model variance in growth for future diameter
 growth_mod_diam_seedlings<-lm(seedlings$Diameter_tplus1 ~ seedlings$Diameter_t+seedlings$Height_t)
 summary(growth_mod_diam_seedlings)
+p.vec_overall[26]<-summary(growth_mod_diam_seedlings)$sigma
 
-growth_mod_diam_seedlings2<-lm(seedlings$Diameter_tplus1~ 0+seedlings$Diameter_t)
-summary(growth_mod_diam_seedlings2)
-
-sigma_growth_diam_seedlings<-summary(growth_mod_diam_seedlings)$sigma
-sigma_growth_diam_seedlings2<-summary(growth_mod_diam_seedlings2)$sigma
-
-growth_mod_diam_larges<-lm(larges$Diameter_tplus1 ~ larges$Diameter_t+larges$Height_t)
-summary(growth_mod_diam_larges)
-
-growth_mod_diam_larges2<-lm(larges$Diameter_tplus1~ larges$Diameter_t)
-summary(growth_mod_diam_larges2)
-
-sigma_growth_diam_larges<-summary(growth_mod_diam_larges)$sigma
-sigma_growth_diam_larges2<-summary(growth_mod_diam_larges2)$sigma
-
-
+#Then, model variance in growth for future height
 growth_mod_height_seedlings<-lm(seedlings$Height_tplus1 ~ seedlings$Diameter_t + seedlings$Height_t)
 summary(growth_mod_height_seedlings)
+p.vec_overall[30]<-summary(growth_mod_height_seedlings)$sigma
 
-growth_mod_height_larges<-lm(larges$Height_tplus1 ~ larges$Diameter_t + larges$Height_t)
+
+#(b) Modeling D1 growth (by biotype)
+growth_mod_seedlings_lineage<-manova(cbind(seedlings$Diameter_tplus1, seedlings$Height_tplus1) ~ seedlings$Diameter_t+seedlings$Height_t+seedlings$Genetic_type)
+summary(growth_mod_seedlings_lineage)
+#Lineage does not appear to have an effect on seedling growth, so use overall model for all biotypes
+
+#Capture parameters associated with predicting future diameter 
+p.vec_E[23]<-growth_mod_seedlings$coeff[1,1]
+p.vec_E[24]<-growth_mod_seedlings$coeff[2,1]
+p.vec_E[25]<-growth_mod_seedlings$coeff[3,1]
+
+p.vec_H[23]<-growth_mod_seedlings$coeff[1,1]
+p.vec_H[24]<-growth_mod_seedlings$coeff[2,1]
+p.vec_H[25]<-growth_mod_seedlings$coeff[3,1]
+
+p.vec_W[23]<-growth_mod_seedlings$coeff[1,1]
+p.vec_W[24]<-growth_mod_seedlings$coeff[2,1]
+p.vec_W[25]<-growth_mod_seedlings$coeff[3,1]
+
+#Grab parameter associated with variance in D1 growth for diameter
+p.vec_E[26]<-summary(growth_mod_diam_seedlings)$sigma
+p.vec_H[26]<-summary(growth_mod_diam_seedlings)$sigma
+p.vec_W[26]<-summary(growth_mod_diam_seedlings)$sigma
+
+#Grab parameter associated with variance in D1 growth for height
+p.vec_E[30]<-summary(growth_mod_height_seedlings)$sigma
+p.vec_H[30]<-summary(growth_mod_height_seedlings)$sigma
+p.vec_W[30]<-summary(growth_mod_height_seedlings)$sigma
+
+#Grab parameters associated with predicting future height
+p.vec_E[27]<-growth_mod_seedlings$coeff[1,2]
+p.vec_E[28]<-growth_mod_seedlings$coeff[2,2]
+p.vec_E[29]<-growth_mod_seedlings$coeff[3,2]
+
+p.vec_H[27]<-growth_mod_seedlings$coeff[1,2]
+p.vec_H[28]<-growth_mod_seedlings$coeff[2,2]
+p.vec_H[29]<-growth_mod_seedlings$coeff[3,2]
+
+p.vec_W[27]<-growth_mod_seedlings$coeff[1,2]
+p.vec_W[28]<-growth_mod_seedlings$coeff[2,2]
+p.vec_W[29]<-growth_mod_seedlings$coeff[3,2]
+
+#(c) Modeling growth in D2 domain (overall)
+growth_mod_larges<-manova(cbind(larges$Diameter_tplus1, larges$Height_tplus1) ~ larges$Diameter_t+larges$Height_t)
+summary(growth_mod_larges)
+
+#Store parameters associated with modeling future growth in diameter
+p.vec_overall[4]<-growth_mod_larges$coeff[1,1]
+p.vec_overall[5]<-growth_mod_larges$coeff[2,1]
+p.vec_overall[6]<-growth_mod_larges$coeff[3,1]
+
+#Model variance in growth in diameter: 
+
+growth_mod_diam_larges<-lm(larges$Diameter_tplus1 ~ larges$Diameter_t + larges$Height_t + larges$Genetic_type)
+summary(growth_mod_diam_larges)
+
+p.vec_overall[7]<-summary(growth_mod_diam_larges)$sigma
+
+#Store parameters associated with modeling future growth in height
+p.vec_overall[8]<-growth_mod_larges$coeff[1,2]
+p.vec_overall[9]<-growth_mod_larges$coeff[2,2]
+p.vec_overall[10]<-growth_mod_larges$coeff[3,2]
+
+#Model variance in growth in height: 
+
+growth_mod_height_larges<-lm(larges$Height_tplus1 ~ larges$Diameter_t + larges$Height_t + larges$Genetic_type)
 summary(growth_mod_height_larges)
+p.vec_overall[11]<-summary(growth_mod_height_larges)$sigma
 
 
-sigma_growth_height_seedlings<-summary(growth_mod_height_seedlings)$sigma
-sigma_growth_height_larges<-summary(growth_mod_height_larges)$sigma
+#(d) Modeling growth in D2 by biotype
+
+growth_mod_larges_lineage<-manova(cbind(larges$Diameter_tplus1, larges$Height_tplus1) ~ larges$Diameter_t+larges$Height_t+larges$Genetic_type)
+summary(growth_mod_larges_lineage)
+#BUT lineage DOES have an effect on the growth of the larger individuals in D2
+
+#Store parameters associated with growth of D2 individuals in diameter
+p.vec_E[4]<-growth_mod_larges_lineage$coeff[1,1]
+p.vec_E[5]<-growth_mod_larges_lineage$coeff[2,1]
+p.vec_E[6]<-growth_mod_larges_lineage$coeff[3,1]
+
+p.vec_H[4]<-growth_mod_larges_lineage$coeff[1,1] + growth_mod_larges_lineage$coeff[4,1]
+p.vec_H[5]<-growth_mod_larges_lineage$coeff[2,1]
+p.vec_H[6]<-growth_mod_larges_lineage$coeff[3,1]
+
+p.vec_W[4]<-growth_mod_larges_lineage$coeff[1,1] + growth_mod_larges_lineage$coeff[5, 1]
+p.vec_W[5]<-growth_mod_larges_lineage$coeff[2,1]
+p.vec_W[6]<-growth_mod_larges_lineage$coeff[3,1]
 
 
+#Model variance in growth of D2 individuals in diameter
+growth_mod_diam_larges_lineage<-lm(larges$Diameter_tplus1 ~ larges$Diameter_t + larges$Height_t + larges$Genetic_type)
+summary(growth_mod_diam_larges_lineage)
 
+p.vec_E[7]<-summary(growth_mod_diam_larges_lineage)$sigma
+p.vec_H[7]<-summary(growth_mod_diam_larges_lineage)$sigma
+p.vec_W[7]<-summary(growth_mod_diam_larges_lineage)$sigma
+
+#Store parameters associated with modeling growth of D2 individuals in height
+p.vec_E[8]<-growth_mod_larges_lineage$coeff[1,2]
+p.vec_E[9]<-growth_mod_larges_lineage$coeff[2,2]
+p.vec_E[10]<-growth_mod_larges_lineage$coeff[3,2]
+
+p.vec_H[8]<-growth_mod_larges_lineage$coeff[1,2] + growth_mod_larges_lineage$coeff[4,2]
+p.vec_H[9]<-growth_mod_larges_lineage$coeff[2,2]
+p.vec_H[10]<-growth_mod_larges_lineage$coeff[3,2]
+
+p.vec_W[8]<-growth_mod_larges_lineage$coeff[1,2] + growth_mod_larges_lineage$coeff[5,2]
+p.vec_W[9]<-growth_mod_larges_lineage$coeff[2,2]
+p.vec_W[10]<-growth_mod_larges_lineage$coeff[3,2]
+
+#Model variance in growth of D2 individuals in height
+growth_mod_height_larges_lineage<-lm(larges$Height_tplus1 ~ larges$Diameter_t + larges$Height_t + larges$Genetic_type)
+summary(growth_mod_height_larges_lineage)
+
+p.vec_E[11]<-summary(growth_mod_height_larges_lineage)$sigma
+p.vec_H[11]<-summary(growth_mod_height_larges_lineage)$sigma
+p.vec_W[11]<-summary(growth_mod_height_larges_lineage)$sigma
 
 #########Reproduction########
 setwd("/Users/curculion/Dropbox/UM_Dissertation_LaTeX-master/untitled folder/Figures/New_July")
