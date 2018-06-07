@@ -465,7 +465,6 @@ p.vec_H[11]<-summary(growth_mod_height_larges_lineage)$sigma
 p.vec_W[11]<-summary(growth_mod_height_larges_lineage)$sigma
 
 #########Reproduction########
-setwd("/Users/curculion/Dropbox/UM_Dissertation_LaTeX-master/untitled folder/Figures/New_July")
 
 #(i) Probability of being a reproductive female at time t: 
 
@@ -590,16 +589,21 @@ legend("bottomleft", legend=c("Hybrid", "Eastern and Western"), col=c("black", "
 
 seed_surv<-.5072
 
+tau_2_hybrid<-0.5072
+tau_2_E-W<-0.388
 
-###Notes from meeting with Carol on 3/21: In a logistic regression, the residuals are calculated as -2 * log deviance (the log of a large number is small!) Because predicted values are either 0s or 1s, we wind up with the two lines (as I see). There is no cause for alarm in my model checking plots. (There are probably more deep things going on, but will not worry about them too much right now). 
-# http://stats.stackexchange.com/questions/1432/what-do-the-residuals-in-a-logistic-regression-mean
-# https://www.r-bloggers.com/residuals-from-a-logistic-regression/ 
+p.vec_overall[19]<- 0.5072 #TODO: DISCUSS WHETHER SHOULD HAVE USED A DIFFERENT AVG 
+p.vec_E[19]<-0.388
+p.vec_H[19]<-0.5072
+p.vec_W[19]<-0.388
 
 
 
-#Estimating size distribution of seedlings at time t +1: 
+
+#Modeling size distribution of recruits: 
 #Figure out distribution of newly tagged individuals in seedling plots 
-
+#Construct a dataframe just holding recruits (individuals that go from 'untagged' to 'tagged' 
+#AND are located within a seedlingplot)
 
 recruit4_diam<-demog$Diam_4[demog$Status_4=="tagged"&demog$Location=="SeedlingPlot"]
 recruit5_diam<-demog$Diam_5[demog$Status_5=="tagged"&demog$Location=="SeedlingPlot"]
@@ -612,13 +616,8 @@ recruit6_height<-demog$Height_6[demog$Status_6=="tagged"&demog$Location=="Seedli
 recruits_height<-c(recruit4_height, recruit5_height, recruit6_height)
 
 
-#Not confident that ALL of these are actually new recruits (some are way too tall)
+#Not confident that ALL of these are actually new recruits (some are way too tall), so: 
 
-#thing<-boxplot(recruits_diam, ylab="Diameter (mm)")
-#thing2<-boxplot(recruits_height, ylab="Height(cm)", notch=T)
-#thing2$stats
-#boxplot.stats(recruits_height)$stats[5]
-#quantile(recruits_height, na.rm=T)
 
 #How does R calculate the whiskers?:
 #https://www.r-bloggers.com/about-boxplot/
@@ -628,10 +627,6 @@ recruits_height<-c(recruit4_height, recruit5_height, recruit6_height)
 #upper whisker=min(max(x), Q_3 + 1.5 * IQR)
 #lower whisker = max(min(x), Q_1 – 1.5 * IQR) 
 #IQR=Q3-Q1
-
-
-
-
 
 #From ?boxplot help: 
 
@@ -674,6 +669,38 @@ recruits<-as.data.frame(recruits)
 names(recruits)<-c("diam", "height")
 recruits_1<-subset(recruits, recruits$diam<1.6)
 recruits_2<-subset(recruits_1, recruits_1$height<16)
+
+
+#Parameters associated with distribution of recruits diameter
+p.vec_overall[15]<-mu_diam
+p.vec_overall[16]<-mu_diam
+
+p.vec_E[15]<-mu_diam
+p.vec_E[16]<-sd_diam
+
+p.vec_H[15]<-mu_diam
+p.vec_H[16]<-sd_diam
+
+p.vec_W[15]<-mu_diam
+p.vec_W[16]<-sd_diam
+
+
+#Parameters associated with distribution of recruits heights
+p.vec_overall[17]<-mu_height
+p.vec_overall[18]<-sd_height
+
+p.vec_E[17]<-mu_height
+p.vec_E[18]<-sd_height
+
+p.vec_H[17]<-mu_height
+p.vec_H[18]<-sd_height
+
+p.vec_W[17]<-mu_height
+p.vec_W[18]<-sd_height
+
+
+
+##### Model Graduation 
 
 
 #Graduation into large domain: 
