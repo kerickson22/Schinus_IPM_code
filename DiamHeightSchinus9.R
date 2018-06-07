@@ -1,16 +1,8 @@
-# R code illustrating implementation of a size x quality IPM as described in
-# Appendix A of Ellner and Rees, Am Nat (2005 or thereabouts). 
-# The code can be copied and pasted directly into R, or sourced.
-#
-# The model here starts from the size-structured model in CompareSensitivity.R 
-# and adds individual quality as a second dynamic i-state variable. The quality
-# dynamics are a linear autoregressive process, as in the Pfister-Stevens model
-# described in section 3 of Appendix A, and we use the 'stacking' procedure
-# suggested there to create a single large iteration matrix. You then have to
-# be careful about 'unstacking' to plot results and do sensitivity analysis. 
-#
-# This code works with version 0.98-7 of the Matrix package; with 
-# earlier versions it might fail (later ones, too...) 
+# Constructs a integral projection model using diameter and height as two continuous
+# structuring state variables, where population transition probabilities are
+# modeled on two size domains. Modified code from Ellner and Rees, 2011. 
+
+
 
 #clear everything
 rm(list=ls(all=TRUE))

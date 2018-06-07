@@ -1,3 +1,8 @@
+#Code for running the demographic analyses incorporating biotype differences 
+#Code written by Kelley D. Erickson and Carol C. Horvitz
+
+
+
 library(MASS)
 library(mvtnorm)
 library(RColorBrewer)
