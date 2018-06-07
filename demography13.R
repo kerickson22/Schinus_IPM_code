@@ -23,30 +23,25 @@ setwd("C:/Users/KE2/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pra
 #Code run until line 1153
 
 
-data<-read.csv("demography_15_clean.csv", head=T)
+demog<-read.csv("demography_15_clean.csv", head=T)
 
 
-Death_Cause<-c(data$Death_Cause_2, data$Death_Cause_3, data$Death_Cause_4, data$Death_Cause_5, data$Death_Cause_6, data$Death_Cause_7)
+Death_Cause<-c(demog$Death_Cause_2, demog$Death_Cause_3, demog$Death_Cause_4, demog$Death_Cause_5, demog$Death_Cause_6, demog$Death_Cause_7)
 
 
-Status<-c(data$Status_1, data$Status_2, data$Status_3, data$Status_4, data$Status_5, data$Status_6, data$Status_7)
-#Status2<-cbind.data.frame(data$Status_1, data$Status_2, data$Status_3, data$Status_4, data$Status_5, data$Status_6, data$Status_7)
-# row.names(Status)<-data$Plant_ID
+Status<-c(demog$Status_1, demog$Status_2, demog$Status_3, demog$Status_4, demog$Status_5, demog$Status_6, demog$Status_7)
 
-#Why is cbind converting to numeric? #Have to use cbind.data.frame 
-#Since there were some duplicated tag#s, went into Excel and recoded (A lot of the tag numbers at Cocoa were repeated at other sites 
+Diams<-cbind(demog$Diam_1, demog$Diam_2, demog$Diam_3, demog$Diam_4, demog$Diam_5, demog$Diam_6, demog$Diam_7) 
+row.names(Diams)<-demog$Plant_ID
 
-Diams<-cbind(data$Diam_1, data$Diam_2, data$Diam_3, data$Diam_4, data$Diam_5, data$Diam_6, data$Diam_7) 
-row.names(Diams)<-data$Plant_ID
+Heights<-cbind(demog$Height_1, demog$Height_2, demog$Height_3, demog$Height_4, demog$Height_5, demog$Height_6, demog$Height_7)
+row.names(Heights)<-demog$Plant_ID
 
-Heights<-cbind(data$Height_1, data$Height_2, data$Height_3, data$Height_4, data$Height_5, data$Height_6, data$Height_7)
-row.names(Heights)<-data$Plant_ID
+Mins<-cbind(demog$Min_1, demog$Min_2, demog$Min_3, demog$Min_4, demog$Min_5, demog$Min_6, demog$Min_7)
+row.names(Mins)<-demog$Plant_ID
 
-Mins<-cbind(data$Min_1, data$Min_2, data$Min_3, data$Min_4, data$Min_5, data$Min_6, data$Min_7)
-row.names(Mins)<-data$Plant_ID
-
-Maxs<-cbind(data$Max_1, data$Max_2, data$Max_3, data$Max_4, data$Max_5, data$Max_6, data$Max_7)
-row.names(Maxs)<-data$Plant_ID
+Maxs<-cbind(demog$Max_1, demog$Max_2, demog$Max_3, demog$Max_4, demog$Max_5, demog$Max_6, demog$Max_7)
+row.names(Maxs)<-demog$Plant_ID
 
 
 Diams_pooled<-rbind( cbind(Diams[,1], Diams[,2]), cbind(Diams[,2], Diams[,3]), cbind(Diams[, 3], Diams[,4]), cbind(Diams[,4], Diams[,5]), cbind(Diams[,5], Diams[,6]), cbind(Diams[, 6], Diams[, 7]))
@@ -56,9 +51,9 @@ Diams_pooled<-data.frame(Diams_pooled[,1], Diams_pooled[,2])
 names(Diams_pooled)<-c("t", "t_plus_one")
 
 
-Sites_pooled<-rep(data$Site, 6)
-ID_pooled<-rep(data$Plant_ID, 6)
-Location<-rep(data$Location, 6)
+Sites_pooled<-rep(demog$Site, 6)
+ID_pooled<-rep(demog$Plant_ID, 6)
+Location<-rep(demog$Location, 6)
 
 Genetic_type_pooled<-rep(0, length(Sites_pooled))
 
@@ -112,7 +107,7 @@ names(Mins_pooled)<-c("t", "t_plus_one")
 
 
 ###Use status matrix to get survival matrix
-statmat<-as.matrix(data[, c(6, 14, 22, 30, 38, 46, 54)])
+statmat<-as.matrix(demog[, c(6, 14, 22, 30, 38, 46, 54)])
 survmat<-statmat
 survmat<- ifelse(survmat=="prestudy"|survmat=="missing"|survmat=="still_dead", NA, survmat)
 survmat<- ifelse(survmat =="tagged"|survmat=="alive", 1, 0)
@@ -128,7 +123,7 @@ names(survmat_pooled_bysize)<-c("size_t", "surv_t_plus_one")
 
 
 ###Use reproduction status matrix to get reproduction matrix
-repstatmat<-as.matrix(data[, c(8, 16, 24, 32, 40, 48, 56)])
+repstatmat<-as.matrix(demog[, c(8, 16, 24, 32, 40, 48, 56)])
 repmat<-repstatmat
 repmat<- ifelse(repmat =="female", 1, 0)
 repmat_pooled<-rbind( cbind(repmat[,1], repmat[,2]), cbind(repmat[,2], repmat[,3]), cbind(repmat[, 3], repmat[,4]), cbind(repmat[,4], repmat[,5]), cbind(repmat[,5], repmat[,6]), cbind(repmat[, 6], repmat[, 7]))
@@ -495,7 +490,7 @@ sigma_growth_height_larges<-summary(growth_mod_height_larges)$sigma
 #########Reproduction########
 setwd("/Users/curculion/Dropbox/UM_Dissertation_LaTeX-master/untitled folder/Figures/New_July")
 
-(i) Probability of being a reproductive female at time t: 
+#(i) Probability of being a reproductive female at time t: 
 
 
 mod_repro<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t, family=binomial)
@@ -504,6 +499,7 @@ summary(mod_repro)
 #Diameter term is not significant, so remove it: 
 mod_repro<-glm(larges$Rep_tplus1 ~ larges$Height_t, family=binomial)
 
+setwd("/Users/curculion/Dropbox/UM_Dissertation_LaTeX-master/untitled folder/Figures/New_July")
 
 
 b0<-mod_repro$coefficients[1]
@@ -551,9 +547,6 @@ dev.off()
 #*Do have literature based report of 8mo survival rate from seeds sourced from the six sites grown in a common garden experiment in Davie: 
 # "A greater proportion of hybrid seedlings survived than did western seedlings (63.6% vs. 53.2%; see fig. 5)." (Geiger et al. 2011) 
 
-
-	
-save.image("170228.RData")
 
 ##Assumption: Assume mortality is linear
 ##Monthly mortality: 
@@ -606,20 +599,20 @@ seed_surv<-.5072
 # http://stats.stackexchange.com/questions/1432/what-do-the-residuals-in-a-logistic-regression-mean
 # https://www.r-bloggers.com/residuals-from-a-logistic-regression/ 
 
-#data used is wrong! 
+
 
 #Estimating size distribution of seedlings at time t +1: 
 #Figure out distribution of newly tagged individuals in seedling plots 
 
 
-recruit4_diam<-data$Diam_4[data$Status_4=="tagged"&data$Location=="SeedlingPlot"]
-recruit5_diam<-data$Diam_5[data$Status_5=="tagged"&data$Location=="SeedlingPlot"]
-recruit6_diam<-data$Diam_6[data$Status_6=="tagged"&data$Location=="SeedlingPlot"]
+recruit4_diam<-demog$Diam_4[demog$Status_4=="tagged"&demog$Location=="SeedlingPlot"]
+recruit5_diam<-demog$Diam_5[demog$Status_5=="tagged"&demog$Location=="SeedlingPlot"]
+recruit6_diam<-demog$Diam_6[demog$Status_6=="tagged"&demog$Location=="SeedlingPlot"]
 recruits_diam<-c(recruit4_diam, recruit5_diam, recruit6_diam)
 
-recruit4_height<-data$Height_4[data$Status_4=="tagged"&data$Location=="SeedlingPlot"]
-recruit5_height<-data$Height_5[data$Status_5=="tagged"&data$Location=="SeedlingPlot"]
-recruit6_height<-data$Height_6[data$Status_6=="tagged"&data$Location=="SeedlingPlot"]
+recruit4_height<-demog$Height_4[demog$Status_4=="tagged"&demog$Location=="SeedlingPlot"]
+recruit5_height<-demog$Height_5[demog$Status_5=="tagged"&demog$Location=="SeedlingPlot"]
+recruit6_height<-demog$Height_6[demog$Status_6=="tagged"&demog$Location=="SeedlingPlot"]
 recruits_height<-c(recruit4_height, recruit5_height, recruit6_height)
 
 
@@ -711,7 +704,7 @@ b0<-sdlng_grad_mod $coeff[1]
 b1<-sdlng_grad_mod $coeff[2]
 b2<-sdlng_grad_mod $coeff[3]
 
-z_sdling_grad<-outer(x1seq_sdlng, x2seq_sdlng, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
+z_sdling_grad<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
 
 nrz<-nrow(z_sdling_grad)
 ncz<-ncol(z_sdling_grad)
@@ -722,18 +715,17 @@ zfacet<-z_sdling_grad[-1, -1] + z_sdling_grad[-1, -ncz] + z_sdling_grad[-nrz, -1
 facetcol<-cut(zfacet, nbcol)
 
 
-
-x11()
-
 png(file="graduation_overall.png", width=10, height=10, units="in", res=300)
 par(ps=24)
-persp(x1seq_sdlng, x2seq_sdlng, z_sdling_grad, ticktype="detailed", theta=-30, zlim=c(0, 1.02), xlab="\n Diameter (mm)", ylab="\n Height (cm)", zlab="\n P(graduating)", col = color[facetcol])
+persp(x1seq_seedlings, x2seq_seedlings, z_sdling_grad, ticktype="detailed", theta=-30, zlim=c(0, 1.02), xlab="\n Diameter (mm)", ylab="\n Height (cm)", zlab="\n P(graduating)", col = color[facetcol])
 dev.off()
 
 
 
 graduates<-subset(seedlings, seedlings$grad_status==1)
 
+
+#Get distribution of new recruits sizes 
 summary(graduates$Diameter_tplus1)
 hist(graduates$Diameter_tplus1)
 mu_grad_diam<-mean(graduates$Diameter_tplus1)
@@ -744,4 +736,4 @@ hist(graduates$Height_tplus1)
 mu_grad_height<-mean(graduates$Height_tplus1)
 sd_grad_height<-sd(graduates$Height_tplus1)
 
-save.image("170417_models.RData")
+save.image("demography_overall.RData")
