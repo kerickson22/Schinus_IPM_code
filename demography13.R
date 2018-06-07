@@ -1,8 +1,13 @@
+#####Code for performing demographic analysis 
+### By Kelley D. Erickson and Carol C. Horvitz
+
+#Load packages 
 library(MASS)
 library(mvtnorm)
+
+##Set working directory to load data: 
 #MAC
 setwd("/Users/kelley/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data") 
-
 #WINDOWS:
 setwd("C:/Users/KE2/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data") 
 
