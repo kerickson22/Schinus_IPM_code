@@ -702,8 +702,9 @@ p.vec_W[18]<-sd_height
 
 ##### Model Graduation 
 
-
 #Graduation into large domain: 
+
+#Create a new variable that tracks whether individuals transition out of D1 into D2
 grad_status<-rep(NA, length(seedlings$ID))
 for (i in 1:length(seedlings$ID)) {
 	if (is.na(seedlings$Diameter_tplus1[i])) {
@@ -719,36 +720,23 @@ for (i in 1:length(seedlings$ID)) {
 seedlings<-cbind(seedlings, grad_status)
 #Probability of leaving the seedling domain: 
 
-sdlng_grad_mod<-glm(seedlings$grad_status~ seedlings$Diameter_t + seedlings$Height_t, family=binomial)
 
+#(a) Overall model
+
+sdlng_grad_mod<-glm(seedlings$grad_status~ seedlings$Diameter_t + seedlings$Height_t, family=binomial)
 summary(sdlng_grad_mod)
 
-b0<-sdlng_grad_mod $coeff[1]
-b1<-sdlng_grad_mod $coeff[2]
-b2<-sdlng_grad_mod $coeff[3]
-
-z_sdling_grad<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
-
-nrz<-nrow(z_sdling_grad)
-ncz<-ncol(z_sdling_grad)
-nbcol<-100
-jet.colors<-colorRampPalette(c("blue", "green"))
-color<-jet.colors(nbcol)
-zfacet<-z_sdling_grad[-1, -1] + z_sdling_grad[-1, -ncz] + z_sdling_grad[-nrz, -1] + z_sdling_grad[-nrz, -ncz]
-facetcol<-cut(zfacet, nbcol)
+p.vec_overall[31]<-grad_mod$coeff[1]
+p.vec_overall[32]<-grad_mod$coeff[2]
+p.vec_overall[33]<-grad_mod$coeff[3]
 
 
-png(file="graduation_overall.png", width=10, height=10, units="in", res=300)
-par(ps=24)
-persp(x1seq_seedlings, x2seq_seedlings, z_sdling_grad, ticktype="detailed", theta=-30, zlim=c(0, 1.02), xlab="\n Diameter (mm)", ylab="\n Height (cm)", zlab="\n P(graduating)", col = color[facetcol])
-dev.off()
-
-
+#Model distribution of sizes of graduates 
 
 graduates<-subset(seedlings, seedlings$grad_status==1)
 
 
-#Get distribution of new recruits sizes 
+#Get distribution of new recruits sizes (these are not modeled by biotype) 
 summary(graduates$Diameter_tplus1)
 hist(graduates$Diameter_tplus1)
 mu_grad_diam<-mean(graduates$Diameter_tplus1)
@@ -759,4 +747,77 @@ hist(graduates$Height_tplus1)
 mu_grad_height<-mean(graduates$Height_tplus1)
 sd_grad_height<-sd(graduates$Height_tplus1)
 
-save.image("demography_overall.RData")
+
+p.vec_overall[34]<-mu_grad_diam
+p.vec_overall[35]<-sd_grad_diam
+
+#(b) Model graduation by biotype
+sdlng_grad_mod_lineage<-glm(seedlings$grad_status~ seedlings$Diameter_t + seedlings$Height_t + seedlings$Genetic_type, family=binomial)
+summary(sdlng_grad_mod_lineage)
+#The effect of hybrids is only moderatately significantly diff from E, so collapse E and H
+
+lineage4<-rep(0, length(seedlings$Genetic_type))
+for (i in 1:length(seedlings$Genetic_type)) {
+  if (seedlings$Genetic_type[i]=="eastern" || seedlings$Genetic_type[i]=="hybrid") {lineage4[i]<-"E-H"}
+  else{lineage4[i]<-"Western"}
+}
+
+seedlings3<-cbind(seedlings, lineage4)
+
+grad_mod_lineage<-glm(seedlings3$grad_status ~ seedlings3$Diameter_t + seedlings3$Height_t + seedlings3$lineage4, family=binomial)
+summary(grad_mod_lineage)
+
+
+p.vec_E[31]<-grad_mod_lineage$coeff[1]
+p.vec_E[32]<-grad_mod_lineage$coeff[2]
+p.vec_E[33]<-grad_mod_lineage$coeff[3]
+
+p.vec_H[31]<-grad_mod_lineage$coeff[1]
+p.vec_H[32]<-grad_mod_lineage$coeff[2]
+p.vec_H[33]<-grad_mod_lineage$coeff[3]
+
+p.vec_W[31]<-grad_mod_lineage$coeff[1]+grad_mod_lineage$coeff[4]
+p.vec_W[32]<-grad_mod_lineage$coeff[2]
+p.vec_W[33]<-grad_mod_lineage$coeff[3]
+
+#The distribution of graduates sizes does not differ by biotype: 
+p.vec_E[34]<-mu_grad_diam
+p.vec_E[35]<-sd_grad_diam
+
+p.vec_H[34]<-mu_grad_diam
+p.vec_H[35]<-sd_grad_diam
+
+p.vec_W[34]<-mu_grad_diam
+p.vec_W[35]<-sd_grad_diam
+
+p.vec_E[36]<-mu_grad_height
+p.vec_E[37]<-sd_grad_height
+
+p.vec_H[36]<-mu_grad_height
+p.vec_H[37]<-sd_grad_height
+
+p.vec_W[36]<-mu_grad_height
+p.vec_W[37]<-sd_grad_height
+
+
+#Two additional parameters that are fixed: 
+p.vec_overall[38]<-0.005
+p.vec_overall[39]<-0.002
+p.vec_E[38]<-0.005
+p.vec_E[39]<-0.002
+
+p.vec_H[38]<-0.005
+p.vec_H[39]<-0.002
+
+p.vec_W[38]<-0.005
+p.vec_W[39]<-0.002
+
+#SET A MEANINGFUL WORKING DIRECTORY WHERE THESE DATA FILES WILL LIVE
+
+#Save p.vec's for later use: 
+save(p.vec_overall, file="p.vec_overall.RData")
+save(p.vec_E, file="p.vec_E.RData")
+save(p.vec_H, file="p.vec_H.RData")
+save(p.vec_W, file="p.vec_W.RData")
+
+save.image(file="demography_models.RData")
