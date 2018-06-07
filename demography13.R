@@ -7,19 +7,19 @@ library(mvtnorm)
 
 ##Set working directory to load data: 
 #MAC
-setwd("/Users/kelley/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data") 
+setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data") 
 #WINDOWS:
 setwd("C:/Users/KE2/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data") 
 
 
 #Code to Line 399 saved in demography_170208.RData
-load("demography_170208.RData")
-load("demography_170214.RData")
-load("demography_170220_2.RData")
-load("170228.RData")
-load("170316.RData")
-load("170329.RData")
-load("170406.RData")
+#load("demography_170208.RData")
+#load("demography_170214.RData")
+#load("demography_170220_2.RData")
+#load("170228.RData")
+#load("170316.RData")
+#load("170329.RData")
+#load("170406.RData")
 #Code run until line 1153
 
 
@@ -233,7 +233,7 @@ surv_by_min<-min_table[2,]/(min_table[1,] + min_table[2,])
 
 
 
-save.image("170224.RData")
+
 
 write.csv(height_table, file="height_table.csv")
 write.csv(min_table, file="min_table.csv")
@@ -255,6 +255,9 @@ x2seq_larges<-seq(16, 800, length.out=50)
 x1seq_seedlings<-seq(0, 1.6, length.out=50)
 x2seq_seedlings<-seq(0, 16, length.out=50)
 
+
+
+#Create a function for plotting logistic equations (TODO: Do I actually use this function?)
 plot_logistic=function(model, xlab, ylab, x1seq, x2seq){
 b0<-model$coeff[1]
 b1<-model$coeff[2]
@@ -288,6 +291,8 @@ persp(x1seq, x2seq, z1, ticktype="detailed", theta=-30, zlim=c(0, 1.25), zlab="\
 #Full model without interaction:
 
 #Diameter and Height
+
+#Model survival of seedlings in the D1 domain(not separated by biotype)
 surv_mod_seedlings<-glm(seedlings$Surv_tplus1~ seedlings$Diameter_t + seedlings$Height_t, family=binomial)
 
 summary(surv_mod_seedlings)
@@ -299,7 +304,7 @@ b1<-surv_mod_seedlings$coeff[2]
 b2<-surv_mod_seedlings$coeff[3]
 
 
-z1<-outer(x1seq_sdlng, x2seq_sdlng, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
 
 
 nrz<-nrow(z1)
@@ -315,17 +320,14 @@ col = color[facetcol]
 
 
 
-setwd("/Users/kelley/Dropbox/UM_Dissertation_LaTeX-master/untitled folder/Figures/New_July")
-
-
-
+setwd("/Users/curculion/Dropbox/UM_Dissertation_LaTeX-master/untitled folder/Figures/New_July")
 png(file="seedling_surv_overall.png", width=10, height=10, units="in", res=300)
 par(ps=24)
-persp(x1seq_sdlng, x2seq_sdlng, z1, ticktype="detailed", theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", shade=0.55, nticks=4, xlab="\n Diameter (mm)", ylab="\n \n Height (cm)", col = color[facetcol])
+persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed", theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", shade=0.55, nticks=4, xlab="\n Diameter (mm)", ylab="\n \n Height (cm)", col = color[facetcol])
 dev.off()
 
 
-
+#Model D2 survival (not by biotype)
 surv_mod_larges<-glm(larges$Surv_tplus1~larges$Diameter_t + larges$Height_t, family=binomial)
 summary(surv_mod_larges)
 
@@ -355,26 +357,12 @@ persp(x1seq_larges, x2seq_larges, z1, ticktype="detailed", theta=-30, zlim=c(0, 
 dev.off()
 
 
-
-
-
-
-
-
-##Models without height:
-surv_mod_seedlings2<-glm(seedlings$Surv_tplus1~seedlings$Diameter_t, family=binomial)
-summary(surv_mod_seedlings2)
-
-surv_mod_larges2<-glm(larges$Surv_tplus1~larges$Diameter_t, family=binomial)
-summary(surv_mod_larges2)
-
-
 ####GROWTH #####
 
 #Height at t+1 is a function of height_t AND diam_t
 
 
-
+#Model growth on the D1 domain: 
 growth_mod_seedlings<-manova(cbind(seedlings$Diameter_tplus1, seedlings$Height_tplus1) ~ seedlings$Diameter_t+seedlings$Height_t)
 
 summary(growth_mod_seedlings)
@@ -386,14 +374,14 @@ b1<-growth_mod_seedlings$coeff[2,1]
 b2<-growth_mod_seedlings$coeff[3,1]
 
 
-z_diam<-outer(x1seq_sdlng, x2seq_sdlng, function(a,b) (b0+b1*a + b2*b))
+z_diam<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0+b1*a + b2*b))
 
 #Plot height tplus1
 b0<-growth_mod_seedlings$coeff[1,2]
 b1<-growth_mod_seedlings$coeff[2,2]
 b2<-growth_mod_seedlings$coeff[3,2]
 
-z_height<-outer(x1seq_sdlng, x2seq_sdlng, function(a,b) (b0+b1*a + b2*b))
+z_height<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0+b1*a + b2*b))
 
 
 nrz<-nrow(z_diam)
@@ -414,15 +402,15 @@ zfacet_height<-z_height[-1, -1] + z_height[-1, -ncz] + z_height[-nrz, -1] + z_he
 facetcol_height<-cut(zfacet_height, nbcol)
 
 
-x11(width=11, height=7)
 png(file="growth_seedlings_overall.png", width=8, height=16, units="in", res=300)
 par(mfrow=c(2, 1), ps=24)
-persp(x1seq_sdlng, x2seq_sdlng, z_diam, theta=-30, xlab="\n Diameter at t (mm)", ylab="\n \n Height at t (cm)",ticktype="detailed", col = color_diam[facetcol_diam], zlab="\n \n Diameter at t + 1", main="(A) Diameter at t + 1", nticks=4) 
+persp(x1seq_seedlings, x2seq_seedlings, z_diam, theta=-30, xlab="\n Diameter at t (mm)", ylab="\n \n Height at t (cm)",ticktype="detailed", col = color_diam[facetcol_diam], zlab="\n \n Diameter at t + 1", main="(A) Diameter at t + 1", nticks=4) 
 
-persp(x1seq_sdlng, x2seq_sdlng, z_height, theta=-30, xlab="\n Diameter at t (mm)", ylab="\n \n Height at t (cm)", ticktype="detailed",  col= color_height[facetcol_height], zlab="\n \n Height at t + 1", main="(B) Height at t + 1", nticks=4)  
+persp(x1seq_seedlings, x2seq_seedlings, z_height, theta=-30, xlab="\n Diameter at t (mm)", ylab="\n \n Height at t (cm)", ticktype="detailed",  col= color_height[facetcol_height], zlab="\n \n Height at t + 1", main="(B) Height at t + 1", nticks=4)  
 dev.off()
 
 
+#Model growth of individuals in the D2 domain (overall)
 
 growth_mod_larges<-manova(cbind(larges$Diameter_tplus1, larges$Height_tplus1) ~ larges$Diameter_t+larges$Height_t)
 
@@ -471,19 +459,7 @@ persp(x1seq_larges, x2seq_larges, z_height, theta=-30, xlab="\n Diameter at t (m
 dev.off()
 
 
-
-
-
-
-jpeg('growth_larges.jpeg')
-
-x11()
-plot_manova(growth_mod_larges, x1seq_larges, x2seq_larges)
-dev.copy(jpeg, 'growth_larges.jpeg')
-dev.off()
-
-
-
+#Capture variance in growth for modeling size distribution in D2 at time t+1:
 growth_mod_diam_seedlings<-lm(seedlings$Diameter_tplus1 ~ seedlings$Diameter_t+seedlings$Height_t)
 summary(growth_mod_diam_seedlings)
 
@@ -517,7 +493,7 @@ sigma_growth_height_larges<-summary(growth_mod_height_larges)$sigma
 
 
 #########Reproduction########
-
+setwd("/Users/curculion/Dropbox/UM_Dissertation_LaTeX-master/untitled folder/Figures/New_July")
 
 (i) Probability of being a reproductive female at time t: 
 
@@ -529,30 +505,27 @@ summary(mod_repro)
 mod_repro<-glm(larges$Rep_tplus1 ~ larges$Height_t, family=binomial)
 
 
-#Model with only diameter: 
-mod_repro2<-glm(larges$Rep_tplus1 ~ larges$Diameter_t, family=binomial)
 
+b0<-mod_repro$coefficients[1]
+b1<-mod_repro$coefficients[2]
+y<-((exp(b0+b1*x2seq_larges)/(1+exp(b0+b1*x2seq_larges))))
 
-x<-seq(16, 800, by=1)
-b0<-mod_repro2$coeff[1]
-b1<-mod_repro2$coeff[2]
-
-y<-exp(b0+b1*x)/(1+exp(b0+b1*x))
-
-png(file="prob_repro_overall.png", width=10, height=10, units="in", res=300)
-par(ps=24, mar=c(5.1,5.1,4.1,2.1))
-plot(x, y, xlab="Height(cm)", ylab="P(producing fruit)")
+png(file="reproduction_overall.png", width=10, height=10, units="in", res=300)
+par(ps=24)
+par(mar=c(5, 5, 4, 2))
+plot(x2seq_larges, y, xlab="Height at time t (cm)", ylab="\n \n Probability of Reproducing", lwd=3, type='l', lty=5)
 dev.off()
 
-jpeg('reproduction.jpeg')
-plot_repro(mod_repro)
-dev.off()
 
-(ii) Given that an individual is a reproductive female of size[diameter=x, height=y] and genetic type z[known from site], how many fruits do they produce? 
+
+
+#(ii) Given that an individual is a reproductive female of size[diameter=x, height=y] and genetic type z[known from site], how many fruits do they produce? 
 #Depends on diameter and genetic type only (from biomass allocation chapter)
 
-setwd("/Users/ke2/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Allometry")
+setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Allometry")
 load("biomass_170315.RData")
+
+setwd("/Users/curculion/Dropbox/UM_Dissertation_LaTeX-master/untitled folder/Figures/New_July")
 
 LHS$diam_base<-LHS$diam_base*10 #convert from cm to mm
 fruit_mod<-lm(LHS$Fruit_No~LHS$diam_base + LHS$Height)
@@ -562,31 +535,18 @@ fruit_mod2<-lm(LHS$Fruit_No~0+ LHS$diam_base)
 
 
 b1<-fruit_mod2$coeff[1]
-b2<-fruit_mod2$coeff[2]
-
-z_fruit<-outer(x1seq_larges, x2seq_larges, function(a,b) (0*b+b1 +b2*a)) #this model is more realistic
-z_fruit2<-outer(x1seq_larges,x2seq_larges,  function(a,b) (44515.95*a*a+0*b))
-
-nrz<-nrow(z_fruit)
-ncz<-ncol(z_fruit)
-nbcol<-100
-jet.colors<-colorRampPalette(c("blue", "green"))
-color<-jet.colors(nbcol)
-zfacet<-z_fruit[-1, -1] + z_fruit[-1, -ncz] + z_fruit[-nrz, -1] + z_fruit[-nrz, -ncz]
-facetcol<-cut(zfacet, nbcol)
+y<-x1seq_larges*x1seq_larges*b1
 
 
-
-x11()
-persp(x1seq_larges, x2seq_larges, z_fruit, ticktype="detailed", theta=-40, xlab="Diameter (mm)", ylab="Height (cm)", col = color[facetcol])
-
-
-
-
+png(file="fecundity_overall.png", width=10, height=10, units="in", res=300)
+par(ps=24)
+par(mar=c(5, 5, 4, 2))
+plot(x1seq_larges, y, xlab="Diameter at time t (mm)", ylab="\n \n Number of Offspring", lwd=3, type='l')
+dev.off()
 
 
-(iii) Recruitment of seedlings from fruits..... 
-(a) P(survival) from seed at time t to seedling at time t + 1: 
+#(iii) Recruitment of seedlings from fruits..... 
+#(a) P(survival) from seed at time t to seedling at time t + 1: 
 
 #*Do have literature based report of 8mo survival rate from seeds sourced from the six sites grown in a common garden experiment in Davie: 
 # "A greater proportion of hybrid seedlings survived than did western seedlings (63.6% vs. 53.2%; see fig. 5)." (Geiger et al. 2011) 
@@ -610,7 +570,7 @@ for(i in 1:12) {
 	}
 
 
-x11()
+
 par(mfrow=c(1, 2))
 plot(month, hybrid_seed_surv, type='b', col="black", xlab="Months", ylim=c(0,100), ylab="% Alive")
 points(month, eastwest_seed_surv, type='b', col="red")
@@ -641,49 +601,12 @@ legend("bottomleft", legend=c("Hybrid", "Eastern and Western"), col=c("black", "
 
 seed_surv<-.5072
 
-save.image("170316.RData")
-
-
-#Seedlings= P(rep)*obs_seed*surv_seed
-
-b0<-mod_repro$coeff[1]
-b1<-mod_repro$coeff[2] #height
-
-b2<-fruit_mod2$coeff[1] #intercept
-b3<-fruit_mod2$coeff[2] #diameter
-
-
-z_rep<-outer(x1seq, x2seq, function(a,b) ((exp(b0+b1*b)/(1+exp(b0+b1*b))))*(b2 + b3*a))
-
-
-
-
-nrz<-nrow(z_rep)
-ncz<-ncol(z_rep)
-nbcol<-100
-jet.colors<-colorRampPalette(c("blue", "green"))
-color<-jet.colors(nbcol)
-zfacet<-z_rep[-1, -1] + z_rep[-1, -ncz] + z_rep[-nrz, -1] + z_rep[-nrz, -ncz]
-facetcol<-cut(zfacet, nbcol)
-
-
-
-
-
-
-x11()
-persp(x1seq, x2seq, z_rep, theta=-30, xlab="Diameter at t(mm)", ylab="Height at t (cm)", ticktype="detailed",  col= color[facetcol], zlab="# of Seeds", main="Seeds Produced")  
-
-x11()
-persp(x1seq, x2seq, z_rep*.454, theta=-30, xlab="Diameter at t(mm)", ylab="Height at t (cm)", ticktype="detailed",  col= color[facetcol], zlab="# of Seeds", main="# Seeds surv to t + 1: Hybrid-linear")
- 
-persp(x1seq, x2seq, z_rep*.507, theta=-30, xlab="Diameter at t (mm)", ylab="\n Height at t (cm)", ticktype="detailed",  col= color[facetcol], zlab="\n \n \n # of Seeds", main="# Seeds surv: Hybrid-exp") 
 
 ###Notes from meeting with Carol on 3/21: In a logistic regression, the residuals are calculated as -2 * log deviance (the log of a large number is small!) Because predicted values are either 0s or 1s, we wind up with the two lines (as I see). There is no cause for alarm in my model checking plots. (There are probably more deep things going on, but will not worry about them too much right now). 
 # http://stats.stackexchange.com/questions/1432/what-do-the-residuals-in-a-logistic-regression-mean
 # https://www.r-bloggers.com/residuals-from-a-logistic-regression/ 
 
-
+#data used is wrong! 
 
 #Estimating size distribution of seedlings at time t +1: 
 #Figure out distribution of newly tagged individuals in seedling plots 
