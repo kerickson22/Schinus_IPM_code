@@ -1,6 +1,6 @@
 # Constructs a integral projection model using diameter and height as two continuous
 # structuring state variables, where population transition probabilities are
-# modeled on two size domains. Modified code from Ellner and Rees, 2011. 
+# modeled on two size domains. Modified code from Ellner and Rees, 2006. 
 
 
 
