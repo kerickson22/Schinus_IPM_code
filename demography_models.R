@@ -3,33 +3,33 @@
 ### By Kelley D. Erickson and Carol C. Horvitz
 
 ##### Load packages
-library(RColorBrewer)
+#library(RColorBrewer) #not used in manuscript figures 
 
 
 ##### Set working directory to load in data: 
 #MAC
-setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data") 
-load("demography_overall.RData") #This RData file was created after running everything in this script
+#setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data") 
+#load("demography_overall.RData") #This RData file was created after running everything in this script
 demog<-read.csv("demography_15_clean.csv", head=T)
 
 
 ##### Set colors for plotting different biotypes 
 
-col_E_light<-colors[1]
-col_E_dark<-colors[2]
+#col_E_light<-colors[1]
+#col_E_dark<-colors[2]
 
-col_W_light<-colors[5]
-col_W_dark<-colors[6]
+#col_W_light<-colors[5]
+#col_W_dark<-colors[6]
 
-col_H_light<-colors[9]
-col_H_dark<-colors[10]
+#col_H_light<-colors[9]
+#col_H_dark<-colors[10]
 
 ##### Initialize pvec's to store parameters that will go into the IPMs:
 #Initialize p.vec's to store output from model (these will feed into the IPM)
 p.vec_E<-rep(0, 39);
 p.vec_H<-rep(0, 39);
 p.vec_W<-rep(0, 39);
-p.vec_overal<-rep(0, 39)
+p.vec_overall<-rep(0, 39)
 
 #### Restructure the data in a few different ways: 
 
@@ -511,8 +511,8 @@ p.vec_W[13]<-mod_repro_lineage2$coeff[2]
 #Depends on diameter and genetic type only (from biomass allocation chapter)
 ###TODO: Make sure this section matches dissertation wrt values uses for 14, especially for overall model 
 
-setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Allometry")
-load("biomass_170315.RData")
+#setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Allometry")
+#load("biomass_170315.RData")
 
 #(a) Model fecundity (overall) 
 #This function depends only on diameter at base (because that's how it was calculated in allometry paper) 
