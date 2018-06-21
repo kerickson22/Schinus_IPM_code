@@ -518,6 +518,7 @@ p.vec_W[13]<-mod_repro_lineage2$coeff[2]
 #This function depends only on diameter at base (because that's how it was calculated in allometry paper) 
 #OR, do I want to model using both diameter and height because the data is available 
 
+load('LHS.RData')
 LHS$diam_base<-LHS$diam_base*10 #convert from cm to mm
 fruit_mod<-lm(LHS$Fruit_No~0 + LHS$diam_base)
 #
@@ -726,9 +727,9 @@ seedlings<-cbind(seedlings, grad_status)
 sdlng_grad_mod<-glm(seedlings$grad_status~ seedlings$Diameter_t + seedlings$Height_t, family=binomial)
 summary(sdlng_grad_mod)
 
-p.vec_overall[31]<-grad_mod$coeff[1]
-p.vec_overall[32]<-grad_mod$coeff[2]
-p.vec_overall[33]<-grad_mod$coeff[3]
+p.vec_overall[31]<-sdlng_grad_mod$coeff[1]
+p.vec_overall[32]<-sdlng_grad_mod$coeff[2]
+p.vec_overall[33]<-sdlng_grad_mod$coeff[3]
 
 
 #Model distribution of sizes of graduates 

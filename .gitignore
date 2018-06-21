@@ -40,3 +40,4 @@ vignettes/*.pdf
 rsconnect/
 .Rproj.user
 *.csv
+*.RData
