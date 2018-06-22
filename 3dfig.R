@@ -81,6 +81,47 @@ zlim<-1.2
 
 z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
 
+
+x11(width = width.cm/2.54, height = height.cm/2.54, 
+    pointsize = pointsize)
+
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.3,0.3,0.1,0.1),
+    mfrow=c(1, 2))
+survival_plot(b0, b1, b2,max.x, max.y, max.z, z1, x1seq_seedlings,
+              x2seq_seedlings, 1.2,
+              "Diameter (mm)", "Height (cm)", "P(Survival)")
+survival_plot(b0, b1, b2, max.x, max.y, max.z, z1, x1seq_seedlings,
+              x2seq_seedlings, 1.2, 
+              "Diameter (mm)", "Height (cm)", "P(Survival)")
+
+#This creates and EPS figure! That LaTeX can read
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/example5.ps", width=width.cm/2.54, 
+           height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.3,0.3,0.1,0.1),
+    mfrow=c(1, 2))
+survival_plot(b0, b1, b2,max.x, max.y, max.z, z1, x1seq_seedlings,
+              x2seq_seedlings, 1.2,
+              "Diameter (mm)", "Height (cm)", "P(Survival)")
+survival_plot(b0, b1, b2, max.x, max.y, max.z, z1, x1seq_seedlings,
+              x2seq_seedlings, 1.2, 
+              "Diameter (mm)", "Height (cm)", "P(Survival)")
+
+
+dev.off()
+
+
+
+
 x11(width=width.cm/2.54, height=height.cm/2.54, pointsize = pointsize )
 par(mar = c(3, 3, 2, 1), # Margins
     mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
