@@ -89,7 +89,7 @@ par(mar = c(3, 3, 2, 1), # Margins
     mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
     tcl = -0.3, # Length of axis tickmarks
     xpd=NA,
-    mai=c(0.3,0.3,0.1,0.1),
+    mai=c(0.1,0.5,0.1,0.1),
     mfrow=c(1, 2))
 b0<-p.vec_E[20]
 b1<-p.vec_E[21]
@@ -139,7 +139,7 @@ par(mar = c(3, 3, 2, 1), # Margins
     mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
     tcl = -0.3, # Length of axis tickmarks
     xpd=NA,
-    mai=c(0.3,0.3,0.1,0.1),
+    mai=c(0.1,0.5,0.1,0.1),
     mfrow=c(1, 2))
 #Plot diameter tplus1
 b0<-p.vec_E[23]
@@ -182,7 +182,7 @@ par(mar = c(3, 3, 2, 1), # Margins
     mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
     tcl = -0.3, # Length of axis tickmarks
     xpd=NA,
-    mai=c(0.3,0.3,0.1,0.1),
+    mai=c(0.1,0.5,0.1,0.1),
     mfrow=c(1, 2))
 b0<-p.vec_E[1]
 b1<-p.vec_E[2]
@@ -222,7 +222,7 @@ par(mar = c(3, 3, 2, 1), # Margins
     mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
     tcl = -0.3, # Length of axis tickmarks
     xpd=NA,
-    mai=c(0.1,0.3,0.1,0.3),
+    mai=c(0.1,0.5,0.1,0.1),
     mfrow=c(3, 2))
 #Plot diameter tplus1
 b0<-p.vec_E[4]
@@ -242,7 +242,7 @@ persp(x1seq_larges, x2seq_larges, z_diam, ticktype="detailed",
       theta=-30,  zlab="\n \n Diameter \n at t plus 1 (mm) ", 
       shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",
       lwd=1, cex.lab=1)
-mtext(" (a) Eastern" , side=2, line = 3)
+mtext(" (a) Eastern" , side=2, line = 4)
 
 persp(x1seq_larges, x2seq_larges, z_height, ticktype="detailed",
       theta=-30,  zlab="\n \n \n Height \n at t plus 1 (cm) ", 
@@ -269,7 +269,7 @@ persp(x1seq_larges, x2seq_larges, z_diam, ticktype="detailed", theta=-30,
       zlab="\n \n Diameter \n at t plus 1 (mm) ", shade=0.1, nticks=4,
       xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)", 
       cex.lab=1.3,  lwd=1)
-mtext(" (b) Hybrid" , side=2, line = 2)
+mtext(" (b) Hybrid" , side=2, line = 4)
 
 persp(x1seq_larges, x2seq_larges, z_height, ticktype="detailed", theta=-30,  
       zlab="\n \n \n Height \n at t plus 1 (cm) ", shade=0.1, nticks=4,
