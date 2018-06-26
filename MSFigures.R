@@ -3,67 +3,94 @@
 # Modifications to Ellner and Rees scripts added by Kelley D. Erickson
 
 
-#setwd("/Users/kelley/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data/MSFigures")
-setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data/MSFigures")
+#Default width requested by journal: 
+width.cm <- 12.9
+height.cm <- 6.45
+pointsize <- 8
+x11(width = width.cm/2.54, height = height.cm/2.54, 
+    pointsize = pointsize)
 
-load('MSFigures_1.RData') 
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.3,0.3,0.1,0.1))
+
+
+
+
+
+#setwd("/Users/kelley/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data/MSFigures")
+#setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data/MSFigures")
+
+#load('MSFigures_1.RData') 
 
 ###Map of Study Sites
 
-sites <- read.csv('sites.csv', as.is=TRUE)
-
-
-sitesSpatial <- SpatialPointsDataFrame(
-	coords= cbind(sites$Longitude, sites$Latitude),
-	data=sites,
-	proj4string=CRS('+proj=longlat +datum=WGS84 +no defs +ellps=WGS84 +towgs84=0,0,0'))
-
-
-states <- rgdal::readOGR(dsn='./USA_adm_shp', 
-layer='USA_adm2')
-
-florida<-subset(florida, NAME_1=='Florida')
-
-
-
-
-
-xs<-c(-87.63723, -78.5)
-ys<-c(31.00211, 24.52042)
-
-
-
-png(file="map.png", width=13.5, height=10, units='in', res=50)
-par(ps=24, oma=c(0, 0, 0, 0), mar=c(0, 0, 0, 0))
-plot(xs, ys, pch=26)
-
-sp::plot(florida, col='gray80',add=TRUE, xpd=NA)
-points(sitesSpatial, pch=c(15, 15, 16, 16, 17, 17), cex=4, bg=c('purple', 'purple', 'blue', 'blue', 'red', 'red'))
-
-#points(-87.63723, 31.00211, pch=15, col="red", cex=4)
-#points(-78.5, 24.52042, pch=15, col="red", cex=4)
-legend(-87, 28, pch=c(15, 16, 17), pt.cex=4, y.intersp=3, x.intersp=2.5, legend=c("Hybrid", "Eastern", "Western"), bty='n')
-#text(sitesSpatial, labels=sites$Site)
-rect(-87.2, 26.5, -85.5, 28)
-
-#xleft, ybottom, xright, ytop
-
-
-text(-82, 26, "Big Cypress")
-text(-82.8, 26.3, "Wild Turkey")
-text(-83.2, 26.9, "Punta Gorda")
-text(-79.6, 25.6, "Chekika")
-text(-79.5, 27.4, "Fort Pierce")
-text(-79.5, 28.4, "Cape Canaveral")
-dev.off()
+# #sites <- read.csv('sites.csv', as.is=TRUE)
+# 
+# 
+# sitesSpatial <- SpatialPointsDataFrame(
+# 	coords= cbind(sites$Longitude, sites$Latitude),
+# 	data=sites,
+# 	proj4string=CRS('+proj=longlat +datum=WGS84 +no defs +ellps=WGS84 +towgs84=0,0,0'))
+# 
+# 
+# states <- rgdal::readOGR(dsn='./USA_adm_shp', 
+# layer='USA_adm2')
+# 
+# florida<-subset(florida, NAME_1=='Florida')
+# 
+# 
+# 
+# 
+# 
+# xs<-c(-87.63723, -78.5)
+# ys<-c(31.00211, 24.52042)
+# 
+# 
+# 
+# png(file="map.png", width=13.5, height=10, units='in', res=50)
+# par(ps=24, oma=c(0, 0, 0, 0), mar=c(0, 0, 0, 0))
+# plot(xs, ys, pch=26)
+# 
+# sp::plot(florida, col='gray80',add=TRUE, xpd=NA)
+# points(sitesSpatial, pch=c(15, 15, 16, 16, 17, 17), cex=4, bg=c('purple', 'purple', 'blue', 'blue', 'red', 'red'))
+# 
+# #points(-87.63723, 31.00211, pch=15, col="red", cex=4)
+# #points(-78.5, 24.52042, pch=15, col="red", cex=4)
+# legend(-87, 28, pch=c(15, 16, 17), pt.cex=4, y.intersp=3, x.intersp=2.5, legend=c("Hybrid", "Eastern", "Western"), bty='n')
+# #text(sitesSpatial, labels=sites$Site)
+# rect(-87.2, 26.5, -85.5, 28)
+# 
+# #xleft, ybottom, xright, ytop
+# 
+# 
+# text(-82, 26, "Big Cypress")
+# text(-82.8, 26.3, "Wild Turkey")
+# text(-83.2, 26.9, "Punta Gorda")
+# text(-79.6, 25.6, "Chekika")
+# text(-79.5, 27.4, "Fort Pierce")
+# text(-79.5, 28.4, "Cape Canaveral")
+# dev.off()
 
 
 
 ###FIGURE 1: D1 Survival by Biotype
 
 
-png(file="D1_survival.png", width=20, height=10, units="in", res=300)
-par(ps=24, mfrow=c(1, 2))
+#png(file="D1_survival.png", width=20, height=10, units="in", res=300)
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/D1_survival.eps", width=width.cm/2.54, 
+           height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+# x11(width = width.cm/2.54, height = height.cm/2.54, 
+#     pointsize = pointsize)
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.3,0.3,0.1,0.1),
+    mfrow=c(1, 2))
 b0<-p.vec_E[20]
 b1<-p.vec_E[21]
 b2<-p.vec_E[22]
@@ -71,7 +98,11 @@ b2<-p.vec_E[22]
 
 z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
 
-persp(x1seq_seedling, x2seq_seedling, z1, ticktype="detailed", theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", shade=0.1, nticks=4, xlab="\n Diameter (mm)", ylab="\n Height (cm)",  lwd=3, xaxs="i", main="(a) Eastern and Western", cex.main=1)
+persp(x1seq_seedling, x2seq_seedling, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)",
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)",
+      ylab="\n Height (cm)",  lwd=1, xaxs="i",
+      main="(a) Eastern and Western", cex.main=1)
 
 ###Plotting Hybrid seedling survival
 x1seq_seedling<-seq(0, 1.6, length.out=50)
@@ -84,13 +115,32 @@ b2<-p.vec_H[22]
 
 z1<-outer(x1seq_seedling, x2seq_seedling, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
 
-persp(x1seq_seedling, x2seq_seedling, z1, ticktype="detailed", theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", shade=0.1, nticks=4, xlab="\n Diameter (mm)", ylab="\n Height (cm)",  lwd=3, xaxs="i", main="(b) Hybrid", cex.main=1)
+persp(x1seq_seedling, x2seq_seedling, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", 
+      ylab="\n Height (cm)",  lwd=1, xaxs="i", 
+      main="(b) Hybrid", cex.main=1)
+
+#This creates an EPS figure! That LaTeX can read
 
 dev.off()
 
 
-### FIGURE 2 D1 GROWTH 
 
+
+
+### FIGURE 2 D1 GROWTH 
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/D1_growth.eps", width=width.cm/2.54, 
+           height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+# x11(width = width.cm/2.54, height = height.cm/2.54, 
+#     pointsize = pointsize)
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.3,0.3,0.1,0.1),
+    mfrow=c(1, 2))
 #Plot diameter tplus1
 b0<-p.vec_E[23]
 b1<-p.vec_E[24]
@@ -107,27 +157,43 @@ b2<-p.vec_E[29]
 z_height<-outer(x1seq_seedling, x2seq_seedling, function(a,b) (b0+b1*a + b2*b))
 
 
-png(file="D1_growth.png", width=20, height=10, units="in", res=300)
-par(ps=24, mfrow=c(1, 2))
+
+persp(x1seq_seedling, x2seq_seedling, z_diam, ticktype="detailed",
+      theta=-30,  zlab="\n \n Diameter \n at t plus 1 (mm) ", 
+      shade=0.1, nticks=4, xlab="\n Diameter at t (mm)",
+      ylab="\n Height at t (cm)", 
+      lwd=1)
 
 
-persp(x1seq_seedling, x2seq_seedling, z_diam, ticktype="detailed", theta=-30,  zlab="\n \n Diameter \n at t plus 1 (mm) ", shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",  main="(a)", cex.lab=1, cex.axis=0.8, lwd=1, xpd=T)
-
-
-persp(x1seq_seedling, x2seq_seedling, z_height, ticktype="detailed", theta=-30,  zlab="\n \n Height \n at t plus 1 (cm) ", shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)", main="(b)", cex.lab=1, cex.axis=0.8, lwd=1, xpd=T)
+persp(x1seq_seedling, x2seq_seedling, z_height, ticktype="detailed",
+      theta=-30,  zlab="\n \n Height \n at t plus 1 (cm) ",
+      shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", 
+      ylab="\n Height at t (cm)", lwd=1)
 
 dev.off()
 
 ###Figure 3: D2 Survival
-png(file="D2_survival.png", width=20, height=10, units="in", res=300)
-par(ps=24, mfrow=c(1, 2))
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/D2_survival.eps", width=width.cm/2.54, 
+           height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+# x11(width = width.cm/2.54, height = height.cm/2.54, 
+#     pointsize = pointsize)
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.3,0.3,0.1,0.1),
+    mfrow=c(1, 2))
 b0<-p.vec_E[1]
 b1<-p.vec_E[2]
 b2<-p.vec_E[3]
 
 z1<-outer(x1seq_larges, x2seq_larges, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
 
-persp(x1seq_larges, x2seq_larges, z1, ticktype="detailed", theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", shade=0.1, nticks=4, xlab="\n Diameter (mm)", ylab="\n Height (cm)",  lwd=3, xaxs="i", main="(a) Eastern/Western", cex.main=1)
+persp(x1seq_larges, x2seq_larges, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", ylab="\n Height (cm)",
+      lwd=1, main="(a) Eastern and Western", cex.main=1) #xaxs="i"
 #Plotting Hybrid seedling survival
 b0<-p.vec_H[1]
 b1<-p.vec_H[2]
@@ -135,7 +201,10 @@ b2<-p.vec_H[3]
 
 z1<-outer(x1seq_larges, x2seq_larges, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
 
-persp(x1seq_larges, x2seq_larges, z1, ticktype="detailed", theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", shade=0.1, nticks=4, xlab="\n Diameter (mm)", ylab="\n Height (cm)",   lwd=3, xaxs="i", main="(b) Hybrid", cex.main=1)
+persp(x1seq_larges, x2seq_larges, z1, ticktype="detailed", 
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", ylab="\n Height (cm)",  
+      lwd=1, main="(b) Hybrid", cex.main=1) #xaxs="i"
 
 dev.off()
 
@@ -144,8 +213,17 @@ dev.off()
 
 ### Plot Growth Mod Eastern Larges
 
-png(file="D2_growth.png", width=25, height=30, units="in", res=300)
-par(mfrow=c(3, 2), ps=42, mar=c(5.1, 11.1, 4.1, 2.1))
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/D2_growth.eps", width=width.cm/2.54, 
+           height=3*height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+# x11(width = width.cm/2.54, height = height.cm/2.54, 
+#     pointsize = pointsize)
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.1,0.3,0.1,0.3),
+    mfrow=c(3, 2))
 #Plot diameter tplus1
 b0<-p.vec_E[4]
 b1<-p.vec_E[5]
@@ -160,9 +238,16 @@ b2<-p.vec_E[10]
 
 z_height<-outer(x1seq_larges, x2seq_larges, function(a,b) (b0+b1*a + b2*b))
 
-persp(x1seq_larges, x2seq_larges, z_diam, ticktype="detailed", theta=-30,  zlab="\n \n Diameter \n at t plus 1 (mm) ", shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",  lwd=1, xaxs="i",  xpd=T, main="(a)", cex.main=1)
+persp(x1seq_larges, x2seq_larges, z_diam, ticktype="detailed", 
+      theta=-30,  zlab="\n \n Diameter \n at t plus 1 (mm) ", 
+      shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",
+      lwd=1, cex.lab=1)
+mtext(" (a) Eastern" , side=2, line = 3)
 
-persp(x1seq_larges, x2seq_larges, z_height, ticktype="detailed", theta=-30,  zlab="\n \n \n Height \n at t plus 1 (cm) ", shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",  lwd=1, main="(b)", cex.main=1,  lwd=1, xpd=T, xaxs="i")
+persp(x1seq_larges, x2seq_larges, z_height, ticktype="detailed",
+      theta=-30,  zlab="\n \n \n Height \n at t plus 1 (cm) ", 
+      shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",
+      lwd=1,  cex.lab=1.2,  lwd=1)
 
 #Plot Growth Mod Hybrid Larges
 
@@ -180,9 +265,16 @@ b2<-p.vec_H[10]
 
 z_height<-outer(x1seq_larges, x2seq_larges, function(a,b) (b0+b1*a + b2*b))
 
-persp(x1seq_larges, x2seq_larges, z_diam, ticktype="detailed", theta=-30,  zlab="\n \n Diameter \n at t plus 1 (mm) ", shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",  main="(c)", cex.main=1,  lwd=1, xpd=T)
+persp(x1seq_larges, x2seq_larges, z_diam, ticktype="detailed", theta=-30,
+      zlab="\n \n Diameter \n at t plus 1 (mm) ", shade=0.1, nticks=4,
+      xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)", 
+      cex.lab=1.3,  lwd=1)
+mtext(" (b) Hybrid" , side=2, line = 2)
 
-persp(x1seq_larges, x2seq_larges, z_height, ticktype="detailed", theta=-30,  zlab="\n \n \n Height \n at t plus 1 (cm) ", shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",  main="(d)", cex.main=1,  lwd=1, xpd=T)
+persp(x1seq_larges, x2seq_larges, z_height, ticktype="detailed", theta=-30,  
+      zlab="\n \n \n Height \n at t plus 1 (cm) ", shade=0.1, nticks=4,
+      xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",
+      cex.lab=1.4,  lwd=1)
 
 #Plot Growth Mod Western Larges
 
@@ -200,10 +292,16 @@ b2<-p.vec_W[10]
 
 z_height<-outer(x1seq_larges, x2seq_larges, function(a,b) (b0+b1*a + b2*b))
 
-persp(x1seq_larges, x2seq_larges, z_diam, ticktype="detailed", theta=-30,  zlab="\n \n Diameter \n at t plus 1 (mm) ", shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",main="(e)", cex.main=1,  lwd=1, xpd=T)
+persp(x1seq_larges, x2seq_larges, z_diam, ticktype="detailed", theta=-30,
+      zlab="\n \n Diameter \n at t plus 1 (mm) ", shade=0.1, nticks=4,
+      xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",
+      cex.lab=1.5,  lwd=1)
+mtext(" (c) Western" , side=2, line = 4)
 
-persp(x1seq_larges, x2seq_larges, z_height, ticktype="detailed", theta=-30,  zlab="\n \n \n Height \n at t plus 1 (cm) ", shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",  main="(f)", cex.main=1,  lwd=1, xpd=T)
-
+persp(x1seq_larges, x2seq_larges, z_height, ticktype="detailed", theta=-30, 
+      zlab="\n \n \n Height \n at t plus 1 (cm) ", shade=0.1, nticks=4, 
+      xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",
+      cex.lab=1.6,  lwd=1)
 dev.off()
 
 
@@ -256,13 +354,20 @@ legend(600, 0.3, c("Eastern", "Hybrid", "Western"), lty=c(5, 1, 3), y.intersp=2,
 dev.off()
 
 ###FIGURE 7: FECUNDITY
-png(file="fecundity.png", width=10, height=10, units="in", res=300)
+
+y_overall<- p.vec_overall[14]*x1seq_larges*x1seq_larges
+y_E<- p.vec_E[14]*x1seq_larges*x1seq_larges
+y_H<- p.vec_H[14]*x1seq_larges*x1seq_larges
+y_W<-p.vec_W[14]*x1seq_larges*x1seq_larges
+
+png(file="./Figures/fecundity.png", width=10, height=10, units="in", res=300)
 par(ps=24)
 par(mar=c(5, 5, 4, 2))
 plot(x1seq_larges, y_E, xlab="Diameter at time t (mm)", ylab="\n \n Number of Offspring",  lwd=3, type='l', lty=5)
 lines(x1seq_larges, y_H, lwd=3, type='l', lty=1)
 lines(x1seq_larges, y_W,  lwd=3, type='l', lty=3)
-legend(500, 500000, c("Eastern", "Hybrid", "Western"),   lty=c(5, 1, 3), y.intersp=2, lwd=c(3, 3, 3), seg.len=5)
+#lines(x1seq_larges, y_overall, lwd=3, type='l', lty=2, col="red")
+legend("bottomright", c("Eastern", "Hybrid", "Western"),   lty=c(5, 1, 3, 2), y.intersp=2, lwd=c(3, 3, 3, 3), seg.len=5)
 dev.off()
 
 rm(list=ls())

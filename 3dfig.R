@@ -98,7 +98,7 @@ survival_plot(b0, b1, b2, max.x, max.y, max.z, z1, x1seq_seedlings,
               x2seq_seedlings, 1.2, 
               "Diameter (mm)", "Height (cm)", "P(Survival)")
 
-#This creates and EPS figure! That LaTeX can read
+#This creates an EPS figure! That LaTeX can read
 setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/example5.ps", width=width.cm/2.54, 
            height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
