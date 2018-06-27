@@ -737,63 +737,26 @@ load("total.elas_D2_W.RData")
 
 #setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data/MSFigures")
 
+#### Figure Marginal elasticities 
 setEPS(horizontal=F, onefile=F, paper="special")
-postscript("./Figures/marginal_elasticity_diameter.eps", width=width.cm/2.54, 
-           height=2*height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
- # x11(width = width.cm/2.54, height = 2*height.cm/2.54, 
- #     pointsize = pointsize)
-
-par(mar = c(3, 3, 2, 1), # Margins
-    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
-    tcl = -0.3, # Length of axis tickmarks
-    xpd=F,
-    mai=c(0.4,0.3,0.2,0.1),
-    mfrow=c(2, 2))
-
-plot(rowSums(total.elas_D1_E), ylim=c(0, 0.05), xlab="Diameter (mm)", 
-     ylab="Elasticity", main="D1",  type='l', lwd=1, lty=5)
-lines(rowSums(total.elas_D1_H), type='l', lwd=1, lty=1)
-lines(rowSums(total.elas_D1_W), type='l', lwd=1, lty=3)
-
-plot(rowSums(total.elas_F_E), ylim=c(0, 0.05),  xlab="Diameter (mm)", 
-     ylab= "Elasticity", main="F", type='l', lwd=1, lty=5)
-lines(rowSums(total.elas_F_H), type='l', lwd=1, lty=1)
-lines(rowSums(total.elas_F_W), type='l', lwd=1, lty=3)
-
-
-plot(rowSums(total.elas_G_E), ylim= c(0, 0.05), xlab="Diameter (mm)",
-     ylab="Elasticity", main="G", type='l', lwd=1, lty=5)
-lines(rowSums(total.elas_G_H), type='l', lty=1)
-lines(rowSums(total.elas_G_W), type='l', lty=3)
-
-
-plot(rowSums(total.elas_D2_E), ylim= c(0, 0.05),  xlab="Diameter (mm)",
-     ylab="Elasticity", main="D2",  type='l',  lwd=1, lty=5)
-lines(rowSums(total.elas_D2_H), type='l', lwd=1, lty=1)
-lines(rowSums(total.elas_D2_W), type='l', lwd=1, lty=3)
-legend(2, 0.05, lty=c(3, 1, 5), lwd=1, c("Western", "Hybrid", "Eastern"),
-       seg.len=3)
-dev.off()
-
-###Test plot for combining marginal elasticities 
-setEPS(horizontal=F, onefile=F, paper="special")
-postscript("./Figures/marginal_elasticity_test.eps", width=width.cm/2.54, 
+postscript("./Figures/marginal_elasticity.eps", width=width.cm/2.54, 
            height=width.cm/(2*2.54), pointsize=pointsize,  encoding = "TeXtext.enc")
  # x11(width = width.cm/2.54, height = width.cm/(2.54*2), 
- #     pointsize = pointsize)
+  #    pointsize = pointsize)
 
 par(mar = c(3, 3, 2, 1), # Margins
     mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
     tcl = -0.3, # Length of axis tickmarks
     xpd=F,
-    mai=c(0.4,0.3,0.2,0.1),
+    mai=c(0.4,0.4,0.35,0.1),
     mfrow=c(2, 4))
 
 plot(rowSums(total.elas_D1_E), ylim=c(0, 0.05), xlab="Diameter (mm)", 
-     ylab="Elasticity", main="D1",  type='l', lwd=1, lty=5)
+     ylab="Elasticity", main="D1",  type='l', lwd=1, lty=5, cex.axis=1)
 lines(rowSums(total.elas_D1_H), type='l', lwd=1, lty=1)
 lines(rowSums(total.elas_D1_W), type='l', lwd=1, lty=3)
-title(main="(a) Marginal elasticity over diameter", cex.main=1)
+mtext(side=3, "(a) Marginal elasticity over diameter", line=2.6, cex=0.9)
+
 
 plot(rowSums(total.elas_F_E), ylim=c(0, 0.05),  xlab="Diameter (mm)", 
      ylab= "Elasticity", main="F", type='l', lwd=1, lty=5)
@@ -811,138 +774,136 @@ plot(rowSums(total.elas_D2_E), ylim= c(0, 0.05),  xlab="Diameter (mm)",
      ylab="Elasticity", main="D2",  type='l',  lwd=1, lty=5)
 lines(rowSums(total.elas_D2_H), type='l', lwd=1, lty=1)
 lines(rowSums(total.elas_D2_W), type='l', lwd=1, lty=3)
-legend(2, 0.05, lty=c(3, 1, 5), lwd=1, c("Western", "Hybrid", "Eastern"),
-       seg.len=3)
 
-plot(rowSums(total.elas_D1_E), ylim=c(0, 0.05), xlab="Diameter (mm)", 
+
+
+
+plot(colSums(total.elas_D1_E), ylim=c(0, 0.05), xlab="Height (cm)", 
      ylab="Elasticity", main="D1",  type='l', lwd=1, lty=5)
-lines(rowSums(total.elas_D1_H), type='l', lwd=1, lty=1)
-lines(rowSums(total.elas_D1_W), type='l', lwd=1, lty=3)
-title(main="(b) Marginal elasticity over height", cex.main=1)
+lines(colSums(total.elas_D1_H), type='l', lwd=1, lty=1)
+lines(colSums(total.elas_D1_W), type='l', lwd=1, lty=3)
+mtext(side=3, "(b) Marginal elasticity over height", line=2.6, cex=0.9)
 
-plot(rowSums(total.elas_F_E), ylim=c(0, 0.05),  xlab="Diameter (mm)", 
+plot(colSums(total.elas_F_E), ylim=c(0, 0.05),  xlab="Height (cm)",
      ylab= "Elasticity", main="F", type='l', lwd=1, lty=5)
-lines(rowSums(total.elas_F_H), type='l', lwd=1, lty=1)
-lines(rowSums(total.elas_F_W), type='l', lwd=1, lty=3)
+lines(colSums(total.elas_F_H), type='l', lwd=1, lty=1)
+lines(colSums(total.elas_F_W), type='l', lwd=1, lty=3)
 
 
-plot(rowSums(total.elas_G_E), ylim= c(0, 0.05), xlab="Diameter (mm)",
+plot(colSums(total.elas_G_E), ylim= c(0, 0.05), xlab="Height (cm)",
      ylab="Elasticity", main="G", type='l', lwd=1, lty=5)
-lines(rowSums(total.elas_G_H), type='l', lty=1)
-lines(rowSums(total.elas_G_W), type='l', lty=3)
+lines(colSums(total.elas_G_H), type='l', lwd=1, lty=1)
+lines(colSums(total.elas_G_W), type='l', lwd=1, lty=3)
 
-
-plot(rowSums(total.elas_D2_E), ylim= c(0, 0.05),  xlab="Diameter (mm)",
+plot(colSums(total.elas_D2_E), ylim= c(0, 0.05),  xlab="Height (cm)", 
      ylab="Elasticity", main="D2",  type='l',  lwd=1, lty=5)
-lines(rowSums(total.elas_D2_H), type='l', lwd=1, lty=1)
-lines(rowSums(total.elas_D2_W), type='l', lwd=1, lty=3)
+lines(colSums(total.elas_D2_H), type='l', lwd=1, lty=1)
+lines(colSums(total.elas_D2_W), type='l', lwd=1, lty=3)
 legend(2, 0.05, lty=c(3, 1, 5), lwd=1, c("Western", "Hybrid", "Eastern"),
-       seg.len=3)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#Figure A3: Marginal elasticity by height
-png(file="marginal_elasticity_height.png", width=10, height=10, units="in", res=300)
-
-par(mfrow=c(2,2), mar=c(5.1,6.1,4.1,2.1))
-par(ps=24)
-plot(colSums(total.elas_D1_E), ylim=c(0, 0.05), xlab="Height (cm)", ylab="Elasticity", main="D1",  type='l', lwd=2, lty=5)
-lines(colSums(total.elas_D1_H), type='l', lwd=2, lty=1)
-lines(colSums(total.elas_D1_W), type='l', lwd=2, lty=3)
-
-
-plot(colSums(total.elas_F_E), ylim=c(0, 0.05),  xlab="Height (cm)", ylab= "Elasticity", main="F", type='l', lwd=2, lty=5)
-lines(colSums(total.elas_F_H), type='l', lwd=2, lty=1)
-lines(colSums(total.elas_F_W), type='l', lwd=2, lty=3)
-
-
-plot(colSums(total.elas_G_E), ylim= c(0, 0.05), xlab="Height (cm)", ylab="Elasticity", main="G", type='l', lwd=2, lty=5)
-lines(colSums(total.elas_G_H), type='l', lwd=2, lty=1)
-lines(colSums(total.elas_G_W), type='l', lwd=2, lty=3)
-
-plot(colSums(total.elas_D2_E), ylim= c(0, 0.05),  xlab="Height (cm)", ylab="Elasticity", main="D2",  type='l',  lwd=2, lty=5)
-lines(colSums(total.elas_D2_H), type='l', lwd=2, lty=1)
-lines(colSums(total.elas_D2_W), type='l', lwd=2, lty=3)
-legend("topleft", lty=c(3, 1, 5), lwd=2, c("Western", "Hybrid", "Eastern"), bty='n', cex=0.8, y.intersp=2, seg.len=5)
+       seg.len=2)
 dev.off()
 
 
 
 ###FIGURE B1: Contribution of matrix elements to differences in lambda by diameter
-png(file="contributions_diameter.png", width=10, height=10, units="in", res=300)
-par(mfrow=c(2,2), mar=c(5.1,6.1,4.1,2.1))
-par(ps=24)
-plot(y1, rowSums(total.contrib_D1_W), ylim=c(-0.0015, 0.005), xlab="Diameter (mm)", ylab="Contribution", main="D1", type='l', cex=1, cex.axis=1, cex.lab=1, lwd=2, lty=3)
-lines(y1, rowSums(total.contrib_D1_H), type='l', lwd=2, lty=1)
-lines(y1, rowSums(total.contrib_D1_E),  type='l', lwd=2, lty=5)
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/marginal_contributions.eps", width=width.cm/2.54, 
+           height=width.cm/(2*2.54), pointsize=pointsize,  encoding = "TeXtext.enc")
+# x11(width = width.cm/2.54, height = width.cm/(2.54*2), 
+#    pointsize = pointsize)
 
-plot(y3, rowSums(total.contrib_F_W), ylim=c(-0.0015, 0.005), xlab="Diameter (mm)", ylab= "Contribution", main="F", type='l', cex=1, cex.axis=1, cex.lab=1, lwd=2, lty=3)
-lines(y3, rowSums(total.contrib_F_H), type='l', lwd=2, lty=1)
-lines(y3, rowSums(total.contrib_F_E), type='l', lwd=2, lty=5)
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=F,
+    mai=c(0.4,0.4,0.35,0.1),
+    mfrow=c(2, 4))
+plot(y1, rowSums(total.contrib_D1_W), ylim=c(-0.0015, 0.005), 
+     xlab="Diameter (mm)", ylab="Contribution", main="D1", type='l', 
+     cex=1, cex.axis=1, cex.lab=1, lwd=1, lty=3)
+lines(y1, rowSums(total.contrib_D1_H), type='l', lwd=1, lty=1)
+lines(y1, rowSums(total.contrib_D1_E),  type='l', lwd=1, lty=5)
+mtext(side=3, "(a) Contributions by diameter", line=2.6, cex=0.9)
 
-plot(y1, rowSums(total.contrib_G_W), ylim=c(-0.0015, 0.005), xlab="Diameter (mm)", ylab="Contribution", main="G", type='l', cex=1, cex.axis=1, cex.lab=1, lwd=2, lty=3)
-lines(y1, rowSums(total.contrib_G_H), type='l', lwd=2, lty=1)
-lines(y1, rowSums(total.contrib_G_E),  type='l', lwd=2, lty=5)
+plot(y3, rowSums(total.contrib_F_W), ylim=c(-0.0015, 0.005), 
+     xlab="Diameter (mm)", ylab= "Contribution", main="F", type='l',
+     cex=1, cex.axis=1, cex.lab=1, lwd=1, lty=3)
+lines(y3, rowSums(total.contrib_F_H), type='l', lwd=1, lty=1)
+lines(y3, rowSums(total.contrib_F_E), type='l', lwd=1, lty=5)
 
-plot(y3, rowSums(total.contrib_D2_W), ylim=c(-0.0015, 0.005), xlab="Diameter (mm)", ylab="Contribution", main="D2", type='l',  cex=1, cex.axis=1, cex.lab=1, lwd=2, lty=3)
-lines(y3, rowSums(total.contrib_D2_H), type='l', lwd=2, lty=1)
-lines(y3, rowSums(total.contrib_D2_E), type="l", lwd=2, lty=5)
-legend("topright", lty=c(3, 1, 5), lwd=2, c("Western", "Hybrid", "Eastern"), bty='n', cex=0.8, y.intersp=2, seg.len=5)
+plot(y1, rowSums(total.contrib_G_W), ylim=c(-0.0015, 0.005),
+     xlab="Diameter (mm)", ylab="Contribution", main="G", type='l', 
+     cex=1, cex.axis=1, cex.lab=1, lwd=1, lty=3)
+lines(y1, rowSums(total.contrib_G_H), type='l', lwd=1, lty=1)
+lines(y1, rowSums(total.contrib_G_E),  type='l', lwd=1, lty=5)
+
+plot(y3, rowSums(total.contrib_D2_W), ylim=c(-0.0015, 0.005), 
+     xlab="Diameter (mm)", ylab="Contribution", main="D2", type='l', 
+     cex=1, cex.axis=1, cex.lab=1, lwd=1, lty=3)
+lines(y3, rowSums(total.contrib_D2_H), type='l', lwd=1, lty=1)
+lines(y3, rowSums(total.contrib_D2_E), type="l", lwd=1, lty=5)
+
+plot(y2, colSums(total.contrib_D1_W), ylim=c(-0.0015, 0.005),
+     xlab="Height (cm)", ylab="Contribution", main="D1", type='l',
+     cex=1, cex.axis=1, cex.lab=1, lwd=1, lty=3)
+lines(y2, colSums(total.contrib_D1_H),  type='l', lwd=1, lty=1)
+lines(y2, colSums(total.contrib_D1_E), type='l', lwd=1, lty=5)
+mtext(side=3, "(b) Contributions by height", line=2.6, cex=0.9)
+
+plot(y4, colSums(total.contrib_F_W), ylim=c(-0.0015, 0.005), 
+     xlab="Height (cm)", ylab= "Contribution", main="F",
+     type='l',  cex=1, cex.axis=1, cex.lab=1, lwd=1, lty=3)
+lines(y4, colSums(total.contrib_F_H),  type='l', lwd=1, lty=1)
+lines(y4, colSums(total.contrib_F_E),  type='l', lwd=1, lty=5)
+
+plot(y2, colSums(total.contrib_G_W), ylim=c(-0.0015, 0.005), 
+     xlab="Height (cm)", ylab="Contribution", main="G", type='l',
+     cex=1, cex.axis=1, cex.lab=1, lwd=1, lty=3)
+lines(y2, colSums(total.contrib_G_H),  type='l', lwd=1, lty=1)
+lines(y2, colSums(total.contrib_G_E), type='l', lwd=1, lty=5)
+
+plot(y4, colSums(total.contrib_D2_W), ylim=c(-0.0015, 0.005),
+     xlab="Height (cm)", ylab="Contribution", main="D2", type='l', 
+     cex=1, cex.axis=1, cex.lab=1, lwd=1, lty=3)
+lines(y4, colSums(total.contrib_D2_H),  type='l', lwd=1, lty=1)
+lines(y4, colSums(total.contrib_D2_E), type="l", lwd=1, lty=5)
+legend("topright", lty=c(3, 1, 5), lwd=2, c("Western", "Hybrid", "Eastern"),
+        seg.len=2)
 dev.off()
 
 
-###FIGURE B2: Contribution of matrix elements to differences in lambda by height
-
-png(file="contributions_height.png", width=10, height=10, units="in", res=300)
-par(mfrow=c(2,2), mar=c(5.1,6.1,4.1,2.1))
-par(ps=24)
-plot(y2, colSums(total.contrib_D1_W), ylim=c(-0.0015, 0.005), xlab="Height (cm)", ylab="Contribution", main="D1", type='l', cex=1, cex.axis=1, cex.lab=1, lwd=2, lty=3)
-lines(y2, colSums(total.contrib_D1_H),  type='l', lwd=2, lty=1)
-lines(y2, colSums(total.contrib_D1_E), type='l', lwd=2, lty=5)
-
-plot(y4, colSums(total.contrib_F_W), ylim=c(-0.0015, 0.005), xlab="Height (cm)", ylab= "Contribution", main="F", type='l',  cex=1, cex.axis=1, cex.lab=1, lwd=2, lty=3)
-lines(y4, colSums(total.contrib_F_H),  type='l', lwd=2, lty=1)
-lines(y4, colSums(total.contrib_F_E),  type='l', lwd=2, lty=5)
-
-plot(y2, colSums(total.contrib_G_W), ylim=c(-0.0015, 0.005), xlab="Height (cm)", ylab="Contribution", main="G", type='l', cex=1, cex.axis=1, cex.lab=1, lwd=2, lty=3)
-lines(y2, colSums(total.contrib_G_H),  type='l', lwd=2, lty=1)
-lines(y2, colSums(total.contrib_G_E), type='l', lwd=2, lty=5)
-
-plot(y4, colSums(total.contrib_D2_W), ylim=c(-0.0015, 0.005), xlab="Height (cm)", ylab="Contribution", main="D2", type='l',  cex=1, cex.axis=1, cex.lab=1, lwd=2, lty=3)
-lines(y4, colSums(total.contrib_D2_H),  type='l', lwd=2, lty=1)
-lines(y4, colSums(total.contrib_D2_E), type="l", lwd=2, lty=5)
-legend("topright", lty=c(3, 1, 5), lwd=2, c("Western", "Hybrid", "Eastern"), bty='n', cex=0.8, y.intersp=2, seg.len=5)
-dev.off()
 
 #Figure B3: Contributions of matrix elements to variation in lambda by diameter
-png(file='variability_diameter.png', width=10, height=10, units="in", res=300)
-par(mfrow=c(2,2), mar=c(5.1,6.1,4.1,2.1))
-par(ps=24)
-plot(y1, rowSums(total.thing_D1), ylim=c(0, 0.003), xlab="Diameter (mm)", ylab="CV * elas", main="D1",  type='l', cex=1, cex.axis=1, cex.lab=1, lwd=2)
-plot(y3, rowSums(total.thing_F), ylim=c(0, 0.003), xlab="Diameter (mm)", ylab= "CV * elas", main="F", type='l', cex=1, cex.axis=1, cex.lab=1, lwd=2)
-plot(y1, rowSums(total.thing_G, na.rm=T), ylim=c(0, 0.003), xlab="Diameter (mm)", ylab="CV * elas", main="G", type='l', cex=1, cex.axis=1, cex.lab=1, lwd=2)
-plot(y3, rowSums(total.thing_D2), ylim=c(0, 0.003), xlab="Diameter (mm)", ylab="CV * sens", main="D2",  type='l',  cex=1, cex.axis=1, cex.lab=1, lwd=2)
-dev.off()
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/variability.eps", width=width.cm/2.54, 
+           height=width.cm/(2*2.54), pointsize=pointsize,  encoding = "TeXtext.enc")
+# x11(width = width.cm/2.54, height = width.cm/(2.54*2), 
+#    pointsize = pointsize)
 
-#Figure B4: Contributions of matrix elements to variation in lambda by height
-png(file='variability_height.png', width=10, height=10, units="in", res=300)
-par(ps=24)
-plot(y2, colSums(total.thing_D1), ylim=c(0, 0.003), xlab="Height (cm)", ylab="CV * elas", main="D1",  type='l', cex=1, cex.axis=0.5, cex.lab=1, lwd=2)
-plot(y4, colSums(total.thing_F), ylim=c(0, 0.003), xlab="Height (cm)", ylab= "CV * elas", main="F", type='l', cex=1, cex.axis=.5, cex.lab=1, lwd=2)
-plot(y2, colSums(total.thing_G, na.rm=T), ylim=c(0, 0.003), xlab="Height (cm)", ylab="CV * elas", main="G", type='l', cex=1, cex.axis=.5, cex.lab=1, lwd=2)
-plot(y4, colSums(total.thing_D2), ylim=c(0, 0.003), xlab="Height (cm)", ylab="CV * elas", main="D2",  type='l',  cex=1, cex.axis=.5, cex.lab=1, lwd=2)
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=F,
+    mai=c(0.4,0.4,0.35,0.1),
+    mfrow=c(2, 4))
+plot(y1, rowSums(total.thing_D1), ylim=c(0, 0.003), xlab="Diameter (mm)", 
+     ylab="CV * elas", main="D1",  type='l', cex=1, cex.axis=1, cex.lab=1, lwd=1)
+mtext(side=3, "(a) Contributions by diameter", line=2.6, cex=0.9)
+plot(y3, rowSums(total.thing_F), ylim=c(0, 0.003), xlab="Diameter (mm)",
+     ylab= "CV * elas", main="F", type='l', cex=1, cex.axis=1, cex.lab=1, lwd=1)
+plot(y1, rowSums(total.thing_G, na.rm=T), ylim=c(0, 0.003), xlab="Diameter (mm)",
+     ylab="CV * elas", main="G", type='l', cex=1, cex.axis=1, cex.lab=1, lwd=1)
+plot(y3, rowSums(total.thing_D2), ylim=c(0, 0.003), xlab="Diameter (mm)", 
+     ylab="CV * sens", main="D2",  type='l',  cex=1, cex.axis=1, cex.lab=1, lwd=1)
+
+plot(y2, colSums(total.thing_D1), ylim=c(0, 0.003), xlab="Height (cm)", 
+     ylab="CV * elas", main="D1",  type='l', cex=1, cex.axis=0.5, cex.lab=1, lwd=1)
+mtext(side=3, "(b) Contributions by height", line=2.6, cex=0.9)
+plot(y4, colSums(total.thing_F), ylim=c(0, 0.003), xlab="Height (cm)", 
+     ylab= "CV * elas", main="F", type='l', cex=1, cex.axis=.5, cex.lab=1, lwd=1)
+plot(y2, colSums(total.thing_G, na.rm=T), ylim=c(0, 0.003), xlab="Height (cm)",
+     ylab="CV * elas", main="G", type='l', cex=1, cex.axis=.5, cex.lab=1, lwd=1)
+plot(y4, colSums(total.thing_D2), ylim=c(0, 0.003), xlab="Height (cm)", 
+     ylab="CV * elas", main="D2",  type='l',  cex=1, cex.axis=.5, cex.lab=1, lwd=1)
 dev.off()
 
