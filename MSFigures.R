@@ -5,6 +5,8 @@
 
 #Default width requested by journal: 
 width.cm <- 12.9
+width.cm_onepanel<-8.4
+width.cm_onepanel_small<-3.9
 height.cm <- 6.45
 pointsize <- 8
 x11(width = width.cm/2.54, height = height.cm/2.54, 
@@ -241,13 +243,13 @@ z_height<-outer(x1seq_larges, x2seq_larges, function(a,b) (b0+b1*a + b2*b))
 persp(x1seq_larges, x2seq_larges, z_diam, ticktype="detailed", 
       theta=-30,  zlab="\n \n Diameter \n at t plus 1 (mm) ", 
       shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",
-      lwd=1, cex.lab=1)
+      lwd=1, cex.lab=1.5)
 mtext(" (a) Eastern" , side=2, line = 4)
 
 persp(x1seq_larges, x2seq_larges, z_height, ticktype="detailed",
       theta=-30,  zlab="\n \n \n Height \n at t plus 1 (cm) ", 
       shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",
-      lwd=1,  cex.lab=1.2,  lwd=1)
+      lwd=1,  cex.lab=1.5)
 
 #Plot Growth Mod Hybrid Larges
 
@@ -268,13 +270,13 @@ z_height<-outer(x1seq_larges, x2seq_larges, function(a,b) (b0+b1*a + b2*b))
 persp(x1seq_larges, x2seq_larges, z_diam, ticktype="detailed", theta=-30,
       zlab="\n \n Diameter \n at t plus 1 (mm) ", shade=0.1, nticks=4,
       xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)", 
-      cex.lab=1.3,  lwd=1)
+      cex.lab=1.5,  lwd=1)
 mtext(" (b) Hybrid" , side=2, line = 4)
 
 persp(x1seq_larges, x2seq_larges, z_height, ticktype="detailed", theta=-30,  
       zlab="\n \n \n Height \n at t plus 1 (cm) ", shade=0.1, nticks=4,
       xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",
-      cex.lab=1.4,  lwd=1)
+      cex.lab=1.5,  lwd=1)
 
 #Plot Growth Mod Western Larges
 
@@ -301,14 +303,23 @@ mtext(" (c) Western" , side=2, line = 4)
 persp(x1seq_larges, x2seq_larges, z_height, ticktype="detailed", theta=-30, 
       zlab="\n \n \n Height \n at t plus 1 (cm) ", shade=0.1, nticks=4, 
       xlab="\n Diameter at t (mm)", ylab="\n Height at t (cm)",
-      cex.lab=1.6,  lwd=1)
+      cex.lab=1.5,  lwd=1)
 dev.off()
 
 
 ###FIGURE 5: GRADUATION
-png(file="graduation.png", width=20, height=10, units="in", res=300)
-par(mfrow=c(1,2), ps=24, mar=c(5.1, 8.1, 4.1, 2.1))
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/graduation.eps", width=width.cm/2.54, 
+           height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+# x11(width = width.cm/2.54, height = height.cm/2.54, 
+#     pointsize = pointsize)
 
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.1,0.5,0.1,0.1),
+    mfrow=c(1, 2))
 #Eastern and Hybrid
 b0<-p.vec_E[31]
 b1<-p.vec_E[32]
@@ -318,7 +329,10 @@ b2<-p.vec_E[33]
 
 z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
 
-persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed", theta=-30, zlim=c(0, 1.25), zlab="\n P(Graduation)", shade=0.1, nticks=4, xlab="\n Diameter (mm)", ylab="\n Height (cm)",  main="(a) Eastern and Hybrid", cex.lab=1, cex.axis=0.8, cex.main=1, lwd=1, xaxs="i")
+persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Graduation)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", ylab="\n Height (cm)", 
+      main="(a) Eastern and Hybrid", lwd=1)
 
 b0<-p.vec_W[31]
 b1<-p.vec_W[32]
@@ -326,12 +340,26 @@ b2<-p.vec_W[33]
 
 z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
 
-persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed", theta=-30, zlim=c(0, 1.25), zlab="\n P(Graduation)", shade=0.1, nticks=4, xlab="\n Diameter (mm)", ylab="\n Height (cm)",  main=" (b) Western", cex.lab=1, cex.axis=0.8, cex.main=1, lwd=1, xaxs="i")
+persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Graduation)",
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", ylab="\n Height (cm)",
+      main=" (b) Western", lwd=1)
 
 dev.off()
 
 ###FIGURE 6: REPRODUCTION
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/reproduction.eps", width=width.cm_onepanel/2.54, 
+           height=width.cm_onepanel/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+# x11(width = width.cm/2.54, height = height.cm/2.54, 
+#     pointsize = pointsize)
 
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.5,0.5,0.5,0.5),
+    mfrow=c(1, 1))
 b0<-p.vec_E[12]
 b1<-p.vec_E[13]
 y_E<-((exp(b0+b1*x2seq_larges)/(1+exp(b0+b1*x2seq_larges))))
@@ -344,33 +372,53 @@ b0<-p.vec_W[12]
 b1<-p.vec_W[13]
 y_W<-((exp(b0+b1*x2seq_larges)/(1+exp(b0+b1*x2seq_larges))))
 
-png(file="reproduction.png", width=10, height=10, units="in", res=300)
-par(ps=24)
-par(mar=c(5, 5, 4, 2))
-plot(x2seq_larges, y_E, xlab="Height at time t (cm)", ylab="\n \n Probability of Reproducing", lwd=3, type='l', lty=5)
-lines(x2seq_larges, y_H,  lwd=3, type='l', lty=1)
-lines(x2seq_larges, y_W,  lwd=3, type='l', lty=3)
-legend(600, 0.3, c("Eastern", "Hybrid", "Western"), lty=c(5, 1, 3), y.intersp=2, lwd=c(3, 3, 3), seg.len=4)
+plot(x2seq_larges, y_E, xlab="Height at time t (cm)", 
+     ylab="\n \n Probability of Reproducing", lwd=1, type='l', lty=5)
+lines(x2seq_larges, y_H,  lwd=1, type='l', lty=1)
+lines(x2seq_larges, y_W,  lwd=1, type='l', lty=3)
+legend(400, 0.3, c("Eastern", "Hybrid", "Western"), 
+       lty=c(5, 1, 3), lwd=c(1, 1, 1), seg.len=4)
 dev.off()
 
 ###FIGURE 7: FECUNDITY
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/fecundity.eps", width=width.cm_onepanel/2.54, 
+           height=width.cm_onepanel/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+# x11(width = width.cm/2.54, height = height.cm/2.54, 
+#     pointsize = pointsize)
 
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=F,
+    mai=c(0.5,0.5,0.5,0.5),
+    mfrow=c(1, 1))
 y_overall<- p.vec_overall[14]*x1seq_larges*x1seq_larges
 y_E<- p.vec_E[14]*x1seq_larges*x1seq_larges
 y_H<- p.vec_H[14]*x1seq_larges*x1seq_larges
 y_W<-p.vec_W[14]*x1seq_larges*x1seq_larges
 
-png(file="./Figures/fecundity.png", width=10, height=10, units="in", res=300)
-par(ps=24)
-par(mar=c(5, 5, 4, 2))
-plot(x1seq_larges, y_E, xlab="Diameter at time t (mm)", ylab="\n \n Number of Offspring",  lwd=3, type='l', lty=5)
-lines(x1seq_larges, y_H, lwd=3, type='l', lty=1)
-lines(x1seq_larges, y_W,  lwd=3, type='l', lty=3)
+
+plot(x1seq_larges, y_E, xlab="Diameter at time t (mm)", 
+     ylab="\n \n Number of Offspring",  lwd=1, type='l', lty=5)
+lines(x1seq_larges, y_H, lwd=1, type='l', lty=1)
+lines(x1seq_larges, y_W,  lwd=1, type='l', lty=3)
 #lines(x1seq_larges, y_overall, lwd=3, type='l', lty=2, col="red")
-legend("bottomright", c("Eastern", "Hybrid", "Western"),   lty=c(5, 1, 3, 2), y.intersp=2, lwd=c(3, 3, 3, 3), seg.len=5)
+legend(450, 3000000, c("Eastern", "Hybrid", "Western"),   lty=c(5, 1, 3, 2), seg.len=3)
 dev.off()
 
-rm(list=ls())
+
+
+
+save.image(file="2018_06_27.RData")
+
+
+
+
+
+
+
+#rm(list=ls())
 load("total.contrib_D1_E.RData")
 load("total.contrib_D2_E.RData")
 load("total.contrib_F_E.RData")
@@ -411,32 +459,60 @@ load("total.thing_F.RData")
 load("total.thing_G.RData")
 
 #Figure 8: Population Growth Rates
-png(file='lambdas.png', width=10, height=10, units="in", res=300)
-par(mar=c(5.1, 5.1, 2.1, 0), oma=c(1, 0, 0, 0), ps=24)
-barplot(c(lambda_all, lambda_E, lambda_H, lambda_W), col=c("black", "blue", "purple", "red"), ylab=expression(paste(lambda)),  names.arg=c("Overall", "Eastern", "Hybrid", "Western"), ylim=c(1, 1.1),xpd=F)
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/lambdas.eps", width=width.cm_onepanel/2.54, 
+           height=width.cm_onepanel/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+# x11(width = width.cm/2.54, height = height.cm/2.54, 
+#     pointsize = pointsize)
+
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=F,
+    mai=c(0.5,0.5,0.5,0.5),
+    mfrow=c(1, 1))
+barplot(c(lambda_all, lambda_E, lambda_H, lambda_W), 
+        col=c("grey", "grey", "grey", "grey"),
+        ylab=expression(paste(lambda)), 
+        names.arg=c("Overall", "Eastern", "Hybrid", "Western"),
+        ylim=c(1, 1.1), xpd=F)
 dev.off()
 
 #Figure 9: Barplot of contribution of kernel components to differences in lambda
-png(file='barplot_contributions.png', width=4, height=6, units="in", res=300)
-par(mfrow=c(3, 1), mar=c(2.1,7.1,2.1,0), oma = c(1,0,0,0),
-ps=24)
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/barplot_contributions.eps", width=width.cm_onepanel/2.54, 
+           height=3*height.cm/2.54, pointsize=pointsize)
+# x11(width = width.cm_onepanel/2.54, height = 3*width.cm_onepanel/2.54, 
+   #  pointsize = pointsize)
 
-barplot(W, col=c("grey", "grey", "grey"), ylim=c(-0.015, 0.03), names.arg=c("D1", "G", "F", "D2"))
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(0, 0, 0), # Distance of axis tickmark labels (second value)
+    tcl = 0.3, # Length of axis tickmarks
+    xpd=F,
+    mai=c(0.2,.5,0.2,0.1),
+    oma=c(0.1, 0, 0.1, 0),
+    mfrow=c(3, 1))
+
+barplot(W, col=c("grey", "grey", "grey"), ylim=c(-0.015, 0.03),
+        names.arg=c("D1", "G", "F", "D2"), axes=T, cex.names=1.6, cex.axis=1.6)
+
 Lines <- list(bquote(paste( "Contribution to" )),
               bquote(paste(lambda["W"],"-", lambda["overall"])))
-mtext(do.call(expression, Lines),side=2,line=c(5, 3), cex=.6)
+mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
-barplot(H, col=c("grey", "grey", "grey"), ylim=c(-0.015, 0.03), names.arg=c("D1", "G", "F", "D2"))
+barplot(H, col=c("grey", "grey", "grey"), ylim=c(-0.015, 0.03), 
+        names.arg=c("D1", "G", "F", "D2"), cex.names=1.6, cex.axis=1.6)
 Lines <- list(bquote(paste( "Contribution to" )),
               bquote(paste(lambda["H"],"-", lambda["overall"])))
-mtext(do.call(expression, Lines),side=2,line=c(5, 3), cex=.6)
+mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
-barplot(E, col=c("grey", "grey", "grey"), ylim=c(-0.015, 0.03), names.arg=c("D1", "G", "F", "D2"))
+barplot(E, col=c("grey", "grey", "grey"), ylim=c(-0.015, 0.03), 
+        names.arg=c("D1", "G", "F", "D2"), cex.names=1.6, cex.axis=1.6)
 Lines <- list(bquote(paste( "Contribution to" )),
               bquote(paste(lambda["E"],"-", lambda["overall"])))
-mtext(do.call(expression, Lines),side=2,line=c(5, 3), cex=.6)
+mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 dev.off()
 
@@ -584,40 +660,56 @@ dev.off()
 load("ssd_rv_figure.RData")
 
 
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/ssd_rv.eps", width=width.cm/2.54, 
+           height=2*height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+ # x11(width = width.cm/2.54, height = 2*height.cm/2.54, 
+ #     pointsize = pointsize)
+
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.4,0.3,0.2,0.1),
+    mfrow=c(2, 2))
 
 
 
-#jpeg('ssd_rv_all.jpeg')
-png(file="ssd_rv.png", width=10, height=10, units="in", res=300)
-par(mfrow=c(2,2), mar=c(5.1,6.1,4.1,2.1))
-par(ps=20)
 
-plot(y_diam, ss_diam_E,xlab="Diameter (mm)",ylab="frequency",type="l", cex=1, cex.axis=1, cex.lab=1, lty=5, lwd=2); 
-lines(y_diam, ss_diam_W, lwd=2, lty=3)
-lines(y_diam, ss_diam_H, lwd=2, lty=1)
+plot(y_diam, ss_diam_E,xlab="Diameter (mm)",ylab="frequency",
+     type="l", cex=1, cex.axis=1, cex.lab=1, lty=5, lwd=1); 
+lines(y_diam, ss_diam_W, lwd=1, lty=3)
+lines(y_diam, ss_diam_H, lwd=1, lty=1)
 
 title(main="(a) Stable diameter distribution", cex.main=1);
 
 
-plot(y_height,ss_height_E,xlab="Height (cm)",ylab="frequency",type="l", cex=1, cex.axis=1, cex.lab=1, lty=5, lwd=2); 
-lines(y_height, ss_height_W, lwd=2, lty=3)
-lines(y_height, ss_height_H, lwd=2, lty=1)
+plot(y_height,ss_height_E,xlab="Height (cm)",ylab="frequency",
+     type="l", cex=1, cex.axis=1, cex.lab=1, lty=5, lwd=1); 
+lines(y_height, ss_height_W, lwd=1, lty=3)
+lines(y_height, ss_height_H, lwd=1, lty=1)
 title(main="(b) Stable height distribution", cex.main=1); 
 
 
-plot(y_diam, rv_diam_E,xlab="Diameter (mm)",ylab="frequency",type="l", cex=1, cex.axis=1, cex.lab=1, lty=5, lwd=2);
-lines(y_diam, rv_diam_W, lwd=2, lty=3)
-lines(y_diam, rv_diam_H, lwd=2, lty=1)
+plot(y_diam, rv_diam_H, xlab="Diameter(mm)", ylab="frequency",
+     type="l", cex=1, cex.axis=1, cex.lab=1, lty=1, lwd=1)
+lines(y_diam, rv_diam_E, lwd=1, lty=5)
+lines(y_diam, rv_diam_W, lwd=1, lty=3)
+lines(y_diam, rv_diam_H, lwd=1, lty=1)
 
 title(main="(c) Reproductive value: by diameter", cex.main=1);
 
-plot(y_height,rv_height_E,xlab="Height (cm)",ylab="frequency",type="l", cex=1, cex.axis=1, cex.lab=1, lty=5, lwd=2); 
-lines(y_height, rv_height_W, lwd=2, lty=3)
-lines(y_height, rv_height_H, lwd=2, lty=1)
+ 
+plot(y_height, rv_height_H, xlab="Height (cm)", ylab="frequency",
+     type="l", cex=1, cex.axis=1, cex.lab=1, lty=1, lwd=1)
+lines(y_height, rv_height_E, lwd=1, lty=5)
+lines(y_height, rv_height_W, lwd=1, lty=3)
+
 
 title(main="(d) Reproductive value: by height", cex.main=1); 
 
-legend("bottomright", lty=c(3, 1, 5), lwd=2, c("Western", "Hybrid", "Eastern"), bty='n', cex=0.8, y.intersp=2, seg.len=5)
+legend(350, 0.0035, lty=c(3, 1, 5), lwd=1,
+       c("Western", "Hybrid", "Eastern"), cex=1,  seg.len=3)
 
 dev.off()
 
@@ -625,49 +717,141 @@ dev.off()
 
 
 #Figure A2: Marginal elasticity by diameter
-setwd("/Users/curculion/Dropbox/matrix/outputs/sites/Eastern")
+#setwd("/Users/curculion/Dropbox/matrix/outputs/sites/Eastern")
 load("total.elas_D1_E.RData")
 load("total.elas_F_E.RData")
 load("total.elas_G_E.RData")
 load("total.elas_D2_E.RData")
-setwd("/Users/curculion/Dropbox/matrix/outputs/sites/Hybrid")
+#setwd("/Users/curculion/Dropbox/matrix/outputs/sites/Hybrid")
 load("total.elas_D1_H.RData")
 load("total.elas_F_H.RData")
 load("total.elas_G_H.RData")
 load("total.elas_D2_H.RData")
 
-setwd("/Users/curculion/Dropbox/matrix/outputs/sites/Western")
+#setwd("/Users/curculion/Dropbox/matrix/outputs/sites/Western")
 load("total.elas_D1_W.RData")
 load("total.elas_F_W.RData")
 load("total.elas_G_W.RData")
 load("total.elas_D2_W.RData")
 
 
-setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data/MSFigures")
+#setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data/MSFigures")
 
-png(file="marginal_elasticity_diameter.png", width=10, height=10, units="in", res=300)
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/marginal_elasticity_diameter.eps", width=width.cm/2.54, 
+           height=2*height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+ # x11(width = width.cm/2.54, height = 2*height.cm/2.54, 
+ #     pointsize = pointsize)
 
-par(mfrow=c(2,2), mar=c(5.1,6.1,4.1,2.1))
-par(ps=24)
-plot(rowSums(total.elas_D1_E), ylim=c(0, 0.05), xlab="Diameter (mm)", ylab="Elasticity", main="D1",  type='l', lwd=2, lty=5)
-lines(rowSums(total.elas_D1_H), type='l', lwd=2, lty=1)
-lines(rowSums(total.elas_D1_W), type='l', lwd=2, lty=3)
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=F,
+    mai=c(0.4,0.3,0.2,0.1),
+    mfrow=c(2, 2))
 
-plot(rowSums(total.elas_F_E), ylim=c(0, 0.05),  xlab="Diameter (mm)", ylab= "Elasticity", main="F", type='l', lwd=2, lty=5)
-lines(rowSums(total.elas_F_H), type='l', lwd=2, lty=1)
-lines(rowSums(total.elas_F_W), type='l', lwd=2, lty=3)
+plot(rowSums(total.elas_D1_E), ylim=c(0, 0.05), xlab="Diameter (mm)", 
+     ylab="Elasticity", main="D1",  type='l', lwd=1, lty=5)
+lines(rowSums(total.elas_D1_H), type='l', lwd=1, lty=1)
+lines(rowSums(total.elas_D1_W), type='l', lwd=1, lty=3)
+
+plot(rowSums(total.elas_F_E), ylim=c(0, 0.05),  xlab="Diameter (mm)", 
+     ylab= "Elasticity", main="F", type='l', lwd=1, lty=5)
+lines(rowSums(total.elas_F_H), type='l', lwd=1, lty=1)
+lines(rowSums(total.elas_F_W), type='l', lwd=1, lty=3)
 
 
-plot(rowSums(total.elas_G_E), ylim= c(0, 0.05), xlab="Diameter (mm)", ylab="Elasticity", main="G", type='l', lwd=2, lty=5)
+plot(rowSums(total.elas_G_E), ylim= c(0, 0.05), xlab="Diameter (mm)",
+     ylab="Elasticity", main="G", type='l', lwd=1, lty=5)
 lines(rowSums(total.elas_G_H), type='l', lty=1)
 lines(rowSums(total.elas_G_W), type='l', lty=3)
 
 
-plot(rowSums(total.elas_D2_E), ylim= c(0, 0.05),  xlab="Diameter (mm)", ylab="Elasticity", main="D2",  type='l',  lwd=2, lty=5)
-lines(rowSums(total.elas_D2_H), type='l', lwd=2, lty=1)
-lines(rowSums(total.elas_D2_W), type='l', lwd=2, lty=3)
-legend("topleft", lty=c(3, 1, 5), lwd=2, c("Western", "Hybrid", "Eastern"), bty='n', cex=0.8, y.intersp=2, seg.len=5)
+plot(rowSums(total.elas_D2_E), ylim= c(0, 0.05),  xlab="Diameter (mm)",
+     ylab="Elasticity", main="D2",  type='l',  lwd=1, lty=5)
+lines(rowSums(total.elas_D2_H), type='l', lwd=1, lty=1)
+lines(rowSums(total.elas_D2_W), type='l', lwd=1, lty=3)
+legend(2, 0.05, lty=c(3, 1, 5), lwd=1, c("Western", "Hybrid", "Eastern"),
+       seg.len=3)
 dev.off()
+
+###Test plot for combining marginal elasticities 
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/marginal_elasticity_test.eps", width=width.cm/2.54, 
+           height=width.cm/(2*2.54), pointsize=pointsize,  encoding = "TeXtext.enc")
+ # x11(width = width.cm/2.54, height = width.cm/(2.54*2), 
+ #     pointsize = pointsize)
+
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=F,
+    mai=c(0.4,0.3,0.2,0.1),
+    mfrow=c(2, 4))
+
+plot(rowSums(total.elas_D1_E), ylim=c(0, 0.05), xlab="Diameter (mm)", 
+     ylab="Elasticity", main="D1",  type='l', lwd=1, lty=5)
+lines(rowSums(total.elas_D1_H), type='l', lwd=1, lty=1)
+lines(rowSums(total.elas_D1_W), type='l', lwd=1, lty=3)
+title(main="(a) Marginal elasticity over diameter", cex.main=1)
+
+plot(rowSums(total.elas_F_E), ylim=c(0, 0.05),  xlab="Diameter (mm)", 
+     ylab= "Elasticity", main="F", type='l', lwd=1, lty=5)
+lines(rowSums(total.elas_F_H), type='l', lwd=1, lty=1)
+lines(rowSums(total.elas_F_W), type='l', lwd=1, lty=3)
+
+
+plot(rowSums(total.elas_G_E), ylim= c(0, 0.05), xlab="Diameter (mm)",
+     ylab="Elasticity", main="G", type='l', lwd=1, lty=5)
+lines(rowSums(total.elas_G_H), type='l', lty=1)
+lines(rowSums(total.elas_G_W), type='l', lty=3)
+
+
+plot(rowSums(total.elas_D2_E), ylim= c(0, 0.05),  xlab="Diameter (mm)",
+     ylab="Elasticity", main="D2",  type='l',  lwd=1, lty=5)
+lines(rowSums(total.elas_D2_H), type='l', lwd=1, lty=1)
+lines(rowSums(total.elas_D2_W), type='l', lwd=1, lty=3)
+legend(2, 0.05, lty=c(3, 1, 5), lwd=1, c("Western", "Hybrid", "Eastern"),
+       seg.len=3)
+
+plot(rowSums(total.elas_D1_E), ylim=c(0, 0.05), xlab="Diameter (mm)", 
+     ylab="Elasticity", main="D1",  type='l', lwd=1, lty=5)
+lines(rowSums(total.elas_D1_H), type='l', lwd=1, lty=1)
+lines(rowSums(total.elas_D1_W), type='l', lwd=1, lty=3)
+title(main="(b) Marginal elasticity over height", cex.main=1)
+
+plot(rowSums(total.elas_F_E), ylim=c(0, 0.05),  xlab="Diameter (mm)", 
+     ylab= "Elasticity", main="F", type='l', lwd=1, lty=5)
+lines(rowSums(total.elas_F_H), type='l', lwd=1, lty=1)
+lines(rowSums(total.elas_F_W), type='l', lwd=1, lty=3)
+
+
+plot(rowSums(total.elas_G_E), ylim= c(0, 0.05), xlab="Diameter (mm)",
+     ylab="Elasticity", main="G", type='l', lwd=1, lty=5)
+lines(rowSums(total.elas_G_H), type='l', lty=1)
+lines(rowSums(total.elas_G_W), type='l', lty=3)
+
+
+plot(rowSums(total.elas_D2_E), ylim= c(0, 0.05),  xlab="Diameter (mm)",
+     ylab="Elasticity", main="D2",  type='l',  lwd=1, lty=5)
+lines(rowSums(total.elas_D2_H), type='l', lwd=1, lty=1)
+lines(rowSums(total.elas_D2_W), type='l', lwd=1, lty=3)
+legend(2, 0.05, lty=c(3, 1, 5), lwd=1, c("Western", "Hybrid", "Eastern"),
+       seg.len=3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #Figure A3: Marginal elasticity by height
