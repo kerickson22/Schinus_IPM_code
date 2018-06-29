@@ -45,3 +45,10 @@ rsconnect/
 *.pdf
 *.eps
 *.ps
+*.gdbindexes
+*.gdbtable
+*.gdbtablx
+*.atx
+*.spx
+Sites.gdb/timestamps
+Sites.gdb/gdb
