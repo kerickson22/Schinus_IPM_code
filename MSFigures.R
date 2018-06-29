@@ -85,8 +85,8 @@ par(mar = c(3, 3, 2, 1), # Margins
 setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/D1_survival.eps", width=width.cm/2.54, 
            height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
-# x11(width = width.cm/2.54, height = height.cm/2.54, 
-#     pointsize = pointsize)
+ x11(width = width.cm/2.54, height = height.cm/2.54, 
+     pointsize = pointsize)
 par(mar = c(3, 3, 2, 1), # Margins
     mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
     tcl = -0.3, # Length of axis tickmarks
@@ -351,13 +351,13 @@ dev.off()
 setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/reproduction.eps", width=width.cm_onepanel/2.54, 
            height=width.cm_onepanel/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
-# x11(width = width.cm/2.54, height = height.cm/2.54, 
-#     pointsize = pointsize)
+ # x11(width = width.cm_onepanel/2.54, height = width.cm_onepanel/2.54, 
+ #     pointsize = pointsize)
 
 par(mar = c(3, 3, 2, 1), # Margins
     mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
     tcl = -0.3, # Length of axis tickmarks
-    xpd=NA,
+    xpd=F,
     mai=c(0.5,0.5,0.5,0.5),
     mfrow=c(1, 1))
 b0<-p.vec_E[12]
@@ -373,11 +373,10 @@ b1<-p.vec_W[13]
 y_W<-((exp(b0+b1*x2seq_larges)/(1+exp(b0+b1*x2seq_larges))))
 
 plot(x2seq_larges, y_E, xlab="Height at time t (cm)", 
-     ylab="\n \n Probability of Reproducing", lwd=1, type='l', lty=5)
-lines(x2seq_larges, y_H,  lwd=1, type='l', lty=1)
+     ylab="\n \n Probability of Reproducing", lwd=1, type='l', lty=1)
 lines(x2seq_larges, y_W,  lwd=1, type='l', lty=3)
-legend(400, 0.3, c("Eastern", "Hybrid", "Western"), 
-       lty=c(5, 1, 3), lwd=c(1, 1, 1), seg.len=4)
+legend(5, 0.98, c("Eastern and Hybrid", "Western"), 
+       lty=c(1, 3), lwd=c(1, 1), seg.len=1.5)
 dev.off()
 
 ###FIGURE 7: FECUNDITY
