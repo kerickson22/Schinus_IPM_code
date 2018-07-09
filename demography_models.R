@@ -518,14 +518,13 @@ p.vec_W[13]<-mod_repro_lineage2$coeff[2]
 #This function depends only on diameter at base (because that's how it was calculated in allometry paper) 
 #OR, do I want to model using both diameter and height because the data is available 
 
-load('LHS.RData')
-LHS$diam_base<-LHS$diam_base*10 #convert from cm to mm
-fruit_mod<-lm(LHS$Fruit_No~0 + LHS$diam_base)
-#
-fruit_mod<-lm(LHS$Fruit_No~0 + LHS$diam_base + LHS$Height)
-summary(fruit_mod)
+p.vec_overall[14]<-4.89
+p.vec_E[14]<-4
+p.vec_H[14]<-4.25
+p.vec_W[14]<-5.52
+#These values are taken from Erickson et al. 2017 and rescaled (in that paper diameter was 
+# measured in cm instead of mm)
 
-p.vec_overall[14]<-fruit_mod$coeff[1]
 #(b) Model fecundity (by biotype)
 
 mod_fruit_production<-lm(LHS$Fruit_No ~ 0 + LHS$Height:LHS$Genetic_Type)
