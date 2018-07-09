@@ -392,10 +392,11 @@ par(mar = c(3, 3, 2, 1), # Margins
     xpd=F,
     mai=c(0.5,0.5,0.5,0.5),
     mfrow=c(1, 1))
-y_overall<- p.vec_overall[14]*x1seq_larges*x1seq_larges
-y_E<- p.vec_E[14]*x1seq_larges*x1seq_larges
-y_H<- p.vec_H[14]*x1seq_larges*x1seq_larges
-y_W<-p.vec_W[14]*x1seq_larges*x1seq_larges
+
+y_overall<- 4.89*x1seq_larges*x1seq_larges
+y_E<- 4.00*x1seq_larges*x1seq_larges
+y_H<- 4.25*x1seq_larges*x1seq_larges
+y_W<-5.52*x1seq_larges*x1seq_larges
 
 
 plot(x1seq_larges, y_E, xlab="Diameter at time t (mm)", 
@@ -403,7 +404,7 @@ plot(x1seq_larges, y_E, xlab="Diameter at time t (mm)",
 lines(x1seq_larges, y_H, lwd=1, type='l', lty=1)
 lines(x1seq_larges, y_W,  lwd=1, type='l', lty=3)
 #lines(x1seq_larges, y_overall, lwd=3, type='l', lty=2, col="red")
-legend(450, 3000000, c("Eastern", "Hybrid", "Western"),   lty=c(5, 1, 3, 2), seg.len=3)
+legend(5, 2500000, c("Eastern", "Hybrid", "Western"),   lty=c(5, 1, 3, 2), seg.len=3)
 dev.off()
 
 
