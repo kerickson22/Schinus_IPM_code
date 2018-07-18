@@ -2,14 +2,8 @@
 #####This code initializes a vector (called p.vec) that will be used in constructed the integral projection models
 ### By Kelley D. Erickson and Carol C. Horvitz
 
-##### Load packages
-#library(RColorBrewer) #not used in manuscript figures 
 
-
-##### Set working directory to load in data: 
-#MAC
-#setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data") 
-#load("demography_overall.RData") #This RData file was created after running everything in this script
+#Load demographic data
 demog<-read.csv("demography_15_clean.csv", head=T)
 
 ##This is a csv file where each row is a an individual 
