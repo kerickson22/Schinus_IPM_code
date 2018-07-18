@@ -12,17 +12,39 @@
 #load("demography_overall.RData") #This RData file was created after running everything in this script
 demog<-read.csv("demography_15_clean.csv", head=T)
 
+##This is a csv file where each row is a an individual 
+# The column names are : 
+# Obs : Observation number (each plant should have a different observation number; these were assigned post data 
+#      entry when we discovered that some of the numbers for individuals were reused between sites
+# Site: Which site (Big Cypress, Cape Canaveral, Chekika, Forty Pierce, Punta Gorda, Wild Turkey)
+# Plant ID: The tag number of an individual (each individual in a site has a different number, but numbers were
+#      reused across sites)
+# Location: SeedlingPlot (individual located in a seedling plot) or NA (individual not in seedling plot)
+# Date_i: The date the census took place for censuses i = 1:7
+# Status_i: One of four categories for censuses i=1:7: 
+#     alive: individual was alive when censused
+#     firstdead: the individual was recorded as dead at this census and was alive at the last census 
+#     missing: the individual was not located at this census
+#     prestudy: the individual had not been tagged yet 
+#     stilldead: the individual was already marked dead at a previous census
+# Death_Cause_i: One of three categories for censuses i = 1:7
+#     NA: for individuals that died, there was no reason to suspect their deaths were due to management actions
+#     sprayed: individual death attributed to being sprayed with herbicide (these individuals should be excluded)
+#     fire: individual death attributed to fire (these individuals should be excluded from analysis)
+# Rep_stat_i: One of 4 categories for censuses  i = 1:7
+#     NA: for individuals whose reproductive status is unknown at census i 
+#     female: for individuals who have produced fruit at any previous census up to an including census i 
+#     male: for individuals who have not produced fruit at any previous census (may have observed male flowers)
+#     pre-reproductive: for individuals who have not produced fruit at any previous census 
+# Diam_i: Diameter (in mm) of individual at census i 
+# Height_i: Height (in cm) of individual at census i 
+# Max_i: Maximum canopy width in cm of individual at census i 
+# Min_i: Minimum canopy width in cm of individual at census i 
+# Multistem: For each individual takes on one of two values: 
+#     NA: individuals that are not multistem
+#     FLAG: Individuals that are multistem 
 
-##### Set colors for plotting different biotypes 
 
-#col_E_light<-colors[1]
-#col_E_dark<-colors[2]
-
-#col_W_light<-colors[5]
-#col_W_dark<-colors[6]
-
-#col_H_light<-colors[9]
-#col_H_dark<-colors[10]
 
 ##### Initialize pvec's to store parameters that will go into the IPMs:
 #Initialize p.vec's to store output from model (these will feed into the IPM)
@@ -133,8 +155,11 @@ repmat_pooled<-rbind( cbind(repmat[,1], repmat[,2]), cbind(repmat[,2], repmat[,3
 pooled<-cbind(ID_pooled, Sites_pooled, Location, Death_Cause, Genetic_type_pooled, Mins_pooled, Maxs_pooled, Diams_pooled, Heights_pooled, repmat_pooled, survmat_pooled)
 names(pooled)<-c("ID", "Site","Location", "Death_Cause", "Genetic_type", "Min_t", "Min_tplus1", "Max_t", "Max_tplus1", "Diameter_t", "Diameter_tplus1", "Height_t", "Height_tplus1", "Rep_t", "Rep_tplus1", "Surv_t", "Surv_tplus1")
 
+
+##### Figuring out which state variables to use: 
 predictors<-cbind(pooled$Min_t, pooled$Diameter_t, pooled$Height_t, pooled$Max_t)
 
+# What is the correlation amongst the predictor variables? 
 correlation<-cor(predictors[, 1:4], use="pairwise.complete.obs")
 colnames(correlation)<-c("Min", "Diameter", "Height", "Max")
 rownames(correlation)<-c("Min", "Diameter", "Height", "Max")
@@ -142,31 +167,7 @@ rownames(correlation)<-c("Min", "Diameter", "Height", "Max")
 correlation
 #Over the entire dataset, there is the lowest correlation between diameter and height
 
-
-#Boxplot of sizes of individuals that survive to t plus 1 and those that do not
-boxplot(pooled$Diameter_t[pooled$Surv_tplus1==0], pooled$Diameter_t[pooled$Surv_tplus1==1], names=c("Don't survive", "Survive to t+1"), ylab="Diameter (cm) at time t")
-
-
-#Boxplots of sizes of individuals who reproduce and those that do not 
-boxplot(pooled$Diameter_t[pooled$Rep_t==0], pooled$Diameter_t[pooled$Rep_t==1], names=c("Not a repro. female at t", "repro. female at t"), ylab="Diameter (mm) at time t")
-
-
-Diam_cat_t<-rep(0, 9072 )
-Height_cat_t<-rep(0, 9072)
-Min_cat_t<-rep(0, 9072)
-
-for (i in 1:9072) { 
-	if (is.na(pooled$Diameter_t[i])) Diam_cat_t[i]<-NA 
-	else if (pooled$Diameter_t[i]<100) Diam_cat_t[i]<-"(0, 100mm)" 
-	else if (pooled$Diameter_t[i]<200) Diam_cat_t[i]<-"[100, 200mm)" 
-	else if (pooled$Diameter_t[i]<300) Diam_cat_t[i]<-"[200, 300mm)" 
-	else if (pooled$Diameter_t[i]<400) Diam_cat_t[i]<-"[300, 400mm)"
-	else if (pooled$Diameter_t[i]<500) Diam_cat_t[i]<-"[400, 500mm)"
-	else if (pooled$Diameter_t[i]<600) Diam_cat_t[i]<-"[500, 600mm)"
-	else if (pooled$Diameter_t[i]<700) Diam_cat_t[i]<-"[600, 700mm)" 
-	else if (pooled$Diameter_t[i]<800) Diam_cat_t[i]<-"[700, 800mm)"
-	else Diam_cat_t[i]<-"<=800mm"
-}
+#Determining whether there are outliers in size? 
 
 for (i in 1:9072) { 
 	if (is.na(pooled$Height_t[i])) Height_cat_t[i]<-NA 
@@ -205,16 +206,6 @@ restrict<-subset(pooled2, is.na(Death_Cause))
 #Remove outliers (very large diameters)
 restrict2<-subset(restrict, Diameter_t<800)
 
-diam_table<-table(restrict2$Surv_tplus1, restrict2$Diam_cat_t)
-surv_by_diam<-diam_table[2,]/(diam_table[1,]+diam_table[2,])
-
-
-#In these tables below I have already removed deaths by "unnatural" causes as well as outliers (very large diameters >800mm)
-height_table<-table(restrict2$Surv_tplus1, restrict2$Height_cat_t)
-surv_by_height<-height_table[2,]/(height_table[1,] + height_table[2,])
-
-min_table<-table(restrict2$Surv_tplus1, restrict2$Min_cat_t)
-surv_by_min<-min_table[2,]/(min_table[1,] + min_table[2,])
 
 
 #Divide dataset into size domains (seedlings and larges)
@@ -222,6 +213,8 @@ seedlings<-subset(restrict2, restrict2$Diameter_t<1.6)
 seedlings<-subset(seedlings, seedlings$Height_t<16)
 larges<-subset(restrict2, restrict2$Diameter_t>1.6)
 larges<-subset(larges, larges$Height_t>16)
+
+
 
 x1seq_larges<-seq(1.6, 800, length.out=50)
 x2seq_larges<-seq(16, 800, length.out=50)
