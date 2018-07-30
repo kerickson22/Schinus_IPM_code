@@ -13,25 +13,15 @@ library(mvtnorm)
 library(msm)
 
  
-#setwd("/Users/ke2/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data") 
-#load("170329.RData") #From demography11 script
-#ubuntu laptop: setwd("/home/kelley/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data")
-#Windows desktop: setwd("C:/Users/KE2/Dropbox/March 2016 Documents/Documents/Grad/dissertation/PRatt_demographic_data")")
-
-load("170417_models.RData") #From this script...
 
 # Set matrix size (to show up errors) and convergence tolerance. 
 # Make m1 and m2 smaller to make this run faster.  
-m1=3
+m1=10
 m2=m1+1
-m3=5
+m3=100
 m4=m3+1
 tol=1.e-8; 
 
-
-
-
-#Multiply vector by 1, 1.5, 2, 2.5, etc. and round 
 
 
 
@@ -91,8 +81,11 @@ p.vec[37]<-sd_grad_height					#sd graduate height
 p.vec[38]<-0.005								#Probability fruit removed from tree
 p.vec[39]<-0.002								#Probability seed survives journey
 
-
-
+#p.vecs are defined externally in script 1demography_models.R
+load('p.vec_overall.RData')
+load('p.vec_E.RData')
+load('p.vec_H.RData')
+load('p.vec_W.RData')
 #============================================================================# 
 #  Define the kernels and iteration matrix:
 #Domain 1: Seedling Domain
@@ -102,10 +95,6 @@ p.vec[39]<-0.002								#Probability seed survives journey
 #	 for diam=diameter in range [1.6,700]
 #and for height=height in range [16, 800]
 #============================================================================# 
-#Range of diameter: [0, 800]
-0.9*max(restrict2$Diameter_t) #700
-#Range of height:  [0, 800]
-0.9*max(restrict2$Height_t, na.rm=T) #800
 
 
 
@@ -121,7 +110,7 @@ pyx2=function(diamp,heightp,diam, height, params) { 0.997*(exp(params[1]+params[
 
 
 #Fecundity=P(fruiting)*# of Fruits Produced*P(survival of seeds)*Distribution of Seedling Diameters*Distribution of Seedling Heights
-fyx=function(diamp,heightp,diam,height, params) {(exp(params[12]+params[13]*height)/(1+exp(params[12]+params[13]*height)))*(p.vec[14]*diam*diam)*p.vec[38]*p.vec[39]*p.vec[19]*dtnorm(diamp,mean=params[15],sd=params[16], lower=0, upper=1.6)*dtnorm(heightp,mean=params[17],sd=params[18], lower=0, upper=16)}
+fyx=function(diamp,heightp,diam,height, params) {(exp(params[12]+params[13]*height)/(1+exp(params[12]+params[13]*height)))*(params[14]*diam*diam)*params[38]*params[39]*params[19]*dtnorm(diamp,mean=params[15],sd=params[16], lower=0, upper=1.6)*dtnorm(heightp,mean=params[17],sd=params[18], lower=0, upper=16)}
 
 #Graduation = P(graduation)*Distribution of Graduates Diams*Distribution of Graduates Heights
 gyx=function(diamp,heightp,diam,height, params) {((exp(params[20]+params[21]*diam+params[22]*height)/(1+exp(params[20]+params[21]*diam+params[22]*height))))*(exp(params[31]+params[32]*diam + params[33]*height)/(1+exp(params[31]+params[32]*diam + params[33]*height))
@@ -145,6 +134,7 @@ h4=(800-16)/m4
 # though you can probably do better if you need to. The shortcuts here have 
 # been checked against the results from code that uses loops for everything.
 
+#####Part One: Overall model 
 ###Construct D1 (Seedling Domain):
 plop=function(i,j) {(j-1)*m1+i} # for putting values in proper place in A 
 Plop=outer(1:m1,1:m2,plop); 
@@ -157,7 +147,7 @@ Kvals_D1=array(0,c(m1,m2,m1,m2));
 for(i in 1:m1){
 	for(j in 1:m2){
 		for(k in 1:m1){
-				kvals=pyx1(y1[k],y2[1:m2],y1[i],y2[j], p.vec)
+				kvals=pyx1(y1[k],y2[1:m2],y1[i],y2[j], p.vec_overall)
 				D1[Plop[k,1:m2],Plop[i,j]]=kvals
 				Kvals_D1[k,1:m2,i,j]=kvals
 			
@@ -178,7 +168,7 @@ Kvals_D2=array(0,c(m3,m4,m3,m4));
 for(i in 1:m3){
 	for(j in 1:m4){
 		for(k in 1:m3){
-				kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec)
+				kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec_overall)
 				D2[Plop[k,1:m4],Plop[i,j]]=kvals
 				Kvals_D2[k,1:m4,i,j]=kvals
 			
@@ -198,7 +188,7 @@ Kvals_F=array(0, c(m1, m2, m3, m4))
 for(i in 1:m3) {
 	for (j in 1:m4) {
 		for (k in 1:m1) {
-			kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec)
+			kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec_overall)
 			F[Plop1[k, 1:m2], Plop2[i,j]]=kvals
 			Kvals_F[k, 1:m2, i, j]=kvals
 		}}
@@ -217,7 +207,7 @@ Kvals_G=array(0, c(m3, m4, m1, m2))
 for(i in 1:m1) {
 	for (j in 1:m2) {
 		for (k in 1:m3) {
-			kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec)
+			kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec_overall)
 			G[Plop1[k, 1:m4], Plop2[i,j]]=kvals
 			Kvals_G[k, 1:m4, i, j]=kvals
 		}}
@@ -234,7 +224,7 @@ new_A<-cbind(yellow_white, white_green)
 
 A<-new_A
 
-#save(A, file="A_matrix.RData")
+save(A, file="A_matrix_overall.RData")
 #rm(list=ls(all=TRUE))
 #load("A_matrix.RData")
 
@@ -328,32 +318,6 @@ lam.stable.t=lam;
 #####################################
 
 
-rm(list=ls(all=TRUE))
-#setwd("/Users/ke2/Dropbox/matrix/outputs/m1=10/m3=100")
-#setwd("/Users/ke2/Dropbox/matrix/outputs/sites/Hybrid")
-#setwd("/Users/ke2/Dropbox/matrix/outputs/sites/Eastern")
-#setwd("/Users/ke2/Dropbox/matrix/outputs/sites/Western")
-
-setwd("/Users/kelley/Dropbox/matrix/outputs/m1=10/m3=100")
-
-load("D1.RData")
-load("D2.RData")
-load("F.RData")
-load("G.RData")
-load("Kvals_D1.RData")
-load("Kvals_D2.RData")
-load("Kvals_F.RData")
-load("Kvals_G.RData")
-load("lam.stable.RData")
-load("stable.dist.RData")
-load("v.RData")
-
-
-A<-cbind(rbind(D1, G), rbind(F, D2))
-m1<-10
-m2<-m1+1
-m3<-100
-m4<-m3+1
 
 
 # Compute elasticity matrix 
@@ -489,49 +453,22 @@ repro.val_larges=matrix(v[((m1*m2)+1):((m1*m2)+(m3*m4))], m3, m4);
 stable.state_larges=matrix(stable.dist[((m1*m2) +1):((m1*m2) + (m3*m4))], m3, m4);
 
 
-
-h1=1.6/m1; 
-y1=(h1/2)*((0:(m1-1))+(1:m1)); #for diameter in D1
-h2=16/m2
-y2=(h2/2)*((0:(m2-1))+(1:m2)); #for height in D1
-h3=(700-1.6)/m3;
-y3=(h3/2)*((0:(m3-1))+(1:m3))+1.6; #for diameter in D2
-h4=(800-16)/m4
- y4=(h4/2)*((0:(m4-1))+(1:m4))+16; #for height in D2
-
 #============================================================================# 
-#  Plot stable state distribution and state-dependent total elasticity 
+#  Calculate stable state distribution and state-dependent total elasticity 
 #============================================================================# 
-x11()
-
-png(file="ssd_overall.png", width=10, height=10, units="in", res=300)
-par(mfrow=c(2,2), ps=24, mar=c(5.1, 5.1, 4.1, 2.1)); 
-
 
 ss_diam1<-apply(stable.state_smalls, 1, sum)
 ss_diam2<-apply(stable.state_larges, 1, sum)
 ss_diam<-c(ss_diam1, ss_diam2)
 y_diam<-c(y1, y3)
 
-#ss_diam_E<-ss_diam
-#ss_diam_W<-ss_diam
-#ss_diam_H<-ss_diam
 
-plot(y_diam, ss_diam,xlab="Diameter (mm)",ylab="frequency",type="l", lwd=2); 
-title(main="Stable diameter distribution", cex.main=1);
 
 ss_height1<-apply(stable.state_smalls, 2, sum)
 ss_height2<-apply(stable.state_larges, 2, sum)
 ss_height<-c(ss_height1, ss_height2)
 y_height<-c(y2, y4)
 
-
-#ss_height_E<-ss_height
-#ss_height_W<-ss_height
-#ss_height_H<-ss_height
-
-plot(y_height,ss_height,xlab="Height (cm)",ylab="frequency",type="l", lwd=2); 
-title(main="Stable height distribution", cex.main=1); 
 
 
 
@@ -540,222 +477,33 @@ rv_diam2<-apply(repro.val_larges, 1, sum)
 rv_diam<-c(rv_diam1, rv_diam2)
 y_diam<-c(y1, y3)
 
-#rv_diam_E<-rv_diam
-#rv_diam_W<-rv_diam
-#rv_diam_H<-rv_diam
 
-plot(y_diam, rv_diam,xlab="Diameter (mm)",ylab="frequency",type="l", lwd=2); 
-title(main="Reproductive value: by diameter", cex.main=1);
+
+
 
 rv_height1<-apply(repro.val_smalls, 2, sum)
 rv_height2<-apply(repro.val_larges, 2, sum)
 rv_height<-c(rv_height1, rv_height2)
 y_height<-c(y2, y4)
 
-#rv_height_E<-rv_height
-#rv_height_W<-rv_height
-#rv_height_H<-rv_height
 
-plot(y_height,rv_height,xlab="Height (cm)",ylab="frequency",type="l", lwd=2); 
-title(main="Reproductive value: by height", cex.main=1); 
 
+total.elas_D1_overall<-total.elas_D1
+total.elas_D2_overall<-total.elas_D2
+total.elas_G_overall<-total.elas_G
+total.elas_F_overall<-total.elas_F
 
-dev.off()
+save(total.elas_D1_all, file="total.elas_D1_all.RData")
+save(total.elas_D2_all, file="total.elas_D2_all.RData")
+save(total.elas_G_all, file="total.elas_G_all.RData")
+save(total.elas_F_all, file="total.elas_F_all.RData")
 
-#####
-#####
 
-x11()
-
-jpeg('ssd_rv_all.jpeg')
-par(mfrow=c(2,2)); 
-
-
-
-#ss_diam_E<-ss_diam
-#ss_diam_W<-ss_diam
-#ss_diam_H<-ss_diam
-
-plot(y_diam, ss_diam_E,xlab="Diameter (mm)",ylab="frequency",type="l", cex=1.5, cex.axis=1.2, cex.lab=1.2, col=col_E_dark, lwd=2); 
-lines(y_diam, ss_diam_W, lwd=2, col=col_W_dark)
-lines(y_diam, ss_diam_H, lwd=2, col=col_H_dark)
-
-title(main="Stable diameter distribution", cex=2);
-
-
-
-#ss_height_E<-ss_height
-#ss_height_W<-ss_height
-#ss_height_H<-ss_height
-
-plot(y_height,ss_height_E,xlab="Height (cm)",ylab="frequency",type="l", cex=1.5, cex.axis=1.2, cex.lab=1.2, col=col_E_dark, lwd=2); 
-lines(y_height, ss_height_W, lwd=2, col=col_W_dark)
-lines(y_height, ss_height_H, lwd=2, col=col_H_dark)
-title(main="Stable height distribution", cex=2); 
-
-#rv_diam_E<-rv_diam
-#rv_diam_W<-rv_diam
-#rv_diam_H<-rv_diam
-
-plot(y_diam, rv_diam_E,xlab="Diameter (mm)",ylab="frequency",type="l", cex=1.5, cex.axis=1.2, cex.lab=1.2, col=col_E_dark, lwd=2);
-lines(y_diam, rv_diam_W, lwd=2, col=col_W_dark)
-lines(y_diam, rv_diam_H, lwd=2, col=col_H_dark)
-
-title(main="Reproductive value: by diameter", cex=2);
-
-
-
-#rv_height_E<-rv_height
-#rv_height_W<-rv_height
-#rv_height_H<-rv_height
-
-plot(y_height,rv_height_E,xlab="Height (cm)",ylab="frequency",type="l", cex=1.5, cex.axis=1.2, cex.lab=1.2, col=col_E_dark, lwd=2); 
-lines(y_height, rv_height_W, lwd=2, col=col_W_dark)
-lines(y_height, rv_height_H, lwd=2, col=col_H_dark)
-
-title(main="Reproductive value: by height", cex=2); 
-
-
-dev.off()
-
-
-
-#####
-#####
-
-
-
-
-
-#matrix.image(y2,y1,stable.state_smalls,xlab="Height (cm)",ylab="Diameter (mm)");
-#contour(y2,y1,t(stable.state_smalls),add=T,cex=3);
-#title(main="Stable diameter-height distribution: small domain"); 
-
-
-# Function to do an image plot of a matrix in the usual orientation, A(1,1) at top left  
-matrix.image=function(x,y,A,col=topo.colors(200),...) {
-	nx=length(x); ny=length(y); 
-	x1=c(1.5*x[1]-0.5*x[2],1.5*x[nx]-0.5*x[nx-1]); 
-	y1=c(1.5*y[1]-0.5*y[2],1.5*y[ny]-0.5*y[ny-1]); 
-	image(list(x=x,y=y,z=t(A)),xlim=x1,ylim=rev(y1),col=col,bty="u",...);  
-}
-
-
-#total.elas_D1_E<-total.elas_D1
-#total.elas_D2_E<-total.elas_D2
-#total.elas_G_E<-total.elas_G
-#total.elas_F_E<-total.elas_F
-
-
-#total.elas_D1_W<-total.elas_D1
-#total.elas_D2_W<-total.elas_D2
-#total.elas_G_W<-total.elas_G
-#total.elas_F_W<-total.elas_F
-
-#total.elas_D1_H<-total.elas_D1
-#total.elas_D2_H<-total.elas_D2
-#total.elas_G_H<-total.elas_G
-#total.elas_F_H<-total.elas_F
-
-
-
-#total.elas_D1_all<-total.elas_D1
-#total.elas_D2_all<-total.elas_D2
-#total.elas_G_all<-total.elas_G
-#total.elas_F_all<-total.elas_F
-
-#save(total.elas_D1_all, file="total.elas_D1_all.RData")
-#save(total.elas_D2_all, file="total.elas_D2_all.RData")
-#save(total.elas_G_all, file="total.elas_G_all.RData")
-#save(total.elas_F_all, file="total.elas_F_all.RData")
-
-#save(total.elas_D1_H, file="total.elas_D1_H.RData")
-#save(total.elas_D2_H, file="total.elas_D2_H.RData")
-#save(total.elas_G_H, file="total.elas_G_H.RData")
-#save(total.elas_F_H, file="total.elas_F_H.RData")
-
-save(total.elas_D1_W, file="total.elas_D1_W.RData")
-save(total.elas_D2_W, file="total.elas_D2_W.RData")
-save(total.elas_G_W, file="total.elas_G_W.RData")
-save(total.elas_F_W, file="total.elas_F_W.RData")
-
-
-load("total.elas_D1_all.Rdata")
-load("total.elas_F_all.RData")
-load("total.elas_G_all.RData")
-load("total.elas_D2_all.RData")
-
-#x11()
-#jpeg('elasticity.jpeg')
-png(file="elasticity_overall.png", width=10, height=10, units="in", res=300)
-par(mfrow=c(2, 2), ps=24, mar=c(5.1, 5.1, 4.1, 2.1))
-matrix.image(y2,y1,total.elas_D1_all,xlab="Height (cm)",ylab="Diameter (mm)");
-contour(y2,y1,t(total.elas_D1_all),add=T,);
-title(main="State-dependent Elasticity: D1", cex.main=1); 
-
-matrix.image(y4,y3,total.elas_F_all,xlab="Height (cm)",ylab="Diameter (mm)");
-contour(y4,y3,t(total.elas_F_all),add=T,cex=3);
-title(main="State-dependent Elasticity: F", cex.main=1);
-
-matrix.image(y2, y1, total.elas_G_all, xlab="Height(cm)", ylab="Diameter (mm)")
-contour(y2, y1, t(total.elas_G_all), add=T, cex=3);
-title(main="State-dependent Elasticity: G", cex.main=1)
-
-matrix.image(y4, y3, total.elas_D2_all, xlab="Height (cm)", ylab="Diameter (mm)")
-contour(y4, y3, t(total.elas_D2_all), add=T, cex=3);
-title(main="State-dependent Elasticity: D2", cex.main=1) 
-
-dev.off()
-
-#Another way of looking at it: 
-
-
-png(file="marginal_elasticity_diameter_overall.png", width=10, height=10, units="in", res=300)
-par(mfrow=c(2,2), mar=c(5.1,6.1,4.1,2.1))
-par(ps=24)
-plot(rowSums(total.elas_D1), ylim=c(0, 0.05), xlab="Diameter (mm)", ylab="Elasticity", main="D1",  type='l', lwd=2)
-plot(rowSums(total.elas_F), ylim=c(0, 0.05),  xlab="Diameter (mm)", ylab= "Elasticity", main="F", type='l', lwd=2)
-plot(rowSums(total.elas_G), ylim= c(0, 0.05), xlab="Diameter (mm)", ylab="Elasticity", main="G", type='l', lwd=2)
-plot(rowSums(total.elas_D2), ylim= c(0, 0.05),  xlab="Diameter (mm)", ylab="Elasticity", main="D2",  type='l',  lwd=2)
-dev.off()
-
-
-
-
-png(file="marginal_elasticity_height_overall.png", width=10, height=10, units="in", res=300)
-par(mfrow=c(2,2), mar=c(5.1,6.1,4.1,2.1))
-par(ps=24)
-plot(colSums(total.elas_D1), ylim=c(0, 0.05), xlab="Height (cm)", ylab="Elasticity", main="D1",  type='l', lwd=2)
-plot(colSums(total.elas_F), ylim=c(0, 0.05),  xlab="Height (cm)", ylab= "Elasticity", main="F", type='l', lwd=2)
-plot(colSums(total.elas_G), ylim= c(0, 0.05), xlab="Height (cm)", ylab="Elasticity", main="G", type='l', lwd=2)
-plot(colSums(total.elas_D2), ylim= c(0, 0.05),  xlab="Height (cm)", ylab="Elasticity", main="D2",  type='l',  lwd=2)
-dev.off()
-
-
-
-####Marginall elasticities wrt overall
-#total.elas_D1_all-total.elas_D1_H
-#setwd("/Users/ke2/Dropbox/matrix/outputs/m1=10/m3=100")
-load("total.elas_D1_all.RData")
-load("total.elas_D2_all.RData")
-load("total.elas_G_all.RData")
-load("total.elas_F_all.RData")
-#setwd("/Users/ke2/Dropbox/matrix/outputs/sites/Hybrid")
-load("total.elas_D1_H.RData")
-#setwd("/Users/ke2/Dropbox/matrix/outputs/sites/Eastern")
-load("total.elas_D1_E.RData")
-load("total.elas_D2_E.RData")
-load("total.elas_G_E.RData")
-load("total.elas_F_E.RData")
-
-setwd("/Users/ke2/Dropbox/matrix/outputs/sites/Western")
-load("total.elas_D1_W.RData")
-load("total.elas_D2_W.RData")
-load("total.elas_G_W.RData")
-load("total.elas_F_W.RData")
 
 setwd("/Users/ke2/Dropbox/matrix/outputs/sites/")
 
+
+##Redo these with comparisons between overall and Eastern 
 elas_D1_ref_E<-total.elas_D1_all-total.elas_D1_E
 elas_D2_ref_E<-total.elas_D2_all-total.elas_D2_E
 elas_G_ref_E<-total.elas_G_all-total.elas_G_E

@@ -121,7 +121,7 @@ Mins_pooled<-rbind( cbind(Mins[,1], Mins[,2]), cbind(Mins[,2], Mins[,3]),
 Mins_pooled<-data.frame(Mins_pooled[,1], Mins_pooled[,2])
 names(Mins_pooled)<-c("t", "t_plus_one")
 
-#Max and Min are highly correlated with eachother and should not both be used to describe population dynamics
+
 
 
 ###Use status matrix to get survival matrix
@@ -158,47 +158,24 @@ correlation<-cor(predictors[, 1:4], use="pairwise.complete.obs")
 colnames(correlation)<-c("Min", "Diameter", "Height", "Max")
 rownames(correlation)<-c("Min", "Diameter", "Height", "Max")
 
-correlation
+correlation<-round(correlation, 2)
+correlations<-write.csv(correlation, "correlations.csv")
 #Over the entire dataset, there is the lowest correlation between diameter and height
 
-#Determining whether there are outliers in size? 
-
-for (i in 1:9072) { 
-	if (is.na(pooled$Height_t[i])) Height_cat_t[i]<-NA 
-	else if (pooled$Height_t[i]<100) Height_cat_t[i]<-"(0, 100cm)" 
-	else if (pooled$Height_t[i]<200) Height_cat_t[i]<-"[100, 200cm)" 
-	else if (pooled$Height_t[i]<300) Height_cat_t[i]<-"[200, 300cm)" 
-	else if (pooled$Height_t[i]<400) Height_cat_t[i]<-"[300, 400cm)"
-	else if (pooled$Height_t[i]<500) Height_cat_t[i]<-"[400, 500cm)"
-	else if (pooled$Height_t[i]<600) Height_cat_t[i]<-"[500, 600cm)"
-	else if (pooled$Height_t[i]<700) Height_cat_t[i]<-"[600, 700cm)" 
-	else if (pooled$Height_t[i]<800) Height_cat_t[i]<-"[700, 800cm)"
-	else Height_cat_t[i]<-"<=800cm"
-}
-
-for (i in 1:9072) { 
-	if (is.na(pooled$Min_t[i])) Min_cat_t[i]<-NA 
-	else if (pooled$Min_t[i]<100) Min_cat_t[i]<-"(0, 100cm)" 
-	else if (pooled$Min_t[i]<200) Min_cat_t[i]<-"[100, 200cm)" 
-	else if (pooled$Min_t[i]<300) Min_cat_t[i]<-"[200, 300cm)" 
-	else if (pooled$Min_t[i]<400) Min_cat_t[i]<-"[300, 400cm)"
-	else if (pooled$Min_t[i]<500) Min_cat_t[i]<-"[400, 500cm)"
-	else if (pooled$Min_t[i]<600) Min_cat_t[i]<-"[500, 600cm)"
-	else if (pooled$Min_t[i]<700) Min_cat_t[i]<-"[600, 700cm)" 
-	else if (pooled$Min_t[i]<800) Min_cat_t[i]<-"[700, 800cm)"
-	else Min_cat_t[i]<-"<=800cm"
-}
-
-pooled2<-cbind(pooled, Diam_cat_t, Height_cat_t, Min_cat_t)
 
 
 #####Cleaning up the data
 
 #Remove individual deaths that were sprayed or fire or grinding
-restrict<-subset(pooled2, is.na(Death_Cause))
+restrict<-subset(pooled, is.na(Death_Cause))
 
 #Remove outliers (very large diameters)
 restrict2<-subset(restrict, Diameter_t<800)
+
+#Range of diameter: [0, 800]
+0.9*max(restrict2$Diameter_t) #700
+#Range of height:  [0, 800]
+0.9*max(restrict2$Height_t, na.rm=T) #800
 
 
 
@@ -222,7 +199,6 @@ x2seq_seedlings<-seq(0, 16, length.out=50)
 #(a) Of D1-sized individuals (overall model; not separated by biotype) 
 
 surv_mod_seedlings<-glm(seedlings$Surv_tplus1~ seedlings$Diameter_t + seedlings$Height_t, family=binomial)
-
 summary(surv_mod_seedlings)
 #All terms are significant
 
@@ -462,7 +438,7 @@ summary(mod_repro)
 mod_repro<-glm(larges$Rep_tplus1 ~ larges$Height_t, family=binomial)
 
 p.vec_overall[12]<-mod_repro$coeff[1]
-p.vec_E[13]<-mod_repro$coeff[2]
+p.vec_overall[13]<-mod_repro$coeff[2]
 
 #(b) Model probability of being reproductive (by biotype)
 mod_repro_lineage<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t + larges$Genetic_type, family=binomial)
@@ -502,24 +478,18 @@ p.vec_W[13]<-mod_repro_lineage2$coeff[2]
 #load("biomass_170315.RData")
 
 #(a) Model fecundity (overall) 
-#This function depends only on diameter at base (because that's how it was calculated in allometry paper) 
-#OR, do I want to model using both diameter and height because the data is available 
-
-p.vec_overall[14]<-4.89
-p.vec_E[14]<-4
-p.vec_H[14]<-4.25
-p.vec_W[14]<-5.52
 #These values are taken from Erickson et al. 2017 and rescaled (in that paper diameter was 
 # measured in cm instead of mm)
 
+p.vec_overall[14]<-4.89
+
 #(b) Model fecundity (by biotype)
+p.vec_E[14]<-4
+p.vec_H[14]<-4.25
+p.vec_W[14]<-5.52
 
-mod_fruit_production<-lm(LHS$Fruit_No ~ 0 + LHS$Height:LHS$Genetic_Type)
-summary(mod_fruit_production)
 
-p.vec_E[14]<-mod_fruit_production$coeff[1]
-p.vec_H[14]<-mod_fruit_production$coeff[2]
-p.vec_W[14]<-mod_fruit_production$coeff[3]
+
 
 
 
@@ -577,7 +547,7 @@ legend("bottomleft", legend=c("Hybrid", "Eastern and Western"), col=c("black", "
 seed_surv<-.5072
 
 tau_2_hybrid<-0.5072
-tau_2_E-W<-0.388
+tau_2_E_W<-0.388
 
 p.vec_overall[19]<- 0.5072 #TODO: DISCUSS WHETHER SHOULD HAVE USED A DIFFERENT AVG 
 p.vec_E[19]<-0.388
@@ -660,7 +630,7 @@ recruits_2<-subset(recruits_1, recruits_1$height<16)
 
 #Parameters associated with distribution of recruits diameter
 p.vec_overall[15]<-mu_diam
-p.vec_overall[16]<-mu_diam
+p.vec_overall[16]<-sd_diam
 
 p.vec_E[15]<-mu_diam
 p.vec_E[16]<-sd_diam
@@ -738,6 +708,9 @@ sd_grad_height<-sd(graduates$Height_tplus1)
 p.vec_overall[34]<-mu_grad_diam
 p.vec_overall[35]<-sd_grad_diam
 
+p.vec_overall[36]<-mu_grad_height
+p.vec_overall[37]<-sd_grad_height
+
 #(b) Model graduation by biotype
 sdlng_grad_mod_lineage<-glm(seedlings$grad_status~ seedlings$Diameter_t + seedlings$Height_t + seedlings$Genetic_type, family=binomial)
 summary(sdlng_grad_mod_lineage)
@@ -800,6 +773,10 @@ p.vec_W[38]<-0.005
 p.vec_W[39]<-0.002
 
 #SET A MEANINGFUL WORKING DIRECTORY WHERE THESE DATA FILES WILL LIVE
+
+p.vecs<-cbind(p.vec_overall, p.vec_E, p.vec_H, p.vec_W)
+write.csv(p.vecs, file="p.vecs.csv")
+
 
 #Save p.vec's for later use: 
 save(p.vec_overall, file="p.vec_overall.RData")
