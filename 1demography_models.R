@@ -228,6 +228,8 @@ seedlings2<-cbind(seedlings, lineage2)
 surv_mod_seedlings_lineage2<-glm(seedlings2$Surv_tplus1 ~ seedlings2$Diameter_t + seedlings2$Height_t + seedlings2$lineage2, family=binomial)
 summary(surv_mod_seedlings_lineage2)
 
+
+
 p.vec_E[20]<-surv_mod_seedlings_lineage2$coeff[1]
 p.vec_E[21]<-surv_mod_seedlings_lineage2$coeff[2]
 p.vec_E[22]<-surv_mod_seedlings_lineage2$coeff[3]
@@ -432,7 +434,7 @@ p.vec_W[11]<-summary(growth_mod_height_larges_lineage)$sigma
 #(i) Probability of being a reproductive female at time t: 
 
 #(a) Model probability of being reproductive (overall)
-mod_repro<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t, family=binomial)
+mod_repro1<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t, family=binomial)
 summary(mod_repro)
 #Diameter term is not significant, so remove it: 
 mod_repro<-glm(larges$Rep_tplus1 ~ larges$Height_t, family=binomial)
@@ -440,9 +442,9 @@ mod_repro<-glm(larges$Rep_tplus1 ~ larges$Height_t, family=binomial)
 p.vec_overall[12]<-mod_repro$coeff[1]
 p.vec_overall[13]<-mod_repro$coeff[2]
 
-#(b) Model probability of being reproductive (by biotype)
-mod_repro_lineage<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t + larges$Genetic_type, family=binomial)
-summary(mod_repro_lineage)
+#(b) Model probability of being    (by biotype)
+mod_repro_lineage1<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t + larges$Genetic_type, family=binomial)
+summary(mod_repro_lineage1)
 #Diameter term is not significant, so remove it: 
 mod_repro_lineage<-glm(larges$Rep_tplus1 ~ larges$Height_t +larges$Genetic_type, family=binomial)
 #Hybrid and Eastern are not different from eachother so collapse them: 
@@ -724,8 +726,8 @@ for (i in 1:length(seedlings$Genetic_type)) {
 
 seedlings3<-cbind(seedlings, lineage4)
 
-grad_mod_lineage<-glm(seedlings3$grad_status ~ seedlings3$Diameter_t + seedlings3$Height_t + seedlings3$lineage4, family=binomial)
-summary(grad_mod_lineage)
+grad_mod_lineage2<-glm(seedlings3$grad_status ~ seedlings3$Diameter_t + seedlings3$Height_t + seedlings3$lineage4, family=binomial)
+summary(grad_mod_lineage2)
 
 
 p.vec_E[31]<-grad_mod_lineage$coeff[1]
