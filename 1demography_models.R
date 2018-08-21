@@ -194,19 +194,18 @@ x1seq_seedlings<-seq(0, 1.6, length.out=50)
 x2seq_seedlings<-seq(0, 16, length.out=50)
 
 
-##### Modeling Survival 
+##### SURVIVAL of Seedlings (D1)
 
-#(a) Of D1-sized individuals (overall model; not separated by biotype) 
-
+#(a) Overall model 
 surv_mod_seedlings<-glm(seedlings$Surv_tplus1~ seedlings$Diameter_t + seedlings$Height_t, family=binomial)
 summary(surv_mod_seedlings)
 #All terms are significant
 
-p.vec_overall[20]<-surv_mod_seedlings$coeff[1]
-p.vec_overall[21]<-surv_mod_seedlings$coeff[2]
-p.vec_overall[22]<-surv_mod_seedlings$coeff[3]
+p.vec_overall[1]<-surv_mod_seedlings$coeff[1]
+p.vec_overall[2]<-surv_mod_seedlings$coeff[2]
+p.vec_overall[3]<-surv_mod_seedlings$coeff[3]
 
-#(b) of D1-sized individuals (by biotype)
+#(b) By Biotype 
 
 surv_mod_seedlings_site<-glm(seedlings$Surv_tplus1~ seedlings$Diameter_t + seedlings$Height_t+seedlings$Site, family=binomial)
 summary(surv_mod_seedlings_site)
@@ -230,28 +229,202 @@ summary(surv_mod_seedlings_lineage2)
 
 
 
-p.vec_E[20]<-surv_mod_seedlings_lineage2$coeff[1]
-p.vec_E[21]<-surv_mod_seedlings_lineage2$coeff[2]
-p.vec_E[22]<-surv_mod_seedlings_lineage2$coeff[3]
+p.vec_E[1]<-surv_mod_seedlings_lineage2$coeff[1]
+p.vec_E[2]<-surv_mod_seedlings_lineage2$coeff[2]
+p.vec_E[3]<-surv_mod_seedlings_lineage2$coeff[3]
 
-p.vec_H[20]<-surv_mod_seedlings_lineage2$coeff[1]+surv_mod_seedlings_lineage2$coeff[4]
-p.vec_H[21]<-surv_mod_seedlings_lineage2$coeff[2]
-p.vec_H[22]<-surv_mod_seedlings_lineage2$coeff[3]
+p.vec_H[1]<-surv_mod_seedlings_lineage2$coeff[1]+surv_mod_seedlings_lineage2$coeff[4]
+p.vec_H[2]<-surv_mod_seedlings_lineage2$coeff[2]
+p.vec_H[3]<-surv_mod_seedlings_lineage2$coeff[3]
 
-p.vec_W[20]<-surv_mod_seedlings_lineage2$coeff[1]
-p.vec_W[21]<-surv_mod_seedlings_lineage2$coeff[2]
-p.vec_W[22]<-surv_mod_seedlings_lineage2$coeff[3]
+p.vec_W[1]<-surv_mod_seedlings_lineage2$coeff[1]
+p.vec_W[2]<-surv_mod_seedlings_lineage2$coeff[2]
+p.vec_W[3]<-surv_mod_seedlings_lineage2$coeff[3]
 
-#(c) Model D2-survival (overall)
+
+
+##### Seedling(D1) GROWTH 
+
+#Size at t+1 is a function of height_t AND diam_t
+
+#(a) Overall model 
+growth_mod_seedlings<-manova(cbind(seedlings$Diameter_tplus1, seedlings$Height_tplus1) ~ seedlings$Diameter_t+seedlings$Height_t)
+summary(growth_mod_seedlings)
+
+#Grab parameters associated with future diameter
+p.vec_overall[4]<-growth_mod_seedlings$coeff[1,1]
+p.vec_overall[5]<-growth_mod_seedlings$coeff[2,1]
+p.vec_overall[6]<-growth_mod_seedlings$coeff[3,1]
+
+#To model variance in D1 growth for diameter and height, use separate linear models and store the variance: 
+#First, model variance in growth for future diameter
+growth_mod_diam_seedlings<-lm(seedlings$Diameter_tplus1 ~ seedlings$Diameter_t+seedlings$Height_t)
+summary(growth_mod_diam_seedlings)
+p.vec_overall[7]<-summary(growth_mod_diam_seedlings)$sigma
+
+#Grab parameters associated with future height
+p.vec_overall[8]<-growth_mod_seedlings$coeff[1,2]
+p.vec_overall[9]<-growth_mod_seedlings$coeff[2,2]
+p.vec_overall[10]<-growth_mod_seedlings$coeff[3,2]
+
+
+#Then, model variance in growth for future height
+growth_mod_height_seedlings<-lm(seedlings$Height_tplus1 ~ seedlings$Diameter_t + seedlings$Height_t)
+summary(growth_mod_height_seedlings)
+p.vec_overall[11]<-summary(growth_mod_height_seedlings)$sigma
+
+
+#(b) By Biotype: 
+growth_mod_seedlings_lineage<-manova(cbind(seedlings$Diameter_tplus1, seedlings$Height_tplus1) ~ seedlings$Diameter_t+seedlings$Height_t+seedlings$Genetic_type)
+summary(growth_mod_seedlings_lineage)
+#Lineage does not appear to have an effect on seedling growth, so use overall model for all biotypes
+
+#Capture parameters associated with predicting future diameter 
+p.vec_E[4]<-growth_mod_seedlings$coeff[1,1]
+p.vec_E[5]<-growth_mod_seedlings$coeff[2,1]
+p.vec_E[6]<-growth_mod_seedlings$coeff[3,1]
+p.vec_E[7]<-summary(growth_mod_diam_seedlings)$sigma
+
+p.vec_H[4]<-growth_mod_seedlings$coeff[1,1]
+p.vec_H[5]<-growth_mod_seedlings$coeff[2,1]
+p.vec_H[6]<-growth_mod_seedlings$coeff[3,1]
+p.vec_H[7]<-summary(growth_mod_diam_seedlings)$sigma
+
+p.vec_W[4]<-growth_mod_seedlings$coeff[1,1]
+p.vec_W[5]<-growth_mod_seedlings$coeff[2,1]
+p.vec_W[6]<-growth_mod_seedlings$coeff[3,1]
+p.vec_W[7]<-summary(growth_mod_diam_seedlings)$sigma
+
+#Grab parameters associated with predicting future height
+p.vec_E[8]<-growth_mod_seedlings$coeff[1,2]
+p.vec_E[9]<-growth_mod_seedlings$coeff[2,2]
+p.vec_E[10]<-growth_mod_seedlings$coeff[3,2]
+p.vec_E[11]<-summary(growth_mod_height_seedlings)$sigma
+
+p.vec_H[8]<-growth_mod_seedlings$coeff[1,2]
+p.vec_H[9]<-growth_mod_seedlings$coeff[2,2]
+p.vec_H[10]<-growth_mod_seedlings$coeff[3,2]
+p.vec_H[11]<-summary(growth_mod_height_seedlings)$sigma
+
+p.vec_W[8]<-growth_mod_seedlings$coeff[1,2]
+p.vec_W[9]<-growth_mod_seedlings$coeff[2,2]
+p.vec_W[10]<-growth_mod_seedlings$coeff[3,2]
+p.vec_W[11]<-summary(growth_mod_height_seedlings)$sigma
+
+##### "GRADUATION" from the seedling(D1) domain into the larger plant domain (D2)
+
+
+
+#Create a new variable that tracks whether individuals transition out of D1 into D2
+grad_status<-rep(NA, length(seedlings$ID))
+for (i in 1:length(seedlings$ID)) {
+  if (is.na(seedlings$Diameter_tplus1[i])) {
+    grad_status[i]<-NA
+  }
+  else if (is.na(seedlings$Height_tplus1[i])) {
+    grad_status[i]<-NA
+  }
+  else if (seedlings$Diameter_tplus1[i]>1.6& seedlings$Height_tplus1[i]>16) { grad_status[i]<-1}
+  else {grad_status[i]<-0}
+}
+
+seedlings<-cbind(seedlings, grad_status)
+
+#Probability of leaving the seedling domain: 
+
+
+#(a) Overall model
+
+sdlng_grad_mod<-glm(seedlings$grad_status~ seedlings$Diameter_t + seedlings$Height_t, family=binomial)
+summary(sdlng_grad_mod)
+
+p.vec_overall[12]<-sdlng_grad_mod$coeff[1]
+p.vec_overall[13]<-sdlng_grad_mod$coeff[2]
+p.vec_overall[14]<-sdlng_grad_mod$coeff[3]
+
+
+#Model distribution of sizes of graduates 
+
+graduates<-subset(seedlings, seedlings$grad_status==1)
+
+
+#Get distribution of new recruits sizes (these are not modeled by biotype) 
+summary(graduates$Diameter_tplus1)
+hist(graduates$Diameter_tplus1)
+mu_grad_diam<-mean(graduates$Diameter_tplus1)
+sd_grad_diam<-sd(graduates$Diameter_tplus1)
+
+summary(graduates$Height_tplus1)
+hist(graduates$Height_tplus1)
+mu_grad_height<-mean(graduates$Height_tplus1)
+sd_grad_height<-sd(graduates$Height_tplus1)
+
+
+p.vec_overall[15]<-mu_grad_diam
+p.vec_overall[16]<-sd_grad_diam
+
+p.vec_overall[17]<-mu_grad_height
+p.vec_overall[18]<-sd_grad_height
+
+#(b) Model graduation by biotype
+sdlng_grad_mod_lineage<-glm(seedlings$grad_status~ seedlings$Diameter_t + seedlings$Height_t + seedlings$Genetic_type, family=binomial)
+summary(sdlng_grad_mod_lineage)
+#The effect of hybrids is only moderatately significantly diff from E, so collapse E and H
+
+lineage4<-rep(0, length(seedlings$Genetic_type))
+for (i in 1:length(seedlings$Genetic_type)) {
+  if (seedlings$Genetic_type[i]=="eastern" || seedlings$Genetic_type[i]=="hybrid") {lineage4[i]<-"E-H"}
+  else{lineage4[i]<-"Western"}
+}
+
+seedlings3<-cbind(seedlings, lineage4)
+
+grad_mod_lineage2<-glm(seedlings3$grad_status ~ seedlings3$Diameter_t + seedlings3$Height_t + seedlings3$lineage4, family=binomial)
+summary(grad_mod_lineage2)
+
+
+p.vec_E[12]<-grad_mod_lineage$coeff[1]
+p.vec_E[13]<-grad_mod_lineage$coeff[2]
+p.vec_E[14]<-grad_mod_lineage$coeff[3]
+
+p.vec_H[12]<-grad_mod_lineage$coeff[1]
+p.vec_H[13]<-grad_mod_lineage$coeff[2]
+p.vec_H[14]<-grad_mod_lineage$coeff[3]
+
+p.vec_W[12]<-grad_mod_lineage$coeff[1]+grad_mod_lineage$coeff[4]
+p.vec_W[13]<-grad_mod_lineage$coeff[2]
+p.vec_W[14]<-grad_mod_lineage$coeff[3]
+
+#The distribution of graduates sizes does not differ by biotype: 
+p.vec_E[15]<-mu_grad_diam
+p.vec_E[16]<-sd_grad_diam
+
+p.vec_H[15]<-mu_grad_diam
+p.vec_H[16]<-sd_grad_diam
+
+p.vec_W[15]<-mu_grad_diam
+p.vec_W[16]<-sd_grad_diam
+
+p.vec_E[17]<-mu_grad_height
+p.vec_E[18]<-sd_grad_height
+
+p.vec_H[17]<-mu_grad_height
+p.vec_H[18]<-sd_grad_height
+
+p.vec_W[17]<-mu_grad_height
+p.vec_W[18]<-sd_grad_height
+
+##### SURVIVAL of larger plants (in the D2 domain)
+#(a) Overall model 
 
 surv_mod_larges<-glm(larges$Surv_tplus1~larges$Diameter_t + larges$Height_t, family=binomial)
 summary(surv_mod_larges)
 
-p.vec_overall[1]<-surv_mod_larges$coeff[1]
-p.vec_overall[2]<-surv_mod_larges$coeff[2]
-p.vec_overall[3]<-surv_mod_larges$coeff[3]
+p.vec_overall[22]<-surv_mod_larges$coeff[1]
+p.vec_overall[23]<-surv_mod_larges$coeff[2]
+p.vec_overall[24]<-surv_mod_larges$coeff[3]
 
-#(d) Model D2-survival (by biotype)
+#(b) Model D2-survival (by biotype)
 
 surv_mod_larges_lineage<-glm(larges$Surv_tplus1~larges$Diameter_t + larges$Height_t +larges$Genetic_type, family=binomial)
 summary(surv_mod_larges_lineage)
@@ -268,116 +441,46 @@ larges2<-cbind(larges, lineage3)
 surv_mod_larges_lineage2<-glm(larges2$Surv_tplus1 ~ larges2$Diameter_t + larges2$Height_t+larges2$lineage3, family=binomial)
 summary(surv_mod_larges_lineage2)
 
-p.vec_E[1]<-surv_mod_larges_lineage2$coeff[1]
-p.vec_E[2]<-surv_mod_larges_lineage2$coeff[2]
-p.vec_E[3]<-surv_mod_larges_lineage2$coeff[3]
+p.vec_E[22]<-surv_mod_larges_lineage2$coeff[1]
+p.vec_E[23]<-surv_mod_larges_lineage2$coeff[2]
+p.vec_E[24]<-surv_mod_larges_lineage2$coeff[3]
 
-p.vec_H[1]<-surv_mod_larges_lineage2$coeff[1] + surv_mod_larges_lineage2$coeff[4]
-p.vec_H[2]<-surv_mod_larges_lineage2$coeff[2]
-p.vec_H[3]<-surv_mod_larges_lineage2$coeff[3]
+p.vec_H[22]<-surv_mod_larges_lineage2$coeff[1] + surv_mod_larges_lineage2$coeff[4]
+p.vec_H[23]<-surv_mod_larges_lineage2$coeff[2]
+p.vec_H[24]<-surv_mod_larges_lineage2$coeff[3]
 
-p.vec_W[1]<-surv_mod_larges_lineage2$coeff[1]
-p.vec_W[2]<-surv_mod_larges_lineage2$coeff[2]
-p.vec_W[3]<-surv_mod_larges_lineage2$coeff[3]
+p.vec_W[22]<-surv_mod_larges_lineage2$coeff[1]
+p.vec_W[23]<-surv_mod_larges_lineage2$coeff[2]
+p.vec_W[24]<-surv_mod_larges_lineage2$coeff[3]
 
-##### Modeling growth 
-#Height (as well as diameter) at t+1 is a function of height_t AND diam_t
+##### GROWTH of larger plants (in the D2 domain)
 
-#(a) Model growth on the D1 domain (overall): 
-growth_mod_seedlings<-manova(cbind(seedlings$Diameter_tplus1, seedlings$Height_tplus1) ~ seedlings$Diameter_t+seedlings$Height_t)
-summary(growth_mod_seedlings)
-
-#Grab parameters associated with future diameter
-p.vec_overall[23]<-growth_mod_seedlings$coeff[1,1]
-p.vec_overall[24]<-growth_mod_seedlings$coeff[2,1]
-p.vec_overall[25]<-growth_mod_seedlings$coeff[3,1]
-
-#Grab parameters associated with future height
-p.vec_overall[27]<-growth_mod_seedlings$coeff[1,2]
-p.vec_overall[28]<-growth_mod_seedlings$coeff[2,2]
-p.vec_overall[29]<-growth_mod_seedlings$coeff[3,2]
-
-#To model variance in D1 growth for diameter and height, use separate linear models and store the variance: 
-
-
-#First, model variance in growth for future diameter
-growth_mod_diam_seedlings<-lm(seedlings$Diameter_tplus1 ~ seedlings$Diameter_t+seedlings$Height_t)
-summary(growth_mod_diam_seedlings)
-p.vec_overall[26]<-summary(growth_mod_diam_seedlings)$sigma
-
-#Then, model variance in growth for future height
-growth_mod_height_seedlings<-lm(seedlings$Height_tplus1 ~ seedlings$Diameter_t + seedlings$Height_t)
-summary(growth_mod_height_seedlings)
-p.vec_overall[30]<-summary(growth_mod_height_seedlings)$sigma
-
-
-#(b) Modeling D1 growth (by biotype)
-growth_mod_seedlings_lineage<-manova(cbind(seedlings$Diameter_tplus1, seedlings$Height_tplus1) ~ seedlings$Diameter_t+seedlings$Height_t+seedlings$Genetic_type)
-summary(growth_mod_seedlings_lineage)
-#Lineage does not appear to have an effect on seedling growth, so use overall model for all biotypes
-
-#Capture parameters associated with predicting future diameter 
-p.vec_E[23]<-growth_mod_seedlings$coeff[1,1]
-p.vec_E[24]<-growth_mod_seedlings$coeff[2,1]
-p.vec_E[25]<-growth_mod_seedlings$coeff[3,1]
-
-p.vec_H[23]<-growth_mod_seedlings$coeff[1,1]
-p.vec_H[24]<-growth_mod_seedlings$coeff[2,1]
-p.vec_H[25]<-growth_mod_seedlings$coeff[3,1]
-
-p.vec_W[23]<-growth_mod_seedlings$coeff[1,1]
-p.vec_W[24]<-growth_mod_seedlings$coeff[2,1]
-p.vec_W[25]<-growth_mod_seedlings$coeff[3,1]
-
-#Grab parameter associated with variance in D1 growth for diameter
-p.vec_E[26]<-summary(growth_mod_diam_seedlings)$sigma
-p.vec_H[26]<-summary(growth_mod_diam_seedlings)$sigma
-p.vec_W[26]<-summary(growth_mod_diam_seedlings)$sigma
-
-#Grab parameter associated with variance in D1 growth for height
-p.vec_E[30]<-summary(growth_mod_height_seedlings)$sigma
-p.vec_H[30]<-summary(growth_mod_height_seedlings)$sigma
-p.vec_W[30]<-summary(growth_mod_height_seedlings)$sigma
-
-#Grab parameters associated with predicting future height
-p.vec_E[27]<-growth_mod_seedlings$coeff[1,2]
-p.vec_E[28]<-growth_mod_seedlings$coeff[2,2]
-p.vec_E[29]<-growth_mod_seedlings$coeff[3,2]
-
-p.vec_H[27]<-growth_mod_seedlings$coeff[1,2]
-p.vec_H[28]<-growth_mod_seedlings$coeff[2,2]
-p.vec_H[29]<-growth_mod_seedlings$coeff[3,2]
-
-p.vec_W[27]<-growth_mod_seedlings$coeff[1,2]
-p.vec_W[28]<-growth_mod_seedlings$coeff[2,2]
-p.vec_W[29]<-growth_mod_seedlings$coeff[3,2]
-
-#(c) Modeling growth in D2 domain (overall)
+#(a) Overall model 
 growth_mod_larges<-manova(cbind(larges$Diameter_tplus1, larges$Height_tplus1) ~ larges$Diameter_t+larges$Height_t)
 summary(growth_mod_larges)
 
 #Store parameters associated with modeling future growth in diameter
-p.vec_overall[4]<-growth_mod_larges$coeff[1,1]
-p.vec_overall[5]<-growth_mod_larges$coeff[2,1]
-p.vec_overall[6]<-growth_mod_larges$coeff[3,1]
+p.vec_overall[22]<-growth_mod_larges$coeff[1,1]
+p.vec_overall[23]<-growth_mod_larges$coeff[2,1]
+p.vec_overall[24]<-growth_mod_larges$coeff[3,1]
 
 #Model variance in growth in diameter: 
 
 growth_mod_diam_larges<-lm(larges$Diameter_tplus1 ~ larges$Diameter_t + larges$Height_t + larges$Genetic_type)
 summary(growth_mod_diam_larges)
 
-p.vec_overall[7]<-summary(growth_mod_diam_larges)$sigma
+p.vec_overall[25]<-summary(growth_mod_diam_larges)$sigma
 
 #Store parameters associated with modeling future growth in height
-p.vec_overall[8]<-growth_mod_larges$coeff[1,2]
-p.vec_overall[9]<-growth_mod_larges$coeff[2,2]
-p.vec_overall[10]<-growth_mod_larges$coeff[3,2]
+p.vec_overall[26]<-growth_mod_larges$coeff[1,2]
+p.vec_overall[27]<-growth_mod_larges$coeff[2,2]
+p.vec_overall[28]<-growth_mod_larges$coeff[3,2]
 
 #Model variance in growth in height: 
 
 growth_mod_height_larges<-lm(larges$Height_tplus1 ~ larges$Diameter_t + larges$Height_t + larges$Genetic_type)
 summary(growth_mod_height_larges)
-p.vec_overall[11]<-summary(growth_mod_height_larges)$sigma
+p.vec_overall[29]<-summary(growth_mod_height_larges)$sigma
 
 
 #(d) Modeling growth in D2 by biotype
@@ -387,51 +490,49 @@ summary(growth_mod_larges_lineage)
 #BUT lineage DOES have an effect on the growth of the larger individuals in D2
 
 #Store parameters associated with growth of D2 individuals in diameter
-p.vec_E[4]<-growth_mod_larges_lineage$coeff[1,1]
-p.vec_E[5]<-growth_mod_larges_lineage$coeff[2,1]
-p.vec_E[6]<-growth_mod_larges_lineage$coeff[3,1]
+p.vec_E[22]<-growth_mod_larges_lineage$coeff[1,1]
+p.vec_E[23]<-growth_mod_larges_lineage$coeff[2,1]
+p.vec_E[24]<-growth_mod_larges_lineage$coeff[3,1]
 
-p.vec_H[4]<-growth_mod_larges_lineage$coeff[1,1] + growth_mod_larges_lineage$coeff[4,1]
-p.vec_H[5]<-growth_mod_larges_lineage$coeff[2,1]
-p.vec_H[6]<-growth_mod_larges_lineage$coeff[3,1]
+p.vec_H[22]<-growth_mod_larges_lineage$coeff[1,1] + growth_mod_larges_lineage$coeff[4,1]
+p.vec_H[23]<-growth_mod_larges_lineage$coeff[2,1]
+p.vec_H[24]<-growth_mod_larges_lineage$coeff[3,1]
 
-p.vec_W[4]<-growth_mod_larges_lineage$coeff[1,1] + growth_mod_larges_lineage$coeff[5, 1]
-p.vec_W[5]<-growth_mod_larges_lineage$coeff[2,1]
-p.vec_W[6]<-growth_mod_larges_lineage$coeff[3,1]
+p.vec_W[22]<-growth_mod_larges_lineage$coeff[1,1] + growth_mod_larges_lineage$coeff[5, 1]
+p.vec_W[23]<-growth_mod_larges_lineage$coeff[2,1]
+p.vec_W[24]<-growth_mod_larges_lineage$coeff[3,1]
 
 
 #Model variance in growth of D2 individuals in diameter
 growth_mod_diam_larges_lineage<-lm(larges$Diameter_tplus1 ~ larges$Diameter_t + larges$Height_t + larges$Genetic_type)
 summary(growth_mod_diam_larges_lineage)
 
-p.vec_E[7]<-summary(growth_mod_diam_larges_lineage)$sigma
-p.vec_H[7]<-summary(growth_mod_diam_larges_lineage)$sigma
-p.vec_W[7]<-summary(growth_mod_diam_larges_lineage)$sigma
+p.vec_E[25]<-summary(growth_mod_diam_larges_lineage)$sigma
+p.vec_H[25]<-summary(growth_mod_diam_larges_lineage)$sigma
+p.vec_W[25]<-summary(growth_mod_diam_larges_lineage)$sigma
 
 #Store parameters associated with modeling growth of D2 individuals in height
-p.vec_E[8]<-growth_mod_larges_lineage$coeff[1,2]
-p.vec_E[9]<-growth_mod_larges_lineage$coeff[2,2]
-p.vec_E[10]<-growth_mod_larges_lineage$coeff[3,2]
+p.vec_E[26]<-growth_mod_larges_lineage$coeff[1,2]
+p.vec_E[27]<-growth_mod_larges_lineage$coeff[2,2]
+p.vec_E[28]<-growth_mod_larges_lineage$coeff[3,2]
 
-p.vec_H[8]<-growth_mod_larges_lineage$coeff[1,2] + growth_mod_larges_lineage$coeff[4,2]
-p.vec_H[9]<-growth_mod_larges_lineage$coeff[2,2]
-p.vec_H[10]<-growth_mod_larges_lineage$coeff[3,2]
+p.vec_H[26]<-growth_mod_larges_lineage$coeff[1,2] + growth_mod_larges_lineage$coeff[4,2]
+p.vec_H[27]<-growth_mod_larges_lineage$coeff[2,2]
+p.vec_H[28]<-growth_mod_larges_lineage$coeff[3,2]
 
-p.vec_W[8]<-growth_mod_larges_lineage$coeff[1,2] + growth_mod_larges_lineage$coeff[5,2]
-p.vec_W[9]<-growth_mod_larges_lineage$coeff[2,2]
-p.vec_W[10]<-growth_mod_larges_lineage$coeff[3,2]
+p.vec_W[26]<-growth_mod_larges_lineage$coeff[1,2] + growth_mod_larges_lineage$coeff[5,2]
+p.vec_W[27]<-growth_mod_larges_lineage$coeff[2,2]
+p.vec_W[28]<-growth_mod_larges_lineage$coeff[3,2]
 
 #Model variance in growth of D2 individuals in height
 growth_mod_height_larges_lineage<-lm(larges$Height_tplus1 ~ larges$Diameter_t + larges$Height_t + larges$Genetic_type)
 summary(growth_mod_height_larges_lineage)
 
-p.vec_E[11]<-summary(growth_mod_height_larges_lineage)$sigma
-p.vec_H[11]<-summary(growth_mod_height_larges_lineage)$sigma
-p.vec_W[11]<-summary(growth_mod_height_larges_lineage)$sigma
+p.vec_E[29]<-summary(growth_mod_height_larges_lineage)$sigma
+p.vec_H[29]<-summary(growth_mod_height_larges_lineage)$sigma
+p.vec_W[29]<-summary(growth_mod_height_larges_lineage)$sigma
 
-#########Reproduction########
-
-#(i) Probability of being a reproductive female at time t: 
+##### Reproduction
 
 #(a) Model probability of being reproductive (overall)
 mod_repro1<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t, family=binomial)
@@ -439,10 +540,10 @@ summary(mod_repro)
 #Diameter term is not significant, so remove it: 
 mod_repro<-glm(larges$Rep_tplus1 ~ larges$Height_t, family=binomial)
 
-p.vec_overall[12]<-mod_repro$coeff[1]
-p.vec_overall[13]<-mod_repro$coeff[2]
+p.vec_overall[30]<-mod_repro$coeff[1]
+p.vec_overall[31]<-mod_repro$coeff[2]
 
-#(b) Model probability of being    (by biotype)
+#(b) Model probability of being reproductive     (by biotype)
 mod_repro_lineage1<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t + larges$Genetic_type, family=binomial)
 summary(mod_repro_lineage1)
 #Diameter term is not significant, so remove it: 
@@ -462,104 +563,30 @@ summary(mod_repro_lineage2)
 
 #Eastern and Hybrid have same probabilty of reproducing, but W differs
 
-p.vec_E[12]<-mod_repro_lineage2$coeff[1]
-p.vec_E[13]<-mod_repro_lineage2$coeff[2]
+p.vec_E[30]<-mod_repro_lineage2$coeff[1]
+p.vec_E[31]<-mod_repro_lineage2$coeff[2]
 
-p.vec_H[12]<-mod_repro_lineage2$coeff[1]
-p.vec_H[13]<-mod_repro_lineage2$coeff[2]
+p.vec_H[30]<-mod_repro_lineage2$coeff[1]
+p.vec_H[31]<-mod_repro_lineage2$coeff[2]
 
-p.vec_W[12]<-mod_repro_lineage2$coeff[1]+mod_repro_lineage2$coeff[3]
-p.vec_W[13]<-mod_repro_lineage2$coeff[2]
+p.vec_W[30]<-mod_repro_lineage2$coeff[1]+mod_repro_lineage2$coeff[3]
+p.vec_W[31]<-mod_repro_lineage2$coeff[2]
 
 
-#(ii) Given that an individual is a reproductive female of size[diameter=x, height=y] and genetic type z[known from site], how many fruits do they produce? 
-#Depends on diameter and genetic type only (from biomass allocation chapter)
-###TODO: Make sure this section matches dissertation wrt values uses for 14, especially for overall model 
-
-#setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Allometry")
-#load("biomass_170315.RData")
-
-#(a) Model fecundity (overall) 
+##### Fecundity (given that an individual is reproductive )
 #These values are taken from Erickson et al. 2017 and rescaled (in that paper diameter was 
 # measured in cm instead of mm)
+#(a) Overall 
 
-p.vec_overall[14]<-4.89
+p.vec_overall[32]<-4.89
 
 #(b) Model fecundity (by biotype)
-p.vec_E[14]<-4
-p.vec_H[14]<-4.25
-p.vec_W[14]<-5.52
+p.vec_E[32]<-4
+p.vec_H[32]<-4.25
+p.vec_W[32]<-5.52
 
 
-
-
-
-
-#(iii) Recruitment of seedlings from fruits..... 
-#(a) P(survival) from seed at time t to seedling at time t + 1: 
-
-#*Do have literature based report of 8mo survival rate from seeds sourced from the six sites grown in a common garden experiment in Davie: 
-# "A greater proportion of hybrid seedlings survived than did western seedlings (63.6% vs. 53.2%; see fig. 5)." (Geiger et al. 2011) 
-
-
-##Assumption: Assume mortality is linear
-##Monthly mortality: 
-#	Hybrids: (100-63.6)/8 = 4.55
-#	Eastern/Western: (100-53.2)/8 = 5.85
-
-month<-seq(0, 12, by=1)
-hybrid_seed_surv<-rep(100, 12)
-eastwest_seed_surv<-rep(100, 12)
-
-for(i in 1:12) {
-	hybrid_seed_surv[i+1]<-hybrid_seed_surv[i]-4.55
-	eastwest_seed_surv[i+1]<-eastwest_seed_surv[i]-5.85
-	}
-
-
-
-par(mfrow=c(1, 2))
-plot(month, hybrid_seed_surv, type='b', col="black", xlab="Months", ylim=c(0,100), ylab="% Alive")
-points(month, eastwest_seed_surv, type='b', col="red")
-legend("bottomleft", legend=c("Hybrid", "Eastern and Western"), col=c("black", "red"), lty=c(1,1))
-
-#By month 12, 45.4% of hybrid seeds have survived and germinated
-#By month 12, 29.8% of Eastern and Western seeds have survived and germinated 
-
-
-
-#Assumption: assume mortality is exponential: 
-#For hybrids:
-#	e^(-8*lambda)=0.636
-#	-8*lambda = ln(63.6)
-#	lambda=(ln(63.6))/-8
-lambda_hybrid<-(log(0.636))/(-8)
-lambda_eastwest<-(log(0.532))/(-8)
-
-
-y_hybrid<-exp(-1*lambda_hybrid*month)
-y_eastwest<-exp(-1*lambda_eastwest*month)
-plot(month, 100*y_hybrid, type='b', ylim=c(0,100), col="black", xlab="Months", ylab="% Alive")
-points(month, 100*y_eastwest, type='b', col="red")
-legend("bottomleft", legend=c("Hybrid", "Eastern and Western"), col=c("black", "red"), lty=c(1,1))
-
-#By month 12, 50.72% of hybrid seeds have survived and germinated
-#By month 12, 38.8% of Eastern and Western seeds have survived 
-
-seed_surv<-.5072
-
-tau_2_hybrid<-0.5072
-tau_2_E_W<-0.388
-
-p.vec_overall[19]<- 0.5072 #TODO: DISCUSS WHETHER SHOULD HAVE USED A DIFFERENT AVG 
-p.vec_E[19]<-0.388
-p.vec_H[19]<-0.5072
-p.vec_W[19]<-0.388
-
-
-
-
-#Modeling size distribution of recruits: 
+##### Size distribution of new recruits 
 #Figure out distribution of newly tagged individuals in seedling plots 
 #Construct a dataframe just holding recruits (individuals that go from 'untagged' to 'tagged' 
 #AND are located within a seedlingplot)
@@ -631,153 +658,89 @@ recruits_2<-subset(recruits_1, recruits_1$height<16)
 
 
 #Parameters associated with distribution of recruits diameter
-p.vec_overall[15]<-mu_diam
-p.vec_overall[16]<-sd_diam
+p.vec_overall[33]<-mu_diam
+p.vec_overall[34]<-sd_diam
 
-p.vec_E[15]<-mu_diam
-p.vec_E[16]<-sd_diam
+p.vec_E[33]<-mu_diam
+p.vec_E[34]<-sd_diam
 
-p.vec_H[15]<-mu_diam
-p.vec_H[16]<-sd_diam
+p.vec_H[33]<-mu_diam
+p.vec_H[34]<-sd_diam
 
-p.vec_W[15]<-mu_diam
-p.vec_W[16]<-sd_diam
+p.vec_W[33]<-mu_diam
+p.vec_W[34]<-sd_diam
 
 
 #Parameters associated with distribution of recruits heights
-p.vec_overall[17]<-mu_height
-p.vec_overall[18]<-sd_height
+p.vec_overall[35]<-mu_height
+p.vec_overall[36]<-sd_height
 
-p.vec_E[17]<-mu_height
-p.vec_E[18]<-sd_height
+p.vec_E[35]<-mu_height
+p.vec_E[36]<-sd_height
 
-p.vec_H[17]<-mu_height
-p.vec_H[18]<-sd_height
+p.vec_H[35]<-mu_height
+p.vec_H[36]<-sd_height
 
-p.vec_W[17]<-mu_height
-p.vec_W[18]<-sd_height
-
-
-
-##### Model Graduation 
-
-#Graduation into large domain: 
-
-#Create a new variable that tracks whether individuals transition out of D1 into D2
-grad_status<-rep(NA, length(seedlings$ID))
-for (i in 1:length(seedlings$ID)) {
-	if (is.na(seedlings$Diameter_tplus1[i])) {
-		grad_status[i]<-NA
-	}
-	else if (is.na(seedlings$Height_tplus1[i])) {
-		grad_status[i]<-NA
-	}
-	else if (seedlings$Diameter_tplus1[i]>1.6& seedlings$Height_tplus1[i]>16) { grad_status[i]<-1}
-	else {grad_status[i]<-0}
-	}
-
-seedlings<-cbind(seedlings, grad_status)
-#Probability of leaving the seedling domain: 
+p.vec_W[35]<-mu_height
+p.vec_W[36]<-sd_height
 
 
-#(a) Overall model
+##### Some additional (fixed parameters)
+# TAU_1: Pre-dispersal seed survival 
 
-sdlng_grad_mod<-glm(seedlings$grad_status~ seedlings$Diameter_t + seedlings$Height_t, family=binomial)
-summary(sdlng_grad_mod)
+p.vec_overall[37]<-0.002
+p.vec_E[37]<-0.002
+p.vec_H[37]<-0.002
+p.vec_W[37]<-0.002
 
-p.vec_overall[31]<-sdlng_grad_mod$coeff[1]
-p.vec_overall[32]<-sdlng_grad_mod$coeff[2]
-p.vec_overall[33]<-sdlng_grad_mod$coeff[3]
-
-
-#Model distribution of sizes of graduates 
-
-graduates<-subset(seedlings, seedlings$grad_status==1)
-
-
-#Get distribution of new recruits sizes (these are not modeled by biotype) 
-summary(graduates$Diameter_tplus1)
-hist(graduates$Diameter_tplus1)
-mu_grad_diam<-mean(graduates$Diameter_tplus1)
-sd_grad_diam<-sd(graduates$Diameter_tplus1)
-
-summary(graduates$Height_tplus1)
-hist(graduates$Height_tplus1)
-mu_grad_height<-mean(graduates$Height_tplus1)
-sd_grad_height<-sd(graduates$Height_tplus1)
-
-
-p.vec_overall[34]<-mu_grad_diam
-p.vec_overall[35]<-sd_grad_diam
-
-p.vec_overall[36]<-mu_grad_height
-p.vec_overall[37]<-sd_grad_height
-
-#(b) Model graduation by biotype
-sdlng_grad_mod_lineage<-glm(seedlings$grad_status~ seedlings$Diameter_t + seedlings$Height_t + seedlings$Genetic_type, family=binomial)
-summary(sdlng_grad_mod_lineage)
-#The effect of hybrids is only moderatately significantly diff from E, so collapse E and H
-
-lineage4<-rep(0, length(seedlings$Genetic_type))
-for (i in 1:length(seedlings$Genetic_type)) {
-  if (seedlings$Genetic_type[i]=="eastern" || seedlings$Genetic_type[i]=="hybrid") {lineage4[i]<-"E-H"}
-  else{lineage4[i]<-"Western"}
-}
-
-seedlings3<-cbind(seedlings, lineage4)
-
-grad_mod_lineage2<-glm(seedlings3$grad_status ~ seedlings3$Diameter_t + seedlings3$Height_t + seedlings3$lineage4, family=binomial)
-summary(grad_mod_lineage2)
-
-
-p.vec_E[31]<-grad_mod_lineage$coeff[1]
-p.vec_E[32]<-grad_mod_lineage$coeff[2]
-p.vec_E[33]<-grad_mod_lineage$coeff[3]
-
-p.vec_H[31]<-grad_mod_lineage$coeff[1]
-p.vec_H[32]<-grad_mod_lineage$coeff[2]
-p.vec_H[33]<-grad_mod_lineage$coeff[3]
-
-p.vec_W[31]<-grad_mod_lineage$coeff[1]+grad_mod_lineage$coeff[4]
-p.vec_W[32]<-grad_mod_lineage$coeff[2]
-p.vec_W[33]<-grad_mod_lineage$coeff[3]
-
-#The distribution of graduates sizes does not differ by biotype: 
-p.vec_E[34]<-mu_grad_diam
-p.vec_E[35]<-sd_grad_diam
-
-p.vec_H[34]<-mu_grad_diam
-p.vec_H[35]<-sd_grad_diam
-
-p.vec_W[34]<-mu_grad_diam
-p.vec_W[35]<-sd_grad_diam
-
-p.vec_E[36]<-mu_grad_height
-p.vec_E[37]<-sd_grad_height
-
-p.vec_H[36]<-mu_grad_height
-p.vec_H[37]<-sd_grad_height
-
-p.vec_W[36]<-mu_grad_height
-p.vec_W[37]<-sd_grad_height
-
-
-#Two additional parameters that are fixed: 
+#DELTA: Probability of dispersal 
 p.vec_overall[38]<-0.005
-p.vec_overall[39]<-0.002
 p.vec_E[38]<-0.005
-p.vec_E[39]<-0.002
-
 p.vec_H[38]<-0.005
-p.vec_H[39]<-0.002
-
 p.vec_W[38]<-0.005
-p.vec_W[39]<-0.002
 
-#SET A MEANINGFUL WORKING DIRECTORY WHERE THESE DATA FILES WILL LIVE
+#TAU_2: Post-dispersal seed survival
+# Estimated from Geiger et al. 2011 
 
-p.vecs<-cbind(p.vec_overall, p.vec_E, p.vec_H, p.vec_W)
-write.csv(p.vecs, file="p.vecs.csv")
+# Geiger et al. (2011) report 8mo survival rate from seeds sourced from the six sites grown in a 
+# common garden experiment in Davie: 
+# "A greater proportion of hybrid seedlings survived than did western seedlings
+# (63.6% vs. 53.2%; see fig. 5)." (Geiger et al. 2011) 
+
+
+
+month<-seq(0, 12, by=1)
+hybrid_seed_surv<-rep(100, 12)
+eastwest_seed_surv<-rep(100, 12)
+
+
+#Assumption: assume mortality is exponential: 
+#For hybrids:
+#	e^(-8*lambda)=0.636
+#	-8*lambda = ln(63.6)
+#	lambda=(ln(63.6))/-8
+lambda_hybrid<-(log(0.636))/(-8)
+lambda_eastwest<-(log(0.532))/(-8)
+
+
+y_hybrid<-exp(-1*lambda_hybrid*month)
+y_eastwest<-exp(-1*lambda_eastwest*month)
+plot(month, 100*y_hybrid, type='b', ylim=c(0,100), col="black", xlab="Months", ylab="% Alive")
+points(month, 100*y_eastwest, type='b', col="red")
+legend("bottomleft", legend=c("Hybrid", "Eastern and Western"), col=c("black", "red"), lty=c(1,1))
+
+#By month 12, 50.72% of hybrid seeds have survived and germinated
+#By month 12, 38.8% of Eastern and Western seeds have survived 
+
+seed_surv<-.5072
+
+tau_2_hybrid<-0.5072
+tau_2_E_W<-0.388
+
+p.vec_overall[39]<- 0.5072 #Selected the highest survival probability (could have selected lowest)
+p.vec_E[39]<-0.388
+p.vec_H[39]<-0.5072
+p.vec_W[39]<-0.388
 
 
 #Save p.vec's for later use: 

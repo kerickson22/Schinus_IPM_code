@@ -1,8 +1,12 @@
 # Constructs a integral projection model using diameter and height as two continuous
 # structuring state variables, where population transition probabilities are
-# modeled on two size domains. Modified code from Ellner and Rees, 2006. 
+# modeled on two size domains.
 
+# This script is modified (by KDE and CCH) from the code provided by Ellner and Rees, 2006 that is available for download at: 
+# https://www.jstor.org/stable/get_asset/10.1086/499438?supp_index=0&refreqid=excelsior%3Aa8885edea7fee9610a049fc3992a448a
 
+# Due to the large size of the objects created, this code can be slow to run. 
+# To save disk space, whenever possible, large objects are saved and then removed from the workspace 
 
 #clear everything
 rm(list=ls(all=TRUE))
@@ -14,8 +18,14 @@ library(msm)
 
  
 
-# Set matrix size (to show up errors) and convergence tolerance. 
-# Make m1 and m2 smaller to make this run faster.  
+# Set matrix size: 
+# m1: The number of categories of diameter that the seedling domain (D1) is divided into
+# m2: The number of categories of height that the seedling domain (D1) is divided into
+# m3: The number of categories of diameter that the large plant domain (D2) is divided into
+# m4: The number of categories of height that the large plant domain (D2) is divided into
+
+#The values used here were chosen by continuing to increase the dimensions of the matrix 
+# until the calculated value of lambda stabilized 
 m1=10
 m2=m1+1
 m3=100
@@ -36,56 +46,12 @@ matrix.image=function(x,y,A,col=topo.colors(200),...) {
 # (I) Parameters and demographic functions for computing the kernel 
 #============================================================================================#
 
-#probability of seedling establishment
-    
-
-# rounded parameter vector, see Table 1 for more details
-p.vec<-rep(0,39);
-p.vec[1]<- surv_mod_larges$coeff[1]			#Intercept survival for large domain
-p.vec[2]<- surv_mod_larges$coeff[2]			#diam slope survival for large domain
-p.vec[3]<- surv_mod_larges$coeff[3]			#height slope survival for large domain
-p.vec[4]<- growth_mod_larges$coeff[1,1]		#intercept growth diam for large domain
-p.vec[5]<- growth_mod_larges$coeff[2,1]		#diam slope growth diam for large domain
-p.vec[6]<- growth_mod_larges$coeff[3,1]		#height slope growth diam for large domain
-p.vec[7]<- sigma_growth_diam_larges			#sd growth diam for large domain
-p.vec[8]<- growth_mod_larges$coeff[1,2]		#intercept growth height for large domain
-p.vec[9]<- growth_mod_larges$coeff[2,2]		#diam slope growth height for large domain 
-p.vec[10]<- growth_mod_larges$coeff[3,2]		#height slope growth height for large domain
-p.vec[11]<- sigma_growth_height_larges		#sd growth height for large domain 
-p.vec[12]<-	mod_repro$coeff[1]				#intercept repro 
-p.vec[13]<-	mod_repro$coeff[2]				#height slope repro
-p.vec[14]<-	4.8894							#slope fruit production (diam)
-p.vec[15]<- mu_diam							#mean recruit diam
-p.vec[16]<-sd_diam							#sd recruit diam
-p.vec[17]<-mu_height							#mean recruit height
-p.vec[18]<-sd_height							#sd recruit height
-p.vec[19]<-p_surv_seedlings					#probability of seedling establishment
-p.vec[20]<-surv_mod_seedlings$coeff[1]		#intercept of seedling survival mod 
-p.vec[21]<-surv_mod_seedlings$coeff[2]		#diam slope survival for seedlings
-p.vec[22]<-surv_mod_seedlings$coeff[3]		#height slope survival for seedlings
-p.vec[23]<-growth_mod_seedlings$coeff[1,1]	#intercept growth diameter for seedlings
-p.vec[24]<-growth_mod_seedlings$coeff[2,1]	#diam slope growth diam for seedlings
-p.vec[25]<-growth_mod_seedlings$coeff[3,1]	#height slope growth diam for seedlings
-p.vec[26]<-sigma_growth_diam_seedlings		#sd growth diam for seedlings
-p.vec[27]<-growth_mod_seedlings$coeff[1,2]	#intercept growth height for seedlings
-p.vec[28]<-growth_mod_seedlings$coeff[2,2]	#diam slope growth height for seedlings
-p.vec[29]<-growth_mod_seedlings$coeff[3,2]	#height slope growth height for seedlings
-p.vec[30]<-sigma_growth_height_seedlings		#sd growth height for seedlings
-p.vec[31]<-sdlng_grad_mod$coeff[1]			#intercept graduation 
-p.vec[32]<-sdlng_grad_mod$coeff[2]			#diam slope graduation
-p.vec[33]<-sdlng_grad_mod$coeff[3]			#height slope graduation
-p.vec[34]<-mu_grad_diam						#mean graduate diam
-p.vec[35]<-sd_grad_diam						#sd graduate diam
-p.vec[36]<-mu_grad_height					#mean graduate height
-p.vec[37]<-sd_grad_height					#sd graduate height
-p.vec[38]<-0.005								#Probability fruit removed from tree
-p.vec[39]<-0.002								#Probability seed survives journey
-
 #p.vecs are defined externally in script 1demography_models.R
 load('p.vec_overall.RData')
 load('p.vec_E.RData')
 load('p.vec_H.RData')
 load('p.vec_W.RData')
+
 #============================================================================# 
 #  Define the kernels and iteration matrix:
 #Domain 1: Seedling Domain
@@ -100,21 +66,22 @@ load('p.vec_W.RData')
 
 
 #Survival-Growth of Seedlings (in D1)
-pyx1=function(diamp,heightp,diam, height, params) { (1-((exp(params[31]+params[32]*diam + params[33]*height)/(1+exp(params[31]+params[32]*diam + params[33]*height))
-)))*(exp(params[20]+params[21]*diam+params[22]*height)/(1+exp(params[20]+params[21]*diam+params[22]*height)))*dtnorm(diamp,mean=params[23] + params[24]*diam + params[25]*height,sd=params[26], lower=0, upper=1.6)*dtnorm(heightp,mean=params[27]+params[28]*diam + params[29]*height,sd=params[30], lower=0, upper=16)}
+pyx1=function(diamp,heightp,diam, height, params) { (1-((exp(params[12]+params[13]*diam + params[14]*height)/(1+exp(params[12]+params[13]*diam + params[14]*height))
+)))*(exp(params[1]+params[2]*diam+params[3]*height)/(1+exp(params[1]+params[2]*diam+params[3]*height)))*dtnorm(diamp,mean=params[4] + params[5]*diam + params[6]*height,sd=params[7], lower=0, upper=1.6)*dtnorm(heightp,mean=params[8]+params[9]*diam + params[10]*height,sd=params[11], lower=0, upper=16)}
 
 
 #Survival-Growth of Larger Plants (in D2)
+#Note that D2 survival is multiplied by 0.997 to avoid 100% survival 
 
-pyx2=function(diamp,heightp,diam, height, params) { 0.997*(exp(params[1]+params[2]*diam+params[3]*height)/(1+exp(params[1]+params[2]*diam+params[3]*height)))*dtnorm(diamp,mean=params[4] + params[5]*diam + params[6]*height,sd=params[7], lower=1.6, upper=700)*dtnorm(heightp,mean=params[8]+params[9]*diam + params[10]*height,sd=params[11], lower=16, upper=800)}
+pyx2=function(diamp,heightp,diam, height, params) { 0.997*(exp(params[19]+params[20]*diam+params[21]*height)/(1+exp(params[19]+params[20]*diam+params[21]*height)))*dtnorm(diamp,mean=params[22] + params[23]*diam + params[24]*height,sd=params[25], lower=1.6, upper=700)*dtnorm(heightp,mean=params[26]+params[27]*diam + params[28]*height,sd=params[29], lower=16, upper=800)}
 
 
 #Fecundity=P(fruiting)*# of Fruits Produced*P(survival of seeds)*Distribution of Seedling Diameters*Distribution of Seedling Heights
-fyx=function(diamp,heightp,diam,height, params) {(exp(params[12]+params[13]*height)/(1+exp(params[12]+params[13]*height)))*(params[14]*diam*diam)*params[38]*params[39]*params[19]*dtnorm(diamp,mean=params[15],sd=params[16], lower=0, upper=1.6)*dtnorm(heightp,mean=params[17],sd=params[18], lower=0, upper=16)}
+fyx=function(diamp,heightp,diam,height, params) {(exp(params[30]+params[31]*height)/(1+exp(params[30]+params[31]*height)))*(params[32]*diam*diam)*params[38]*params[37]*params[39]*dtnorm(diamp,mean=params[33],sd=params[34], lower=0, upper=1.6)*dtnorm(heightp,mean=params[35],sd=params[36], lower=0, upper=34)}
 
 #Graduation = P(graduation)*Distribution of Graduates Diams*Distribution of Graduates Heights
-gyx=function(diamp,heightp,diam,height, params) {((exp(params[20]+params[21]*diam+params[22]*height)/(1+exp(params[20]+params[21]*diam+params[22]*height))))*(exp(params[31]+params[32]*diam + params[33]*height)/(1+exp(params[31]+params[32]*diam + params[33]*height))
-)*dtnorm(diamp,mean=params[34],sd=params[35], lower=1.6, upper=700)*dtnorm(heightp,mean=params[36],sd=params[37], lower=16, upper=800)}
+gyx=function(diamp,heightp,diam,height, params) {((exp(params[1]+params[2]*diam+params[3]*height)/(1+exp(params[1]+params[2]*diam+params[3]*height))))*(exp(params[12]+params[13]*diam + params[14]*height)/(1+exp(params[12]+params[13]*diam + params[14]*height))
+)*dtnorm(diamp,mean=params[15],sd=params[16], lower=1.6, upper=700)*dtnorm(heightp,mean=params[17],sd=params[18], lower=16, upper=800)}
 
 #kyx=function(diamp,heightp,diam,height, params) {pyx(diamp,heightp, diam,height, params)+fyx(diamp,heightp,diam,height, params)}
 
@@ -132,50 +99,138 @@ h4=(800-16)/m4
 
 # Compute the iteration matrix. With a bit of vectorizing it's not too slow,
 # though you can probably do better if you need to. The shortcuts here have 
-# been checked against the results from code that uses loops for everything.
+# been checked against the results from code that uses loops for everything. (comment from Ellner and Rees)
 
-#####Part One: Overall model 
+ 
 ###Construct D1 (Seedling Domain):
 plop=function(i,j) {(j-1)*m1+i} # for putting values in proper place in A 
 Plop=outer(1:m1,1:m2,plop); 
 
-D1=matrix(0,m1*m2,m1*m2); 
-Kvals_D1=array(0,c(m1,m2,m1,m2));  
+D1_overall=matrix(0,m1*m2,m1*m2); 
+D1_E=matrix(0,m1*m2,m1*m2); 
+D1_H=matrix(0,m1*m2,m1*m2); 
+D1_W=matrix(0,m1*m2,m1*m2); 
 
+Kvals_D1_overall=array(0,c(m1,m2,m1,m2));  
+Kvals_D1_E=array(0,c(m1,m2,m1,m2));  
+Kvals_D1_H=array(0,c(m1,m2,m1,m2));  
+Kvals_D1_W=array(0,c(m1,m2,m1,m2));  
 
-
+#Overall
 for(i in 1:m1){
 	for(j in 1:m2){
 		for(k in 1:m1){
 				kvals=pyx1(y1[k],y2[1:m2],y1[i],y2[j], p.vec_overall)
-				D1[Plop[k,1:m2],Plop[i,j]]=kvals
-				Kvals_D1[k,1:m2,i,j]=kvals
+				D1_overall[Plop[k,1:m2],Plop[i,j]]=kvals
+				Kvals_D1_overall[k,1:m2,i,j]=kvals
 			
 	}}
 	cat(i,"\n"); 
 }
-D1=D1*h1*h2 #multiply D1 by widths
+D1_overall=D1_overall*h1*h2 #multiply D1 by widths
+save(D1_overall, file="D1_overall.RData")
+save(Kvals_D1_overall, file="Kvals_D1_overall.RData")
+rm(D1_overall, Kvals_D1_overall)
+# Eastern
+for(i in 1:m1){
+  for(j in 1:m2){
+    for(k in 1:m1){
+      kvals=pyx1(y1[k],y2[1:m2],y1[i],y2[j], p.vec_E)
+      D1_E[Plop[k,1:m2],Plop[i,j]]=kvals
+      Kvals_D1_E[k,1:m2,i,j]=kvals
+      
+    }}
+  cat(i,"\n"); 
+}
+D1_E=D1_E*h1*h2 #multiply D1 by widths
+save(D1_E, file="D1_E.RData")
+save(Kvals_D1_E, file="Kvals_D1_E.RData")
+rm(D1_D1_E, Kvals_D1_E)
+# Hybrid
+for(i in 1:m1){
+  for(j in 1:m2){
+    for(k in 1:m1){
+      kvals=pyx1(y1[k],y2[1:m2],y1[i],y2[j], p.vec_H)
+      D1_H[Plop[k,1:m2],Plop[i,j]]=kvals
+      Kvals_D1_H[k,1:m2,i,j]=kvals
+      
+    }}
+  cat(i,"\n"); 
+}
+D1_H=D1_H*h1*h2 #multiply D1 by widths
+save(D1_H, file="D1_H.RData")
+save(Kvals_D1_H, file="Kvals_D1_H.RData")
+rm(D1_D1_H, Kvals_D1_H)
+# Western
+for(i in 1:m1){
+  for(j in 1:m2){
+    for(k in 1:m1){
+      kvals=pyx1(y1[k],y2[1:m2],y1[i],y2[j], p.vec_W)
+      D1_W[Plop[k,1:m2],Plop[i,j]]=kvals
+      Kvals_D1_W[k,1:m2,i,j]=kvals
+      
+    }}
+  cat(i,"\n"); 
+}
+D1_W=D1_W*h1*h2 #multiply D1 by widths
+save(D1_W, file="D1_W.RData")
+save(Kvals_D1_W, file="Kvals_D1_W.RData")
+rm(D1_D1_W, Kvals_D1_W)
+
+
+
+
+
+
+
+
+
 		
 ###Construct D2 (Large Domain):
 plop=function(i,j) {(j-1)*m3+i} # for putting values in proper place in A 
 Plop=outer(1:m3,1:m4,plop); 
 
-D2=matrix(0,m3*m4,m3*m4); 
-Kvals_D2=array(0,c(m3,m4,m3,m4));  
+D2_overall=matrix(0,m3*m4,m3*m4);
+D2_E=matrix(0,m3*m4,m3*m4)
+D2_H=matrix(0,m3*m4,m3*m4)
+D2_W=matrix(0,m3*m4,m3*m4)
 
+Kvals_D2_overall=array(0,c(m3,m4,m3,m4));  
+Kvals_D2_E=array(0,c(m3,m4,m3,m4)); 
+Kvals_D2_H=array(0,c(m3,m4,m3,m4)); 
+Kvals_D2_W=array(0,c(m3,m4,m3,m4)); 
 
-
+#overall
 for(i in 1:m3){
 	for(j in 1:m4){
 		for(k in 1:m3){
 				kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec_overall)
-				D2[Plop[k,1:m4],Plop[i,j]]=kvals
-				Kvals_D2[k,1:m4,i,j]=kvals
+				D2_overall[Plop[k,1:m4],Plop[i,j]]=kvals
+				Kvals_D2_overall[k,1:m4,i,j]=kvals
 			
 	}}
 	cat(i,"\n"); 
 }		
-D2=D2*h3*h4 #Multiply D2 by widths
+D2_overall=D2_overall*h3*h4 #Multiply D2 by widths
+save(D2_overall, file="D2_overall.RData")
+save(Kvals_D2_overall, file="Kvals_D2_overall")
+
+#Eastern
+for(i in 1:m3){
+  for(j in 1:m4){
+    for(k in 1:m3){
+      kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec_E)
+      D2_E[Plop[k,1:m4],Plop[i,j]]=kvals
+      Kvals_D2_E[k,1:m4,i,j]=kvals
+      
+    }}
+  cat(i,"\n"); 
+}		
+D2_E=D2_E*h3*h4 #Multiply D2 by widths
+
+
+
+
 
 ###Construct F (Fecundity):
 plop1=function(i, j) {(j-1)*m1 + i}
@@ -218,18 +273,12 @@ G=G*h3*h4
 #Putting the matrix together:
 
 
-yellow_white<-rbind(D1, G)
-white_green<-rbind(F, D2)
-new_A<-cbind(yellow_white, white_green)
-
+left_side<-rbind(D1, G)
+right_side<-rbind(F, D2)
+new_A<-cbind(left_side, right_side)
 A<-new_A
-
 save(A, file="A_matrix_overall.RData")
-#rm(list=ls(all=TRUE))
-#load("A_matrix.RData")
 
-#lambda<-eigen(A)$values[1]
-#lambda
 
 
 
@@ -638,27 +687,3 @@ lines(colSums(total.elas_D2_W), type='l', lwd=2, col=col_W_dark)
 lines(colSums(total.elas_D2_H), type='l', lwd=2, col=col_H_dark)
 dev.off()
 
-################################################################
-#####
-#####	Investigating the effects of varying the seed parameters
-#####
-#################################################################
-
-setwd("/Users/kelley/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data") 
-
-library(calibrate)
-
-data3<-read.csv("seed_params.csv", header=T)
-
-
-png(file="varying_tau.png", width=10, height=10, units="in", res=300)
-par(ps=24, mar=c(5.1, 5.1, 4.1, 2.1))
-plot(log10(data3$tau_postdispersal[1:4]), data3$lambda[1:4], type='b', ylab=expression(lambda), xlab=expression(log(tau[1])))
-dev.off()
-
-textxy(data3$param, data3$lambda, paste("(", data3$param, ", ", data3$lambda, ")"), cex=.7)
-dev.off()
-
-lambdas<-c(1.045574, 1.079985, 1.086125)
-
-plot(lambdas, col=c(E_col_dark, H_col_dark, W_col_dark), 
