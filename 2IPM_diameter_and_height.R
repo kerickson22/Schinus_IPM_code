@@ -5,6 +5,9 @@
 # This script is modified (by KDE and CCH) from the code provided by Ellner and Rees, 2006 that is available for download at: 
 # https://www.jstor.org/stable/get_asset/10.1086/499438?supp_index=0&refreqid=excelsior%3Aa8885edea7fee9610a049fc3992a448a
 
+#Here, we expand on Ellner and Rees' code by modeling the population dynamics on two continuous size domains 
+# (See details in associated manuscript)
+
 # Due to the large size of the objects created, this code can be slow to run. 
 # To save disk space, whenever possible, large objects are saved and then removed from the workspace 
 
@@ -16,7 +19,8 @@ library(MASS)
 library(mvtnorm)
 library(msm)
 
- 
+#increase memory limit on Windows machines  (This will make everything run faster)
+memory.limit(memory.limit() *2^30)
 
 # Set matrix size: 
 # m1: The number of categories of diameter that the seedling domain (D1) is divided into
@@ -47,10 +51,10 @@ matrix.image=function(x,y,A,col=topo.colors(200),...) {
 #============================================================================================#
 
 #p.vecs are defined externally in script 1demography_models.R
-load('p.vec_overall.RData')
-load('p.vec_E.RData')
-load('p.vec_H.RData')
-load('p.vec_W.RData')
+load('./Overall/p.vec_overall.RData')
+load('./Eastern/p.vec_E.RData')
+load('./Hybrid/p.vec_H.RData')
+load('./Western/p.vec_W.RData')
 
 #============================================================================# 
 #  Define the kernels and iteration matrix:
@@ -128,8 +132,8 @@ for(i in 1:m1){
 	cat(i,"\n"); 
 }
 D1_overall=D1_overall*h1*h2 #multiply D1 by widths
-save(D1_overall, file="D1_overall.RData")
-save(Kvals_D1_overall, file="Kvals_D1_overall.RData")
+save(D1_overall, file="./Overall/D1_overall.RData")
+save(Kvals_D1_overall, file="./Overall/Kvals_D1_overall.RData")
 rm(D1_overall, Kvals_D1_overall)
 # Eastern
 for(i in 1:m1){
@@ -143,9 +147,9 @@ for(i in 1:m1){
   cat(i,"\n"); 
 }
 D1_E=D1_E*h1*h2 #multiply D1 by widths
-save(D1_E, file="D1_E.RData")
-save(Kvals_D1_E, file="Kvals_D1_E.RData")
-rm(D1_D1_E, Kvals_D1_E)
+save(D1_E, file="./Eastern/D1_E.RData")
+save(Kvals_D1_E, file="./Eastern/Kvals_D1_E.RData")
+rm(D1_E, Kvals_D1_E)
 # Hybrid
 for(i in 1:m1){
   for(j in 1:m2){
@@ -158,9 +162,9 @@ for(i in 1:m1){
   cat(i,"\n"); 
 }
 D1_H=D1_H*h1*h2 #multiply D1 by widths
-save(D1_H, file="D1_H.RData")
-save(Kvals_D1_H, file="Kvals_D1_H.RData")
-rm(D1_D1_H, Kvals_D1_H)
+save(D1_H, file="./Hybrid/D1_H.RData")
+save(Kvals_D1_H, file="./Hybrid/Kvals_D1_H.RData")
+rm(D1_H, Kvals_D1_H)
 # Western
 for(i in 1:m1){
   for(j in 1:m2){
@@ -173,15 +177,9 @@ for(i in 1:m1){
   cat(i,"\n"); 
 }
 D1_W=D1_W*h1*h2 #multiply D1 by widths
-save(D1_W, file="D1_W.RData")
-save(Kvals_D1_W, file="Kvals_D1_W.RData")
-rm(D1_D1_W, Kvals_D1_W)
-
-
-
-
-
-
+save(D1_W, file="./Western/D1_W.RData")
+save(Kvals_D1_W, file="./Western/Kvals_D1_W.RData")
+rm(D1_W, Kvals_D1_W)
 
 
 
@@ -212,8 +210,9 @@ for(i in 1:m3){
 	cat(i,"\n"); 
 }		
 D2_overall=D2_overall*h3*h4 #Multiply D2 by widths
-save(D2_overall, file="D2_overall.RData")
-save(Kvals_D2_overall, file="Kvals_D2_overall")
+save(D2_overall, file="./Overall/D2_overall.RData")
+save(Kvals_D2_overall, file="./Overall/Kvals_D2_overall")
+rm(D2_overall, Kvals_D2_overall)
 
 #Eastern
 for(i in 1:m3){
@@ -227,60 +226,254 @@ for(i in 1:m3){
   cat(i,"\n"); 
 }		
 D2_E=D2_E*h3*h4 #Multiply D2 by widths
+save(D2_E, file="./Eastern/D2_E.RData")
+save(Kvals_D2_E, file="./Eastern/Kvals_D2_E.RData")
+rm(D2_E, Kvals_D2_E)
+#Hybrid
+for(i in 1:m3){
+  for(j in 1:m4){
+    for(k in 1:m3){
+      kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec_H)
+      D2_H[Plop[k,1:m4],Plop[i,j]]=kvals
+      Kvals_D2_H[k,1:m4,i,j]=kvals
+      
+    }}
+  cat(i,"\n"); 
+}		
+D2_H=D2_H*h3*h4 #Multiply D2 by widths
+save(D2_H, file="./Hybrid/D2_H.RData")
+save(Kvals_D2_H, file="./Hybrid/Kvals_D2_H.RData")
+rm(D2_H, Kvals_D2_H)
+#Western
+for(i in 1:m3){
+  for(j in 1:m4){
+    for(k in 1:m3){
+      kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec_W)
+      D2_W[Plop[k,1:m4],Plop[i,j]]=kvals
+      Kvals_D2_W[k,1:m4,i,j]=kvals
+      
+    }}
+  cat(i,"\n"); 
+}		
+D2_W=D2_W*h3*h4 #Multiply D2 by widths
+save(D2_W, file="./Western/D2_W.RData")
+save(Kvals_D2_W, file="./Western/Kvals_D2_W.RData")
+rm(D2_W, Kvals_D2_W)
 
 
 
 
-
-###Construct F (Fecundity):
+###Construct F (Fertility):
 plop1=function(i, j) {(j-1)*m1 + i}
 plop2=function(i, j) {(j-1)*m3 + i}
 Plop1=outer(1:m1,1:m2,plop1); 
 Plop2=outer(1:m3, 1:m4, plop2);
-F=matrix(0,m1*m2,m3*m4); 
-Kvals_F=array(0, c(m1, m2, m3, m4))
+F_overall=matrix(0,m1*m2,m3*m4); 
+F_E=matrix(0,m1*m2,m3*m4);
+F_H=matrix(0,m1*m2,m3*m4);
+F_W=matrix(0,m1*m2,m3*m4);
 
+Kvals_F_overall=array(0, c(m1, m2, m3, m4))
+Kvals_F_E=array(0, c(m1, m2, m3, m4))
+Kvals_F_H=array(0, c(m1, m2, m3, m4))
+Kvals_F_W=array(0, c(m1, m2, m3, m4))
+
+#Overall
 for(i in 1:m3) {
 	for (j in 1:m4) {
 		for (k in 1:m1) {
 			kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec_overall)
-			F[Plop1[k, 1:m2], Plop2[i,j]]=kvals
-			Kvals_F[k, 1:m2, i, j]=kvals
+			F_overall[Plop1[k, 1:m2], Plop2[i,j]]=kvals
+			Kvals_F_overall[k, 1:m2, i, j]=kvals
 		}}
 		cat(i, "\n");
 }
-F=F*h1*h2
+F_overall=F_overall*h1*h2
+save(F_overall, file="./Overall/F_overall.RData")
+save(Kvals_F_overall, file="./Overall/Kvals_F_overall.RData")
+rm(F_overall, Kvals_F_overall)
+
+#Eastern
+for(i in 1:m3) {
+  for (j in 1:m4) {
+    for (k in 1:m1) {
+      kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec_E)
+      F_E[Plop1[k, 1:m2], Plop2[i,j]]=kvals
+      Kvals_F_E[k, 1:m2, i, j]=kvals
+    }}
+  cat(i, "\n");
+}
+F_E=F_E*h1*h2
+save(F_E, file="./Eastern/F_E.RData")
+save(Kvals_F_E, file="./Eastern/Kvals_F_E.RData")
+rm(F_E, Kvals_F_E)
+
+#Hybrid
+for(i in 1:m3) {
+  for (j in 1:m4) {
+    for (k in 1:m1) {
+      kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec_H)
+      F_H[Plop1[k, 1:m2], Plop2[i,j]]=kvals
+      Kvals_F_H[k, 1:m2, i, j]=kvals
+    }}
+  cat(i, "\n");
+}
+F_H=F_H*h1*h2
+save(F_H, file="./Hybrid/F_H.RData")
+save(Kvals_F_H, file="./Hybrid/Kvals_F_H.RData")
+rm(F_H, Kvals_F_H)
+
+#Western
+for(i in 1:m3) {
+  for (j in 1:m4) {
+    for (k in 1:m1) {
+      kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec_W)
+      F_W[Plop1[k, 1:m2], Plop2[i,j]]=kvals
+      Kvals_F_W[k, 1:m2, i, j]=kvals
+    }}
+  cat(i, "\n");
+}
+F_W=F_W*h1*h2
+save(F_W, file="./Western/F_W.RData")
+save(Kvals_F_W, file="./Western/Kvals_F_W.RData")
+rm(F_W, Kvals_F_W)
+
+
 
 ###Construct G (Graduation):
 plop1=function(i, j) {(j-1)*m3 + i}
 plop2=function(i, j) {(j-1)*m1 + i}
 Plop1=outer(1:m3,1:m4,plop1); 
 Plop2=outer(1:m1, 1:m2, plop2);
-G=matrix(0,m3*m4,m1*m2); 
-Kvals_G=array(0, c(m3, m4, m1, m2))
+G_overall=matrix(0,m3*m4,m1*m2); 
+G_E=matrix(0,m3*m4,m1*m2); 
+G_H=matrix(0,m3*m4,m1*m2); 
+G_W=matrix(0,m3*m4,m1*m2); 
 
+Kvals_G_overall=array(0, c(m3, m4, m1, m2))
+Kvals_G_E=array(0, c(m3, m4, m1, m2))
+Kvals_G_H=array(0, c(m3, m4, m1, m2))
+Kvals_G_W=array(0, c(m3, m4, m1, m2))
+
+#Overall
 for(i in 1:m1) {
 	for (j in 1:m2) {
 		for (k in 1:m3) {
 			kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec_overall)
-			G[Plop1[k, 1:m4], Plop2[i,j]]=kvals
-			Kvals_G[k, 1:m4, i, j]=kvals
+			G_overall[Plop1[k, 1:m4], Plop2[i,j]]=kvals
+			Kvals_G_overall[k, 1:m4, i, j]=kvals
 		}}
 		cat(i, "\n");
 }
-G=G*h3*h4
+G_overall=G_overall*h3*h4
+save(G_overall, file="./Overall/G_overall.RData")
+save(Kvals_G_overall, file="./Overall/Kvals_G_overall.RData")
+rm(G_overall, Kvals_G_overall)
 
-#Putting the matrix together:
+#Eastern
+for(i in 1:m1) {
+  for (j in 1:m2) {
+    for (k in 1:m3) {
+      kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec_E)
+      G_E[Plop1[k, 1:m4], Plop2[i,j]]=kvals
+      Kvals_G_E[k, 1:m4, i, j]=kvals
+    }}
+  cat(i, "\n");
+}
+G_E=G_E*h3*h4
+save(G_E, file="./Eastern/G_E.RData")
+save(Kvals_G_E, file="./Eastern/Kvals_G_E.RData")
+rm(G_E, Kvals_G_E)
+
+#Hybrid
+for(i in 1:m1) {
+  for (j in 1:m2) {
+    for (k in 1:m3) {
+      kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec_H)
+      G_H[Plop1[k, 1:m4], Plop2[i,j]]=kvals
+      Kvals_G_H[k, 1:m4, i, j]=kvals
+    }}
+  cat(i, "\n");
+}
+G_H=G_H*h3*h4
+save(G_H, file="./Hybrid/G_H.RData")
+save(Kvals_G_H, file="./Hybrid/Kvals_G_H.RData")
+rm(G_H, Kvals_G_H)
+
+#Western
+for(i in 1:m1) {
+  for (j in 1:m2) {
+    for (k in 1:m3) {
+      kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec_W)
+      G_W[Plop1[k, 1:m4], Plop2[i,j]]=kvals
+      Kvals_G_W[k, 1:m4, i, j]=kvals
+    }}
+  cat(i, "\n");
+}
+G_W=G_W*h3*h4
+save(G_W, file="./Western/G_W.RData")
+save(Kvals_G_W, file="./Western/Kvals_G_W.RData")
+rm(G_W, Kvals_G_W)
 
 
-left_side<-rbind(D1, G)
-right_side<-rbind(F, D2)
-new_A<-cbind(left_side, right_side)
-A<-new_A
-save(A, file="A_matrix_overall.RData")
 
 
+#Putting the matrices together:
 
+#Overall
+rm(Plop, Plop1, Plop2, i, j, k, kvals ) #clear out workspace to maximize space available 
+load("./Overall/D1_overall.RData")
+load("./Overall/G_overall.RData")
+left_side<-rbind(D1_overall, G_overall)
+rm(D1_overall, G_overall)
+load("./Overall/F_overall.RData")
+load("./Overall/D2_overall.RData")
+right_side<-rbind(F_overall, D2_overall)
+rm(F_overall, D2_overall)
+A_overall<-cbind(left_side, right_side)
+save(A_overall, file="./Overall/A_overall.RData")
+
+#Eastern
+rm(A_overall, left_side, right_side) #clear out workspace to maximize space available 
+load("./Eastern/D1_E.RData")
+load("./Eastern/G_E.RData")
+left_side<-rbind(D1_E, G_E)
+rm(D1_E, G_E)
+load("./Eastern/F_E.RData")
+load("./Eastern/D2_E.RData")
+right_side<-rbind(F_E, D2_E)
+rm(F_E, D2_E)
+A_E<-cbind(left_side, right_side)
+save(A_E, file="./Eastern/A_E.RData")
+
+#Hybrid
+rm(A_E, left_side, right_side) #clear out workspace to maximize space available 
+load("./Hybrid/D1_H.RData")
+load("./Hybrid/G_H.RData")
+left_side<-rbind(D1_H, G_H)
+rm(D1_H, G_H)
+load("./Hybrid/F_H.RData")
+load("./Hybrid/D2_H.RData")
+right_side<-rbind(F_H, D2_H)
+rm(F_H, D2_H)
+A_H<-cbind(left_side, right_side)
+save(A_H, file="./Hybrid/A_H.RData")
+
+#Western
+rm(A_H, left_side, right_side) #clear out workspace to maximize space available 
+load("./Western/D1_W.RData")
+load("./Western/G_W.RData")
+left_side<-rbind(D1_W, G_W)
+rm(D1_W, G_W)
+load("./Western/F_W.RData")
+load("./Western/D2_W.RData")
+right_side<-rbind(F_W, D2_W)
+rm(F_W, D2_W)
+A_W<-cbind(left_side, right_side)
+save(A_W, file="./Western/A_W.RData")
+
+
+rm(A_W, left_side, right_side)
 
 
 
@@ -292,7 +485,10 @@ save(A, file="A_matrix_overall.RData")
 #  for convergence requires extracting matrix entries via the @x slot
 #  of a Matrix object. Matrix is S4-style -- see ?Matrix. 
 #============================================================================# 
-A2=Matrix(A); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
+
+#Overall
+load("./Overall/A_overall.RData")
+A2=Matrix(A_overall); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
 
 qmax=1000; lam=1; 
 while(qmax>tol) {
@@ -308,9 +504,12 @@ stable.dist=nt
 lam.stable=lam;
 
 # Check that the @bits worked as intended.   
-qmax=sum(abs(lam*nt-A%*%nt)); 
+qmax=sum(abs(lam*nt-A_overall%*%nt)); 
 cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
-
+lam.stable_overall<-lam.stable
+stable.dist_overall<-stable.dist
+save(lam.stable_overall, file="./Overall/lam.stable_overall.RData")
+save(stable.dist_overall, file="./Overall/stable.dist_overall.RData")
 
 
 ##Alternate calculation of rv:
@@ -322,7 +521,7 @@ while(qmax>tol) {
 	nt1=A3%*%nt;
 	qmax=sum(abs((nt1-lam*nt)@x));  
 	lam=sum(nt1@x); 
-	nt@x=(nt1@x)/lam; #we're cheating here - don't tell Doug Bates.  
+	nt@x=(nt1@x)/lam;   
 	cat(lam,qmax,"\n");
 } 
 nt=matrix(nt@x,m1*m2+m3*m4,1); 
@@ -332,7 +531,7 @@ lam.stable.t=lam;
 
 
 # Check that the @bits worked as intended.   
-qmax=sum(abs(lam*nt-A%*%nt)); 
+qmax=sum(abs(lam*nt-A_overall%*%nt)); 
 cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
 
 
@@ -357,6 +556,236 @@ while(qmax>tol) {
 } 
 v=t(matrix(vt@x,1,m1*m2+m3*m4)); 
 lam.stable.t=lam; 
+
+v_overall<-v
+save(v_overall, file="./Overall/v_overall.RData")
+
+
+
+
+#Eastern
+load("./Eastern/A_E.RData")
+A2=Matrix(A_E); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
+
+qmax=1000; lam=1; 
+while(qmax>tol) {
+  nt1=A2%*%nt;
+  qmax=sum(abs((nt1-lam*nt)@x));  
+  lam=sum(nt1@x); 
+  nt@x=(nt1@x)/lam; #we're cheating here - don't tell Doug Bates.  
+  cat(lam,qmax,"\n");
+} 
+nt=matrix(nt@x,m1*m2+m3*m4,1); 
+#stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
+stable.dist=nt
+lam.stable=lam;
+
+# Check that the @bits worked as intended.   
+qmax=sum(abs(lam*nt-A_E%*%nt)); 
+cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
+lam.stable_E<-lam.stable
+stable.dist_E<-stable.dist
+save(lam.stable_E, file="./Eastern/lam.stable_E.RData")
+save(stable.dist_E, file="./Eastern/stable.dist_E.RData")
+
+
+##Alternate calculation of rv:
+
+A3=t(A2); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
+
+qmax=1000; lam=1; 
+while(qmax>tol) {
+  nt1=A3%*%nt;
+  qmax=sum(abs((nt1-lam*nt)@x));  
+  lam=sum(nt1@x); 
+  nt@x=(nt1@x)/lam;   
+  cat(lam,qmax,"\n");
+} 
+nt=matrix(nt@x,m1*m2+m3*m4,1); 
+#stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
+#stable.dist=nt
+lam.stable.t=lam; 
+
+
+# Check that the @bits worked as intended.   
+qmax=sum(abs(lam*nt-A_E%*%nt)); 
+cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
+
+
+
+
+
+
+#============================================================================# 
+#  Find reproductive value function by iteration.  
+#  Note that we use left-multiplication to do the transpose iteration,
+#  which is equivalent to using the transpose kernel. 
+#============================================================================# 
+vt=Matrix(1,1,m1*m2+m3*m4); vt1=vt; 
+
+qmax=1000; lam=1; 
+while(qmax>tol) {
+  vt1=vt%*%A2;
+  qmax=sum(abs((vt1-lam*vt)@x));  
+  lam=sum(vt1@x); 
+  vt@x=(vt1@x)/lam;   
+  cat(lam,qmax,"\n");
+} 
+v=t(matrix(vt@x,1,m1*m2+m3*m4)); 
+lam.stable.t=lam; 
+
+v_E<-v
+save(v_E, file="./Eastern/v_E.RData")
+
+
+#Hybrid
+load("./Hybrid/A_H.RData")
+A2=Matrix(A_H); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
+
+qmax=1000; lam=1; 
+while(qmax>tol) {
+  nt1=A2%*%nt;
+  qmax=sum(abs((nt1-lam*nt)@x));  
+  lam=sum(nt1@x); 
+  nt@x=(nt1@x)/lam; #we're cheating here - don't tell Doug Bates.  
+  cat(lam,qmax,"\n");
+} 
+nt=matrix(nt@x,m1*m2+m3*m4,1); 
+#stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
+stable.dist=nt
+lam.stable=lam;
+
+# Check that the @bits worked as intended.   
+qmax=sum(abs(lam*nt-A_H%*%nt)); 
+cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
+lam.stable_H<-lam.stable
+stable.dist_H<-stable.dist
+save(lam.stable_H, file="./Hybrid/lam.stable_H.RData")
+save(stable.dist_H, file="./Hybrid/stable.dist_H.RData")
+
+
+##Alternate calculation of rv:
+
+A3=t(A2); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
+
+qmax=1000; lam=1; 
+while(qmax>tol) {
+  nt1=A3%*%nt;
+  qmax=sum(abs((nt1-lam*nt)@x));  
+  lam=sum(nt1@x); 
+  nt@x=(nt1@x)/lam;   
+  cat(lam,qmax,"\n");
+} 
+nt=matrix(nt@x,m1*m2+m3*m4,1); 
+#stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
+#stable.dist=nt
+lam.stable.t=lam; 
+
+
+# Check that the @bits worked as intended.   
+qmax=sum(abs(lam*nt-A_H%*%nt)); 
+cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
+
+
+
+
+
+
+#============================================================================# 
+#  Find reproductive value function by iteration.  
+#  Note that we use left-multiplication to do the transpose iteration,
+#  which is equivalent to using the transpose kernel. 
+#============================================================================# 
+vt=Matrix(1,1,m1*m2+m3*m4); vt1=vt; 
+
+qmax=1000; lam=1; 
+while(qmax>tol) {
+  vt1=vt%*%A2;
+  qmax=sum(abs((vt1-lam*vt)@x));  
+  lam=sum(vt1@x); 
+  vt@x=(vt1@x)/lam;   
+  cat(lam,qmax,"\n");
+} 
+v=t(matrix(vt@x,1,m1*m2+m3*m4)); 
+lam.stable.t=lam; 
+
+v_H<-v
+save(v_H, file="./Hybrid/v_H.RData")
+
+
+#Western
+load("./Western/A_W.RData")
+A2=Matrix(A_overall); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
+
+qmax=1000; lam=1; 
+while(qmax>tol) {
+  nt1=A2%*%nt;
+  qmax=sum(abs((nt1-lam*nt)@x));  
+  lam=sum(nt1@x); 
+  nt@x=(nt1@x)/lam; #we're cheating here - don't tell Doug Bates.  
+  cat(lam,qmax,"\n");
+} 
+nt=matrix(nt@x,m1*m2+m3*m4,1); 
+#stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
+stable.dist=nt
+lam.stable=lam;
+
+# Check that the @bits worked as intended.   
+qmax=sum(abs(lam*nt-A_W%*%nt)); 
+cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
+lam.stable_W<-lam.stable
+stable.dist_W<-stable.dist
+save(lam.stable_W, file="./Western/lam.stable_W.RData")
+save(stable.dist_W, file="./Western/stable.dist_W.RData")
+
+
+##Alternate calculation of rv:
+
+A3=t(A2); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
+
+qmax=1000; lam=1; 
+while(qmax>tol) {
+  nt1=A3%*%nt;
+  qmax=sum(abs((nt1-lam*nt)@x));  
+  lam=sum(nt1@x); 
+  nt@x=(nt1@x)/lam;   
+  cat(lam,qmax,"\n");
+} 
+nt=matrix(nt@x,m1*m2+m3*m4,1); 
+#stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
+#stable.dist=nt
+lam.stable.t=lam; 
+
+
+# Check that the @bits worked as intended.   
+qmax=sum(abs(lam*nt-A_W%*%nt)); 
+cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
+
+
+
+
+
+
+#============================================================================# 
+#  Find reproductive value function by iteration.  
+#  Note that we use left-multiplication to do the transpose iteration,
+#  which is equivalent to using the transpose kernel. 
+#============================================================================# 
+vt=Matrix(1,1,m1*m2+m3*m4); vt1=vt; 
+
+qmax=1000; lam=1; 
+while(qmax>tol) {
+  vt1=vt%*%A2;
+  qmax=sum(abs((vt1-lam*vt)@x));  
+  lam=sum(vt1@x); 
+  vt@x=(vt1@x)/lam;   
+  cat(lam,qmax,"\n");
+} 
+v=t(matrix(vt@x,1,m1*m2+m3*m4)); 
+lam.stable.t=lam; 
+
+v_W<-v
+save(v_W, file="./Western/v_W.RData")
 
 
 
@@ -385,36 +814,170 @@ lam.stable.t=lam;
 
 ####Method: Compute elasticity matrix first then separate:
 
+#Overall
+load("v_overall.RData")
+load("stable.dist_overall.RData")
+load("A_overall.RData")
+load("lam.stable_overall.RData")
 
-v.dot.w<-sum(t(v)%*%stable.dist)
-norm_v<-v/v.dot.w
-check<-t(norm_v)%*%stable.dist #should be 1
+v.dot.w_overall<-sum(t(v_overall)%*%stable.dist_overall)
+norm_v_overall<-v_overall/v.dot.w_overall
+check_overall<-t(norm_v_overall)%*%stable.dist_overall #should be 1
 
-rv<-norm_v
+rv_overall<-norm_v_overall
 
-sens<-norm_v%*%t(stable.dist)
-elas<-sens*A/lam.stable
+sens_overall<-norm_v_overall%*%t(stable.dist_overall)
+elas_overall<-sens_overall*A_overall/lam.stable_overall
 
-plot(colSums(elas[1:m1*m2,]))
+#plot(colSums(elas[1:m1*m2,]))
 
 #Break the elasticity matrix back into its component parts: 
-elas_D1<-elas[1:(m1*m2), 1:(m1*m2)]
-elas_G<-elas[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
-elas_F<-elas[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-elas_D2<-elas[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
+elas_D1_overall<-elas_overall[1:(m1*m2), 1:(m1*m2)]
+elas_G_overall<-elas_overall[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
+elas_F_overall<-elas_overall[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
+elas_D2_overall<-elas_overall[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
 
-sens_D1<-sens[1:(m1*m2), 1:(m1*m2)]
-sens_G<-sens[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
-sens_F<-sens[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-sens_D2<-sens[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
-
-
+sens_D1_overall<-sens_overall[1:(m1*m2), 1:(m1*m2)]
+sens_G_overall<-sens_overall[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
+sens_F_overall<-sens_overall[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
+sens_D2_overall<-sens_overall[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
 
 
+save(elas_D1_overall, file="elas_D1_overall.RData")
+save(elas_G_overall, file="elas_G_overall.RData")
+save(elas_F_overall, file="elas_F_overall.RData")
+save(elas_D2_overall, file="elas_D2_overall.RData")
+save(sens_D1_overall, file="sens_D1_overall.RData")
+save(sens_G_overall, file="sens_G_overall.RData")
+save(sens_F_overall, file="sens_F_overall.RData")
+save(sens_D2_overall, file="sens_D2_overall.RData")
+rm(list=ls())
+
+#Eastern
+load("v_E.RData")
+load("stable.dist_E.RData")
+load("A_E.RData")
+load("lam.stable_E.RData")
+
+v.dot.w_E<-sum(t(v_E)%*%stable.dist_E)
+norm_v_E<-v_E/v.dot.w_E
+check_E<-t(norm_v_E)%*%stable.dist_E #should be 1
+
+rv_E<-norm_v_E
+
+sens_E<-norm_v_E%*%t(stable.dist_E)
+elas_E<-sens_E*A_E/lam.stable_E
+
+#plot(colSums(elas[1:m1*m2,]))
+
+#Break the elasticity matrix back into its component parts: 
+elas_D1_E<-elas_E[1:(m1*m2), 1:(m1*m2)]
+elas_G_E<-elas_E[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
+elas_F_E<-elas_E[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
+elas_D2_E<-elas_E[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
+
+sens_D1_E<-sens_E[1:(m1*m2), 1:(m1*m2)]
+sens_G_E<-sens_E[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
+sens_F_E<-sens_E[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
+sens_D2_E<-sens_E[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
+
+
+save(elas_D1_E, file="elas_D1_E.RData")
+save(elas_G_E, file="elas_G_E.RData")
+save(elas_F_E, file="elas_F_E.RData")
+save(elas_D2_E, file="elas_D2_E.RData")
+save(sens_D1_E, file="sens_D1_E.RData")
+save(sens_G_E, file="sens_G_E.RData")
+save(sens_F_E, file="sens_F_E.RData")
+save(sens_D2_E, file="sens_D2_E.RData")
+rm(list=ls())
+
+#Overall
+load("v_H.RData")
+load("stable.dist_H.RData")
+load("A_H.RData")
+load("lam.stable_H.RData")
+
+v.dot.w_H<-sum(t(v_H)%*%stable.dist_H)
+norm_v_H<-v_H/v.dot.w_H
+check_H<-t(norm_v_H)%*%stable.dist_H #should be 1
+
+rv_H<-norm_v_H
+
+sens_H<-norm_v_H%*%t(stable.dist_H)
+elas_H<-sens_H*A_H/lam.stable_H
+
+#plot(colSums(elas[1:m1*m2,]))
+
+#Break the elasticity matrix back into its component parts: 
+elas_D1_H<-elas_H[1:(m1*m2), 1:(m1*m2)]
+elas_G_H<-elas_H[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
+elas_F_H<-elas_H[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
+elas_D2_H<-elas_H[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
+
+sens_D1_H<-sens_H[1:(m1*m2), 1:(m1*m2)]
+sens_G_H<-sens_H[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
+sens_F_H<-sens_H[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
+sens_D2_H<-sens_H[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
+
+
+save(elas_D1_H, file="elas_D1_H.RData")
+save(elas_G_H, file="elas_G_H.RData")
+save(elas_F_H, file="elas_F_H.RData")
+save(elas_D2_H, file="elas_D2_H.RData")
+save(sens_D1_H, file="sens_D1_H.RData")
+save(sens_G_H, file="sens_G_H.RData")
+save(sens_F_H, file="sens_F_H.RData")
+save(sens_D2_H, file="sens_D2_H.RData")
+rm(list=ls())
+
+#Western
+load("v_W.RData")
+load("stable.dist_W.RData")
+load("A_W.RData")
+load("lam.stable_W.RData")
+
+v.dot.w_W<-sum(t(v_W)%*%stable.dist_W)
+norm_v_W<-v_W/v.dot.w_W
+check_W<-t(norm_v_W)%*%stable.dist_W #should be 1
+
+rv_W<-norm_v_W
+
+sens_W<-norm_v_W%*%t(stable.dist_W)
+elas_W<-sens_W*A_W/lam.stable_W
+
+#plot(colSums(elas[1:m1*m2,]))
+
+#Break the elasticity matrix back into its component parts: 
+elas_D1_W<-elas_W[1:(m1*m2), 1:(m1*m2)]
+elas_G_W<-elas_W[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
+elas_F_W<-elas_W[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
+elas_D2_W<-elas_W[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
+
+sens_D1_W<-sens_W[1:(m1*m2), 1:(m1*m2)]
+sens_G_W<-sens_W[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
+sens_F_W<-sens_W[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
+sens_D2_W<-sens_w[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
+
+
+save(elas_D1_W, file="elas_D1_W.RData")
+save(elas_G_W, file="elas_G_W.RData")
+save(elas_F_W, file="elas_F_W.RData")
+save(elas_D2_W, file="elas_D2_W.RData")
+save(sens_D1_W, file="sens_D1_W.RData")
+save(sens_G_W, file="sens_G_W.RData")
+save(sens_F_W, file="sens_F_W.RData")
+save(sens_D2_W, file="sens_D2_W.RData")
+rm(list=ls())
 
 ########
 ###Now go back to unpack the elasticity matrices into components:
 ########
+
+load("elas_D1_overall.RData")
+load("elas_D1_E.RData")
+load("elas_D1_H.RData")
+load("elas_D1_W.RData")
 
 plop=function(i,j) {(j-1)*m1+i} # for putting values in proper place in array
 Plop=outer(1:m1,1:m2,plop); 

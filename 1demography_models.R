@@ -383,17 +383,17 @@ grad_mod_lineage2<-glm(seedlings3$grad_status ~ seedlings3$Diameter_t + seedling
 summary(grad_mod_lineage2)
 
 
-p.vec_E[12]<-grad_mod_lineage$coeff[1]
-p.vec_E[13]<-grad_mod_lineage$coeff[2]
-p.vec_E[14]<-grad_mod_lineage$coeff[3]
+p.vec_E[12]<-grad_mod_lineage2$coeff[1]
+p.vec_E[13]<-grad_mod_lineage2$coeff[2]
+p.vec_E[14]<-grad_mod_lineage2$coeff[3]
 
-p.vec_H[12]<-grad_mod_lineage$coeff[1]
-p.vec_H[13]<-grad_mod_lineage$coeff[2]
-p.vec_H[14]<-grad_mod_lineage$coeff[3]
+p.vec_H[12]<-grad_mod_lineage2$coeff[1]
+p.vec_H[13]<-grad_mod_lineage2$coeff[2]
+p.vec_H[14]<-grad_mod_lineage2$coeff[3]
 
-p.vec_W[12]<-grad_mod_lineage$coeff[1]+grad_mod_lineage$coeff[4]
-p.vec_W[13]<-grad_mod_lineage$coeff[2]
-p.vec_W[14]<-grad_mod_lineage$coeff[3]
+p.vec_W[12]<-grad_mod_lineage2$coeff[1]+grad_mod_lineage2$coeff[4]
+p.vec_W[13]<-grad_mod_lineage2$coeff[2]
+p.vec_W[14]<-grad_mod_lineage2$coeff[3]
 
 #The distribution of graduates sizes does not differ by biotype: 
 p.vec_E[15]<-mu_grad_diam
@@ -420,9 +420,9 @@ p.vec_W[18]<-sd_grad_height
 surv_mod_larges<-glm(larges$Surv_tplus1~larges$Diameter_t + larges$Height_t, family=binomial)
 summary(surv_mod_larges)
 
-p.vec_overall[22]<-surv_mod_larges$coeff[1]
-p.vec_overall[23]<-surv_mod_larges$coeff[2]
-p.vec_overall[24]<-surv_mod_larges$coeff[3]
+p.vec_overall[19]<-surv_mod_larges$coeff[1]
+p.vec_overall[20]<-surv_mod_larges$coeff[2]
+p.vec_overall[21]<-surv_mod_larges$coeff[3]
 
 #(b) Model D2-survival (by biotype)
 
@@ -441,17 +441,17 @@ larges2<-cbind(larges, lineage3)
 surv_mod_larges_lineage2<-glm(larges2$Surv_tplus1 ~ larges2$Diameter_t + larges2$Height_t+larges2$lineage3, family=binomial)
 summary(surv_mod_larges_lineage2)
 
-p.vec_E[22]<-surv_mod_larges_lineage2$coeff[1]
-p.vec_E[23]<-surv_mod_larges_lineage2$coeff[2]
-p.vec_E[24]<-surv_mod_larges_lineage2$coeff[3]
+p.vec_E[19]<-surv_mod_larges_lineage2$coeff[1]
+p.vec_E[20]<-surv_mod_larges_lineage2$coeff[2]
+p.vec_E[21]<-surv_mod_larges_lineage2$coeff[3]
 
-p.vec_H[22]<-surv_mod_larges_lineage2$coeff[1] + surv_mod_larges_lineage2$coeff[4]
-p.vec_H[23]<-surv_mod_larges_lineage2$coeff[2]
-p.vec_H[24]<-surv_mod_larges_lineage2$coeff[3]
+p.vec_H[19]<-surv_mod_larges_lineage2$coeff[1] + surv_mod_larges_lineage2$coeff[4]
+p.vec_H[20]<-surv_mod_larges_lineage2$coeff[2]
+p.vec_H[21]<-surv_mod_larges_lineage2$coeff[3]
 
-p.vec_W[22]<-surv_mod_larges_lineage2$coeff[1]
-p.vec_W[23]<-surv_mod_larges_lineage2$coeff[2]
-p.vec_W[24]<-surv_mod_larges_lineage2$coeff[3]
+p.vec_W[19]<-surv_mod_larges_lineage2$coeff[1]
+p.vec_W[20]<-surv_mod_larges_lineage2$coeff[2]
+p.vec_W[21]<-surv_mod_larges_lineage2$coeff[3]
 
 ##### GROWTH of larger plants (in the D2 domain)
 
@@ -744,9 +744,9 @@ p.vec_W[39]<-0.388
 
 
 #Save p.vec's for later use: 
-save(p.vec_overall, file="p.vec_overall.RData")
-save(p.vec_E, file="p.vec_E.RData")
-save(p.vec_H, file="p.vec_H.RData")
-save(p.vec_W, file="p.vec_W.RData")
+save(p.vec_overall, file="./Overall/p.vec_overall.RData")
+save(p.vec_E, file="./Eastern/p.vec_E.RData")
+save(p.vec_H, file="./Hybrid/p.vec_H.RData")
+save(p.vec_W, file="./Western/p.vec_W.RData")
 
 save.image(file="demography_models.RData")
