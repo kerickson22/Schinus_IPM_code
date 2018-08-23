@@ -165,6 +165,7 @@ D1_H=D1_H*h1*h2 #multiply D1 by widths
 save(D1_H, file="./Hybrid/D1_H.RData")
 save(Kvals_D1_H, file="./Hybrid/Kvals_D1_H.RData")
 rm(D1_H, Kvals_D1_H)
+
 # Western
 for(i in 1:m1){
   for(j in 1:m2){
@@ -531,7 +532,7 @@ lam.stable.t=lam;
 
 
 # Check that the @bits worked as intended.   
-qmax=sum(abs(lam*nt-A_overall%*%nt)); 
+qmax=sum(abs(lam*nt-t(A_overall)%*%nt)); 
 cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
 
 
@@ -608,7 +609,7 @@ lam.stable.t=lam;
 
 
 # Check that the @bits worked as intended.   
-qmax=sum(abs(lam*nt-A_E%*%nt)); 
+qmax=sum(abs(lam*nt-t(A_E)%*%nt)); 
 cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
 
 
@@ -683,7 +684,7 @@ lam.stable.t=lam;
 
 
 # Check that the @bits worked as intended.   
-qmax=sum(abs(lam*nt-A_H%*%nt)); 
+qmax=sum(abs(lam*nt-t(A_H)%*%nt)); 
 cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
 
 
@@ -715,7 +716,7 @@ save(v_H, file="./Hybrid/v_H.RData")
 
 #Western
 load("./Western/A_W.RData")
-A2=Matrix(A_overall); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
+A2=Matrix(A_W); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
 
 qmax=1000; lam=1; 
 while(qmax>tol) {
@@ -758,7 +759,7 @@ lam.stable.t=lam;
 
 
 # Check that the @bits worked as intended.   
-qmax=sum(abs(lam*nt-A_W%*%nt)); 
+qmax=sum(abs(lam*nt-t(A_W)%*%nt)); 
 cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
 
 
@@ -788,6 +789,7 @@ v_W<-v
 save(v_W, file="./Western/v_W.RData")
 
 
+###TODO: rm() things
 
 #####################################
 ####
@@ -815,10 +817,10 @@ save(v_W, file="./Western/v_W.RData")
 ####Method: Compute elasticity matrix first then separate:
 
 #Overall
-load("v_overall.RData")
-load("stable.dist_overall.RData")
-load("A_overall.RData")
-load("lam.stable_overall.RData")
+load("./Overall/v_overall.RData")
+load("./Overall/stable.dist_overall.RData")
+load("./Overall/A_overall.RData")
+load("./Overall/lam.stable_overall.RData")
 
 v.dot.w_overall<-sum(t(v_overall)%*%stable.dist_overall)
 norm_v_overall<-v_overall/v.dot.w_overall
@@ -828,6 +830,8 @@ rv_overall<-norm_v_overall
 
 sens_overall<-norm_v_overall%*%t(stable.dist_overall)
 elas_overall<-sens_overall*A_overall/lam.stable_overall
+save(sens_overall, file="./Overall/sens_overall.RData")
+save(elas_overall, file="./Overall/elas_overall.RData")
 
 #plot(colSums(elas[1:m1*m2,]))
 
@@ -843,21 +847,24 @@ sens_F_overall<-sens_overall[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
 sens_D2_overall<-sens_overall[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
 
 
-save(elas_D1_overall, file="elas_D1_overall.RData")
-save(elas_G_overall, file="elas_G_overall.RData")
-save(elas_F_overall, file="elas_F_overall.RData")
-save(elas_D2_overall, file="elas_D2_overall.RData")
-save(sens_D1_overall, file="sens_D1_overall.RData")
-save(sens_G_overall, file="sens_G_overall.RData")
-save(sens_F_overall, file="sens_F_overall.RData")
-save(sens_D2_overall, file="sens_D2_overall.RData")
-rm(list=ls())
+save(elas_D1_overall, file="./Overall/elas_D1_overall.RData")
+save(elas_G_overall, file="./Overall/elas_G_overall.RData")
+save(elas_F_overall, file="./Overall/elas_F_overall.RData")
+save(elas_D2_overall, file="./Overall/elas_D2_overall.RData")
+save(sens_D1_overall, file="./Overall/sens_D1_overall.RData")
+save(sens_G_overall, file="./Overall/sens_G_overall.RData")
+save(sens_F_overall, file="./Overall/sens_F_overall.RData")
+save(sens_D2_overall, file="./Overall/sens_D2_overall.RData")
+rm(elas_D1_overall, elas_G_overall, elas_F_overall, elas_D2_overall, sens_D1_overall, 
+   sens_G_overall, sens_F_overall, sens_D2_overall, norm_v_overall, rv_overall, 
+   stable.dist_overall, A_overall, check_overall, v_overall, lam.stable_overall,
+   elas_overall, sens_overall, v.dot.w_overall) 
 
 #Eastern
-load("v_E.RData")
-load("stable.dist_E.RData")
-load("A_E.RData")
-load("lam.stable_E.RData")
+load("./Eastern/v_E.RData")
+load("./Eastern/stable.dist_E.RData")
+load("./Eastern/A_E.RData")
+load("./Eastern/lam.stable_E.RData")
 
 v.dot.w_E<-sum(t(v_E)%*%stable.dist_E)
 norm_v_E<-v_E/v.dot.w_E
@@ -867,6 +874,9 @@ rv_E<-norm_v_E
 
 sens_E<-norm_v_E%*%t(stable.dist_E)
 elas_E<-sens_E*A_E/lam.stable_E
+
+save(sens_E, file="./Eastern/sens_E.RData")
+save(elas_E, file="./Eastern/elas_E.RData")
 
 #plot(colSums(elas[1:m1*m2,]))
 
@@ -882,21 +892,22 @@ sens_F_E<-sens_E[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
 sens_D2_E<-sens_E[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
 
 
-save(elas_D1_E, file="elas_D1_E.RData")
-save(elas_G_E, file="elas_G_E.RData")
-save(elas_F_E, file="elas_F_E.RData")
-save(elas_D2_E, file="elas_D2_E.RData")
-save(sens_D1_E, file="sens_D1_E.RData")
-save(sens_G_E, file="sens_G_E.RData")
-save(sens_F_E, file="sens_F_E.RData")
-save(sens_D2_E, file="sens_D2_E.RData")
-rm(list=ls())
+save(elas_D1_E, file="./Eastern/elas_D1_E.RData")
+save(elas_G_E, file="./Eastern/elas_G_E.RData")
+save(elas_F_E, file="./Eastern/elas_F_E.RData")
+save(elas_D2_E, file="./Eastern/elas_D2_E.RData")
+save(sens_D1_E, file="./Eastern/sens_D1_E.RData")
+save(sens_G_E, file="./Eastern/sens_G_E.RData")
+save(sens_F_E, file="./Eastern/sens_F_E.RData")
+save(sens_D2_E, file="./Eastern/sens_D2_E.RData")
+rm(A_E, check_E, elas_D1_E, elas_D2_E, elas_E, elas_F_E, elas_G_E, norm_v_E, rv_E,
+   sens_D1_E, sens_D2_E, sens_E, sens_F_E, sens_G_E, stable.dist_E, v_E, v.dot.w_E, lam.stable_E)
 
-#Overall
-load("v_H.RData")
-load("stable.dist_H.RData")
-load("A_H.RData")
-load("lam.stable_H.RData")
+#Hybrid
+load("./Hybrid/v_H.RData")
+load("./Hybrid/stable.dist_H.RData")
+load("./Hybrid/A_H.RData")
+load("./Hybrid/lam.stable_H.RData")
 
 v.dot.w_H<-sum(t(v_H)%*%stable.dist_H)
 norm_v_H<-v_H/v.dot.w_H
@@ -906,6 +917,8 @@ rv_H<-norm_v_H
 
 sens_H<-norm_v_H%*%t(stable.dist_H)
 elas_H<-sens_H*A_H/lam.stable_H
+save(sens_H, file="./Hybrid/sens_H.RData")
+save(elas_H, file="./Hybrid/elas_H.RData")
 
 #plot(colSums(elas[1:m1*m2,]))
 
@@ -921,21 +934,22 @@ sens_F_H<-sens_H[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
 sens_D2_H<-sens_H[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
 
 
-save(elas_D1_H, file="elas_D1_H.RData")
-save(elas_G_H, file="elas_G_H.RData")
-save(elas_F_H, file="elas_F_H.RData")
-save(elas_D2_H, file="elas_D2_H.RData")
-save(sens_D1_H, file="sens_D1_H.RData")
-save(sens_G_H, file="sens_G_H.RData")
-save(sens_F_H, file="sens_F_H.RData")
-save(sens_D2_H, file="sens_D2_H.RData")
-rm(list=ls())
+save(elas_D1_H, file="./Hybrid/elas_D1_H.RData")
+save(elas_G_H, file="./Hybrid/elas_G_H.RData")
+save(elas_F_H, file="./Hybrid/elas_F_H.RData")
+save(elas_D2_H, file="./Hybrid/elas_D2_H.RData")
+save(sens_D1_H, file="./Hybrid/sens_D1_H.RData")
+save(sens_G_H, file="./Hybrid/sens_G_H.RData")
+save(sens_F_H, file="./Hybrid/sens_F_H.RData")
+save(sens_D2_H, file="./Hybrid/sens_D2_H.RData")
+rm(A_H, check_H, elas_H, norm_v_H, rv_H, sens_H, stable.dist_H, v_H, elas_D1_H,
+   elas_G_H, elas_F_H, elas_D2_H, sens_D1_H, sens_G_H, sens_F_H, sens_D2_H, lam.stable_H, v.dot.w_H)
 
 #Western
-load("v_W.RData")
-load("stable.dist_W.RData")
-load("A_W.RData")
-load("lam.stable_W.RData")
+load("./Western/v_W.RData")
+load("./Western/stable.dist_W.RData")
+load("./Western/A_W.RData")
+load("./Western/lam.stable_W.RData")
 
 v.dot.w_W<-sum(t(v_W)%*%stable.dist_W)
 norm_v_W<-v_W/v.dot.w_W
@@ -945,6 +959,8 @@ rv_W<-norm_v_W
 
 sens_W<-norm_v_W%*%t(stable.dist_W)
 elas_W<-sens_W*A_W/lam.stable_W
+save(sens_W, file="./Western/sens_W.RData")
+save(elas_W, file="./Western/elas_W.RData")
 
 #plot(colSums(elas[1:m1*m2,]))
 
@@ -957,63 +973,153 @@ elas_D2_W<-elas_W[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
 sens_D1_W<-sens_W[1:(m1*m2), 1:(m1*m2)]
 sens_G_W<-sens_W[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
 sens_F_W<-sens_W[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-sens_D2_W<-sens_w[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
+sens_D2_W<-sens_W[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
 
 
-save(elas_D1_W, file="elas_D1_W.RData")
-save(elas_G_W, file="elas_G_W.RData")
-save(elas_F_W, file="elas_F_W.RData")
-save(elas_D2_W, file="elas_D2_W.RData")
-save(sens_D1_W, file="sens_D1_W.RData")
-save(sens_G_W, file="sens_G_W.RData")
-save(sens_F_W, file="sens_F_W.RData")
-save(sens_D2_W, file="sens_D2_W.RData")
-rm(list=ls())
+save(elas_D1_W, file="./Western/elas_D1_W.RData")
+save(elas_G_W, file="./Western/elas_G_W.RData")
+save(elas_F_W, file="./Western/elas_F_W.RData")
+save(elas_D2_W, file="./Western/elas_D2_W.RData")
+save(sens_D1_W, file="./Western/sens_D1_W.RData")
+save(sens_G_W, file="./Western/sens_G_W.RData")
+save(sens_F_W, file="./Western/sens_F_W.RData")
+save(sens_D2_W, file="./Western/sens_D2_W.RData")
+rm(A_W, check_W, elas_D1_W, elas_D2_W, elas_F_W, elas_G_W, elas_W, norm_v_W, rv_W,
+   sens_D1_W, sens_D2_W, sens_F_W,sens_G_W, sens_W, stable.dist_W, v_W, lam.stable_W, v.dot.w_W)
 
 ########
 ###Now go back to unpack the elasticity matrices into components:
 ########
 
-load("elas_D1_overall.RData")
-load("elas_D1_E.RData")
-load("elas_D1_H.RData")
-load("elas_D1_W.RData")
+load("./Overall/elas_D1_overall.RData")
+load("./Eastern/elas_D1_E.RData")
+load("./Hybrid/elas_D1_H.RData")
+load("./Western/elas_D1_W.RData")
 
 plop=function(i,j) {(j-1)*m1+i} # for putting values in proper place in array
 Plop=outer(1:m1,1:m2,plop); 
 
-Kvals_elas_D1=array(0,c(m1,m2,m1,m2));  
+Kvals_elas_D1_overall=array(0,c(m1,m2,m1,m2));  
+Kvals_elas_D1_E=array(0,c(m1,m2,m1,m2));  
+Kvals_elas_D1_H=array(0,c(m1,m2,m1,m2));  
+Kvals_elas_D1_W=array(0,c(m1,m2,m1,m2));  
 
+#Overall
 for(i in 1:m1){
 	for(j in 1:m2){
 		for(k in 1:m1){
-				kvals= elas_D1[Plop[k,1:m2],Plop[i,j]]
-				Kvals_elas_D1[k,1:m2,i,j]=kvals
+				kvals= elas_D1_overall[Plop[k,1:m2],Plop[i,j]]
+				Kvals_elas_D1_overall[k,1:m2,i,j]=kvals
 			
 	}}
 	cat(i,"\n"); 
 }
+save(Kvals_elas_D1_overall, file="./Overall/Kvals_elas_D1_overall.RData")
+
+#Eastern
+for(i in 1:m1){
+  for(j in 1:m2){
+    for(k in 1:m1){
+      kvals= elas_D1_E[Plop[k,1:m2],Plop[i,j]]
+      Kvals_elas_D1_E[k,1:m2,i,j]=kvals
+      
+    }}
+  cat(i,"\n"); 
+}
+save(Kvals_elas_D1_E, file="./Eastern/Kvals_elas_D1_E.RData")
+
+#Hybrid
+for(i in 1:m1){
+  for(j in 1:m2){
+    for(k in 1:m1){
+      kvals= elas_D1_H[Plop[k,1:m2],Plop[i,j]]
+      Kvals_elas_D1_H[k,1:m2,i,j]=kvals
+      
+    }}
+  cat(i,"\n"); 
+}
+save(Kvals_elas_D1_H, file="./Hybrid/Kvals_elas_D1_H.RData")
+#Western
+for(i in 1:m1){
+  for(j in 1:m2){
+    for(k in 1:m1){
+      kvals= elas_D1_W[Plop[k,1:m2],Plop[i,j]]
+      Kvals_elas_D1_W[k,1:m2,i,j]=kvals
+      
+    }}
+  cat(i,"\n"); 
+}
+save(Kvals_elas_D1_W, file="./Western/Kvals_elas_D1_W.RData")
+
+rm(Kvals_elas_D1_E, Kvals_elas_D1_H, Kvals_elas_D1_W, Kvals_elas_D1_overall, i, j, k, kvals, 
+   elas_D1_E, elas_D1_H, elas_D1_overall, elas_D1_W, Plop)
 
 
 ###Construct D2 (Large Domain):
+
+load("./Overall/elas_D2_overall.RData")
+load("./Eastern/elas_D2_E.RData")
+load("./Hybrid/elas_D2_H.RData")
+load("./Western/elas_D2_W.RData")
 plop=function(i,j) {(j-1)*m3+i} # for putting values in proper place in A 
 Plop=outer(1:m3,1:m4,plop); 
 
 
-Kvals_elas_D2=array(0,c(m3,m4,m3,m4));  
+Kvals_elas_D2_overall=array(0,c(m3,m4,m3,m4));  
+Kvals_elas_D2_E=array(0,c(m3,m4,m3,m4));
+Kvals_elas_D2_H=array(0,c(m3,m4,m3,m4));
+Kvals_elas_D2_W=array(0,c(m3,m4,m3,m4));
 
-
-
+#overall
 for(i in 1:m3){
 	for(j in 1:m4){
 		for(k in 1:m3){
-				kvals= elas_D2[Plop[k,1:m4],Plop[i,j]]
-				Kvals_elas_D2[k,1:m4,i,j]=kvals
+				kvals= elas_D2_overall[Plop[k,1:m4],Plop[i,j]]
+				Kvals_elas_D2_overall[k,1:m4,i,j]=kvals
 			
 	}}
 	cat(i,"\n"); 
 }		
 
+save(Kvals_elas_D2_overall, file="./Overall/Kvals_elas_D2_overall.RData")
+
+#Eastern
+for(i in 1:m3){
+  for(j in 1:m4){
+    for(k in 1:m3){
+      kvals= elas_D2_E[Plop[k,1:m4],Plop[i,j]]
+      Kvals_elas_D2_E[k,1:m4,i,j]=kvals
+      
+    }}
+  cat(i,"\n"); 
+}		
+save(Kvals_elas_D2_E, file="./Eastern/Kvals_elas_D2_E.RData")
+
+#Hybrid
+for(i in 1:m3){
+  for(j in 1:m4){
+    for(k in 1:m3){
+      kvals= elas_D2_H[Plop[k,1:m4],Plop[i,j]]
+      Kvals_elas_D2_H[k,1:m4,i,j]=kvals
+      
+    }}
+  cat(i,"\n"); 
+}		
+save(Kvals_elas_D2_H, file="./Hybrid/Kvals_elas_D2_H.RData")
+
+#Western
+for(i in 1:m3){
+  for(j in 1:m4){
+    for(k in 1:m3){
+      kvals= elas_D2_W[Plop[k,1:m4],Plop[i,j]]
+      Kvals_elas_D2_W[k,1:m4,i,j]=kvals
+      
+    }}
+  cat(i,"\n"); 
+}		
+save(Kvals_elas_D2_W, file="./Western/Kvals_elas_D2_W.RData")
+rm(Kvals_elas_D2_E, Kvals_elas_D2_H, Kvals_elas_D2_overall, Kvals_elas_D2_W, kvals,
+   elas_D2_E, elas_D2_H, elas_D2_overall, elas_D2_W, Plop)
 
 ###Construct F (Fecundity):
 plop1=function(i, j) {(j-1)*m1 + i}
