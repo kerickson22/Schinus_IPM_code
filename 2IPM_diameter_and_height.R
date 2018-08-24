@@ -460,6 +460,7 @@ rm(F_H, D2_H)
 A_H<-cbind(left_side, right_side)
 save(A_H, file="./Hybrid/A_H.RData")
 
+
 #Western
 rm(A_H, left_side, right_side) #clear out workspace to maximize space available 
 load("./Western/D1_W.RData")
@@ -561,7 +562,8 @@ lam.stable.t=lam;
 v_overall<-v
 save(v_overall, file="./Overall/v_overall.RData")
 
-
+rm(A_overall, A2, A3, nt, nt1, stable.dist, stable.dist_overall, v, v_overall, vt, vt1,
+   lam.stable, lam.stable_overall, lam.stable.t, qmax)
 
 
 #Eastern
@@ -637,7 +639,8 @@ lam.stable.t=lam;
 
 v_E<-v
 save(v_E, file="./Eastern/v_E.RData")
-
+rm(A_E, A2, nt, nt1, stable.dist, stable.dist_E, v, v_E, vt, vt1, lam, lam.stable, lam.stable_E, 
+   lam.stable.t, qmax)
 
 #Hybrid
 load("./Hybrid/A_H.RData")
@@ -713,6 +716,8 @@ lam.stable.t=lam;
 v_H<-v
 save(v_H, file="./Hybrid/v_H.RData")
 
+rm(A_H, A2, A3, nt, nt1, stable.dist, stable.dist_H, v, v_H, vt, vt1, lam, lam.stable, lam.stable_H,
+   lam.stable.t, qmax)
 
 #Western
 load("./Western/A_W.RData")
@@ -787,9 +792,8 @@ lam.stable.t=lam;
 
 v_W<-v
 save(v_W, file="./Western/v_W.RData")
-
-
-###TODO: rm() things
+rm(A_W, A2, A3, nt, nt1, stable.dist, stable.dist_W, v, v_W, vt, vt1, 
+   lam.stable, lam.stable_W, lam.stable.t, qmax)
 
 #####################################
 ####
@@ -1122,59 +1126,227 @@ rm(Kvals_elas_D2_E, Kvals_elas_D2_H, Kvals_elas_D2_overall, Kvals_elas_D2_W, kva
    elas_D2_E, elas_D2_H, elas_D2_overall, elas_D2_W, Plop)
 
 ###Construct F (Fecundity):
+load("./Overall/elas_F_overall.RData")
+load("./Eastern/elas_F_E.RData")
+load("./Hybrid/elas_F_H.RData")
+load("./Western/elas_F_W.RData")
+
 plop1=function(i, j) {(j-1)*m1 + i}
 plop2=function(i, j) {(j-1)*m3 + i}
 Plop1=outer(1:m1,1:m2,plop1); 
 Plop2=outer(1:m3, 1:m4, plop2);
 
-Kvals_elas_F=array(0, c(m1, m2, m3, m4))
+Kvals_elas_F_overall=array(0, c(m1, m2, m3, m4))
+Kvals_elas_F_E=array(0, c(m1, m2, m3, m4))
+Kvals_elas_F_H=array(0, c(m1, m2, m3, m4))
+Kvals_elas_F_W=array(0, c(m1, m2, m3, m4))
 
+
+#Overall
 for(i in 1:m3) {
 	for (j in 1:m4) {
 		for (k in 1:m1) {
-			kvals=elas_F[Plop1[k, 1:m2], Plop2[i,j]]
-			Kvals_elas_F[k, 1:m2, i, j]=kvals
+			kvals=elas_F_overall[Plop1[k, 1:m2], Plop2[i,j]]
+			Kvals_elas_F_overall[k, 1:m2, i, j]=kvals
 		}}
 		cat(i, "\n");
 }
+save(Kvals_elas_F_overall, file="./Overall/Kvals_elas_F_overall.RData")
 
+#Eastern
+for(i in 1:m3) {
+  for (j in 1:m4) {
+    for (k in 1:m1) {
+      kvals=elas_F_E[Plop1[k, 1:m2], Plop2[i,j]]
+      Kvals_elas_F_E[k, 1:m2, i, j]=kvals
+    }}
+  cat(i, "\n");
+}
+save(Kvals_elas_F_E, file="./Eastern/Kvals_elas_F_E.RData")
+
+#Hybrid
+for(i in 1:m3) {
+  for (j in 1:m4) {
+    for (k in 1:m1) {
+      kvals=elas_F_H[Plop1[k, 1:m2], Plop2[i,j]]
+      Kvals_elas_F_H[k, 1:m2, i, j]=kvals
+    }}
+  cat(i, "\n");
+}
+save(Kvals_elas_F_H, file="./Hybrid/Kvals_elas_F_H.RData")
+
+#Western
+for(i in 1:m3) {
+  for (j in 1:m4) {
+    for (k in 1:m1) {
+      kvals=elas_F_W[Plop1[k, 1:m2], Plop2[i,j]]
+      Kvals_elas_F_W[k, 1:m2, i, j]=kvals
+    }}
+  cat(i, "\n");
+}
+save(Kvals_elas_F_W, file="./Western/Kvals_elas_F_W.RData")
 
 ###Construct G (Graduation):
+
+load("./Overall/elas_G_overall.RData")
+load("./Eastern/elas_G_E.RData")
+load("./Hybrid/elas_G_H.RData")
+load("./Western/elas_G_W.RData")
+
 plop1=function(i, j) {(j-1)*m3 + i}
 plop2=function(i, j) {(j-1)*m1 + i}
 Plop1=outer(1:m3,1:m4,plop1); 
 Plop2=outer(1:m1, 1:m2, plop2);
 
-Kvals_elas_G=array(0, c(m3, m4, m1, m2))
+Kvals_elas_G_overall=array(0, c(m3, m4, m1, m2))
+Kvals_elas_G_E=array(0, c(m3, m4, m1, m2))
+Kvals_elas_G_H=array(0, c(m3, m4, m1, m2))
+Kvals_elas_G_W=array(0, c(m3, m4, m1, m2))
 
+#Overall
 for(i in 1:m1) {
 	for (j in 1:m2) {
 		for (k in 1:m3) {
-			kvals=elas_G[Plop1[k, 1:m4], Plop2[i,j]]
-			Kvals_elas_G[k, 1:m4, i, j]=kvals
+			kvals=elas_G_overall[Plop1[k, 1:m4], Plop2[i,j]]
+			Kvals_elas_G_overall[k, 1:m4, i, j]=kvals
 		}}
 		cat(i, "\n");
 }
 
+save(Kvals_elas_G_overall, file="./Overall/Kvals_elas_G_overall.RData")
+#Eastern
+for(i in 1:m1) {
+  for (j in 1:m2) {
+    for (k in 1:m3) {
+      kvals=elas_G_E[Plop1[k, 1:m4], Plop2[i,j]]
+      Kvals_elas_G_E[k, 1:m4, i, j]=kvals
+    }}
+  cat(i, "\n");
+}
+save(Kvals_elas_G_E, file="./Eastern/Kvals_elas_G_E.RData")
+#Hybrid
+for(i in 1:m1) {
+  for (j in 1:m2) {
+    for (k in 1:m3) {
+      kvals=elas_G_H[Plop1[k, 1:m4], Plop2[i,j]]
+      Kvals_elas_G_H[k, 1:m4, i, j]=kvals
+    }}
+  cat(i, "\n");
+}
+save(Kvals_elas_G_H, file="./Hybrid/Kvals_elas_G_H.RData")
+#Western
+for(i in 1:m1) {
+  for (j in 1:m2) {
+    for (k in 1:m3) {
+      kvals=elas_G_W[Plop1[k, 1:m4], Plop2[i,j]]
+      Kvals_elas_G_W[k, 1:m4, i, j]=kvals
+    }}
+  cat(i, "\n");
+}
+save(Kvals_elas_G_W, file="./Western/Kvals_elas_G_W.RData")
 
+
+#####Create Total Elasticity Pieces 
+load("./Overall/Kvals_elas_D1_overall.RData")
+load("./Overall/Kvals_elas_D2_overall.RData")
+load("./Overall/Kvals_elas_F_overall.RData")
+load("./Overall/Kvals_elas_G_overall.RData")
 ##############
-total.elas_D1<-apply(Kvals_elas_D1, c(3,4), sum);
-total.elas_D2<-apply(Kvals_elas_D2, c(3,4), sum);
-total.elas_F<-apply(Kvals_elas_F, c(3,4), sum);
-total.elas_G<-apply(Kvals_elas_G, c(3,4), sum);
+#Overall
+total.elas_D1_overall<-apply(Kvals_elas_D1_overall, c(3,4), sum);
+total.elas_D2_overall<-apply(Kvals_elas_D2_overall, c(3,4), sum);
+total.elas_F_overall<-apply(Kvals_elas_F_overall, c(3,4), sum);
+total.elas_G_overall<-apply(Kvals_elas_G_overall, c(3,4), sum);
+save(total.elas_D1_overall, total.elas_D2_overall, total.elas_F_overall, total.elas_G_overall, 
+     file="./Overall/total.elas.RData")
+
+load("./Eastern/Kvals_elas_D1_E.RData")
+load("./Eastern/Kvals_elas_D2_E.RData")
+load("./Eastern/Kvals_elas_F_E.RData")
+load("./Eastern/Kvals_elas_G_E.RData")
+#Eastern
+total.elas_D1_E<-apply(Kvals_elas_D1_E, c(3,4), sum);
+total.elas_D2_E<-apply(Kvals_elas_D2_E, c(3,4), sum);
+total.elas_F_E<-apply(Kvals_elas_F_E, c(3,4), sum);
+total.elas_G_E<-apply(Kvals_elas_G_E, c(3,4), sum);
+save(total.elas_D1_E, total.elas_D2_E, total.elas_F_E, total.elas_G_E, 
+     file="./Eastern/total.elas.RData")
+
+load("./Hybrid/Kvals_elas_D1_H.RData")
+load("./Hybrid/Kvals_elas_D2_H.RData")
+load("./Hybrid/Kvals_elas_F_H.RData")
+load("./Hybrid/Kvals_elas_G_H.RData")
+#Hybrid
+total.elas_D1_H<-apply(Kvals_elas_D1_H, c(3,4), sum);
+total.elas_D2_H<-apply(Kvals_elas_D2_H, c(3,4), sum);
+total.elas_F_H<-apply(Kvals_elas_F_H, c(3,4), sum);
+total.elas_G_H<-apply(Kvals_elas_G_H, c(3,4), sum);
+save(total.elas_D1_H, total.elas_D2_H, total.elas_F_H, total.elas_G_H,
+     file="./Hybrid/total.elas.RData")
+
+load("./Western/Kvals_elas_D1_W.RData")
+load("./Western/Kvals_elas_D2_W.RData")
+load("./Western/Kvals_elas_F_W.RData")
+load("./Western/Kvals_elas_G_W.RData")
+#Western
+total.elas_D1_W<-apply(Kvals_elas_D1_W, c(3,4), sum);
+total.elas_D2_W<-apply(Kvals_elas_D2_W, c(3,4), sum);
+total.elas_F_W<-apply(Kvals_elas_F_W, c(3,4), sum);
+total.elas_G_W<-apply(Kvals_elas_G_W, c(3,4), sum);
+save(total.elas_D1_W, total.elas_D2_W, total.elas_F_W, total.elas_G_W,
+     file="./Western/total.elas.RData")
+
+
 
 #Separate:
-repro.val_smalls=matrix(v[1:(m1*m2)], m1,m2);
-stable.state_smalls=matrix(stable.dist[1:(m1*m2)], m1, m2);
+load("./Overall/v_overall.RData")
+load("./Eastern/v_E.RData")
+load("./Hybrid/v_H.RData")
+load("./Western/v_W.RData")
+load("./Overall/stable.dist_overall.RData")
+load("./Eastern/stable.dist_E.RData")
+load("./Hybrid/stable.dist_H.RData")
+load("./Western/stable.dist_W.RData")
 
-repro.val_larges=matrix(v[((m1*m2)+1):((m1*m2)+(m3*m4))], m3, m4);
-stable.state_larges=matrix(stable.dist[((m1*m2) +1):((m1*m2) + (m3*m4))], m3, m4);
+
+
+repro.val_smalls_overall=matrix(v_overall[1:(m1*m2)], m1,m2);
+stable.state_smalls_overall=matrix(stable.dist_overall[1:(m1*m2)], m1, m2);
+
+repro.val_smalls_E=matrix(v_E[1:(m1*m2)], m1,m2);
+stable.state_smalls_E=matrix(stable.dist_E[1:(m1*m2)], m1, m2);
+
+repro.val_smalls_H=matrix(v_H[1:(m1*m2)], m1,m2);
+stable.state_smalls_H=matrix(stable.dist_H[1:(m1*m2)], m1, m2);
+
+repro.val_smalls_W=matrix(v_W[1:(m1*m2)], m1,m2);
+stable.state_smalls_W=matrix(stable.dist_W[1:(m1*m2)], m1, m2);
+
+
+repro.val_larges_overall=matrix(v_overall[((m1*m2)+1):((m1*m2)+(m3*m4))], m3, m4);
+stable.state_larges_overall=matrix(stable.dist_overall[((m1*m2) +1):((m1*m2) + (m3*m4))], m3, m4);
+
+repro.val_larges_E=matrix(v_E[((m1*m2)+1):((m1*m2)+(m3*m4))], m3, m4);
+stable.state_larges_E=matrix(stable.dist_E[((m1*m2) +1):((m1*m2) + (m3*m4))], m3, m4);
+
+repro.val_larges_H=matrix(v_H[((m1*m2)+1):((m1*m2)+(m3*m4))], m3, m4);
+stable.state_larges_H=matrix(stable.dist_H[((m1*m2) +1):((m1*m2) + (m3*m4))], m3, m4);
+
+repro.val_larges_W=matrix(v_W[((m1*m2)+1):((m1*m2)+(m3*m4))], m3, m4);
+stable.state_larges_W=matrix(stable.dist_W[((m1*m2) +1):((m1*m2) + (m3*m4))], m3, m4);
 
 
 #============================================================================# 
 #  Calculate stable state distribution and state-dependent total elasticity 
 #============================================================================# 
 
+#Overall
+ss_diam1_overall<-apply(stable.state_smalls_overall, 1, sum)
+ss_diam2_overall<-apply(stable.state_larges_overall, 1, sum)
+ss_diam_overall<-c(ss_diam1_overall, ss_diam2_overall)
+y_diam<-c(y1, y3)
+
+#Overall
 ss_diam1<-apply(stable.state_smalls, 1, sum)
 ss_diam2<-apply(stable.state_larges, 1, sum)
 ss_diam<-c(ss_diam1, ss_diam2)
