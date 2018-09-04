@@ -77,9 +77,18 @@ par(mar = c(3, 3, 2, 1), # Margins
 # dev.off()
 
 
+x1seq_seedlings<-seq(0, 1.6, length.out=50)
+
+x2seq_seedlings<-seq(0, 16, length.out=50)
+x1seq_larges <- seq(0, 800, length.out = 50 )
+x2seq_larges <- seq (0, 800, length.out = 50)
+
 
 ###FIGURE 1: D1 Survival by Biotype
-
+load("./Overall/p.vec_overall.RData")
+load("./Eastern/p.vec_E.RData")
+load("./Hybrid/p.vec_H.RData")
+load("./Western/p.vec_W.RData")
 
 #png(file="D1_survival.png", width=20, height=10, units="in", res=300)
 setEPS(horizontal=F, onefile=F, paper="special")
@@ -419,10 +428,10 @@ save.image(file="2018_06_27.RData")
 
 
 #rm(list=ls())
-load("total.contrib_D1_E.RData")
-load("total.contrib_D2_E.RData")
-load("total.contrib_F_E.RData")
-load("total.contrib_G_E.RData")
+load("./Eastern/total.contrib_D1_E.RData")
+load("./Eastern/total.contrib_D2_E.RData")
+load("./Eastern/total.contrib_F_E.RData")
+load("./Eastern/total.contrib_G_E.RData")
 
 load("y1.RData")
 load("y2.RData")
