@@ -1346,185 +1346,96 @@ ss_diam2_overall<-apply(stable.state_larges_overall, 1, sum)
 ss_diam_overall<-c(ss_diam1_overall, ss_diam2_overall)
 y_diam<-c(y1, y3)
 
+save(y_diam, file="./Overall/y_diam.RData")
+save(ss_diam_overall, file="./Overall/ss_diam_overall.Rdata")
+
+#Eastern
+ss_diam1_E<-apply(stable.state_smalls_E, 1, sum)
+ss_diam2_E<-apply(stable.state_larges_E, 1, sum)
+ss_diam_E<-c(ss_diam1_E, ss_diam2_E)
+save(ss_diam_E, file="./Eastern/ss_diam_E.RData")
+
+#Hybrid
+ss_diam1_H<-apply(stable.state_smalls_H, 1, sum)
+ss_diam2_H<-apply(stable.state_larges_H, 1, sum)
+ss_diam_H<-c(ss_diam1_H, ss_diam2_H)
+save(ss_diam_H, file="./Hybrid/ss_diam_H.RData")
+
+#Western
+ss_diam1_W<-apply(stable.state_smalls_W, 1, sum)
+ss_diam2_W<-apply(stable.state_larges_W, 1, sum)
+ss_diam_W<-c(ss_diam1_W, ss_diam2_W)
+save(ss_diam_W, file="./Western/ss_diam_W.RData")
+
+## Height
 #Overall
-ss_diam1<-apply(stable.state_smalls, 1, sum)
-ss_diam2<-apply(stable.state_larges, 1, sum)
-ss_diam<-c(ss_diam1, ss_diam2)
-y_diam<-c(y1, y3)
-
-
-
-ss_height1<-apply(stable.state_smalls, 2, sum)
-ss_height2<-apply(stable.state_larges, 2, sum)
-ss_height<-c(ss_height1, ss_height2)
+ss_height1_overall<-apply(stable.state_smalls_overall, 2, sum)
+ss_height2_overall<-apply(stable.state_larges_overall, 2, sum)
+ss_height_overall<-c(ss_height1_overall, ss_height2_overall)
 y_height<-c(y2, y4)
+save(y_height, file="./Overall/y_height.RData")
+save(ss_height_overall, file="./Overall/ss_height_overall.RData")
 
+#Eastern
+ss_height1_E<-apply(stable.state_smalls_E, 2, sum)
+ss_height2_E<-apply(stable.state_larges_E, 2, sum)
+ss_height_E<-c(ss_height1_E, ss_height2_E)
+save(ss_height_E, file="./Eastern/ss_height_E.RData")
 
+#Hybrid
+ss_height1_H<-apply(stable.state_smalls_H, 2, sum)
+ss_height2_H<-apply(stable.state_larges_H, 2, sum)
+ss_height_H<-c(ss_height1_H, ss_height2_H)
+save(ss_height_H, file="./Hybrid/ss_height_H.RData")
 
+#Western
+ss_height1_W<-apply(stable.state_smalls_W, 2, sum)
+ss_height2_W<-apply(stable.state_larges_W, 2, sum)
+ss_height_W<-c(ss_height1_W, ss_height2_W)
+save(ss_height_W, file="./Western/ss_height_W.RData")
 
-rv_diam1<-apply(repro.val_smalls, 1, sum)
-rv_diam2<-apply(repro.val_larges, 1, sum)
-rv_diam<-c(rv_diam1, rv_diam2)
-y_diam<-c(y1, y3)
+###Reproductive value
+## Diameter 
+#Overall
+rv_diam1_overall<-apply(repro.val_smalls_overall, 1, sum)
+rv_diam2_overall<-apply(repro.val_larges_overall, 1, sum)
+rv_diam_overall<-c(rv_diam1_overall, rv_diam2_overall)
+save(rv_diam_overall, file="./Overall/rv_diam_overall.RData")
+#Eastern
+rv_diam1_E<-apply(repro.val_smalls_E, 1, sum)
+rv_diam2_E<-apply(repro.val_larges_E, 1, sum)
+rv_diam_E<-c(rv_diam1_E, rv_diam2_E)
+save(rv_diam_E, file="./Eastern/rv_diam_E.RData")
+#Hybrid
+rv_diam1_H<-apply(repro.val_smalls_H, 1, sum)
+rv_diam2_H<-apply(repro.val_larges_H, 1, sum)
+rv_diam_H<-c(rv_diam1_H, rv_diam2_H)
+save(rv_diam_H, file="./Hybrid/rv_diam_H.RData")
+#Western
+rv_diam1_W<-apply(repro.val_smalls_W, 1, sum)
+rv_diam2_W<-apply(repro.val_larges_W, 1, sum)
+rv_diam_W<-c(rv_diam1_W, rv_diam2_W)
+save(rv_diam_W, file="./Western/rv_diam_W.RData")
+##Height
+#Overall
+rv_height1_overall<-apply(repro.val_smalls_overall, 2, sum)
+rv_height2_overall<-apply(repro.val_larges_overall, 2, sum)
+rv_height_overall<-c(rv_height1_overall, rv_height2_overall)
+save(rv_height_overall, file="./Overall/rv_height_overall.RData")
+#Eastern
+rv_height1_E<-apply(repro.val_smalls_E, 2, sum)
+rv_height2_E<-apply(repro.val_larges_E, 2, sum)
+rv_height_E<-c(rv_height1_E, rv_height2_E)
+save(rv_height_E, file="./Eastern/rv_height_E.RData")
+#Hybrid
+rv_height1_H<-apply(repro.val_smalls_H, 2, sum)
+rv_height2_H<-apply(repro.val_larges_H, 2, sum)
+rv_height_H<-c(rv_height1_H, rv_height2_H)
+save(rv_height_H, file="./Hybrid/rv_height_H.RData")
+#Western
+rv_height1_W<-apply(repro.val_smalls_W, 2, sum)
+rv_height2_W<-apply(repro.val_larges_W, 2, sum)
+rv_height_W<-c(rv_height1_W, rv_height2_W)
+save(rv_height_W, file="./Western/rv_height_W.RData")
 
-
-
-
-
-rv_height1<-apply(repro.val_smalls, 2, sum)
-rv_height2<-apply(repro.val_larges, 2, sum)
-rv_height<-c(rv_height1, rv_height2)
-y_height<-c(y2, y4)
-
-
-
-total.elas_D1_overall<-total.elas_D1
-total.elas_D2_overall<-total.elas_D2
-total.elas_G_overall<-total.elas_G
-total.elas_F_overall<-total.elas_F
-
-save(total.elas_D1_all, file="total.elas_D1_all.RData")
-save(total.elas_D2_all, file="total.elas_D2_all.RData")
-save(total.elas_G_all, file="total.elas_G_all.RData")
-save(total.elas_F_all, file="total.elas_F_all.RData")
-
-
-
-setwd("/Users/ke2/Dropbox/matrix/outputs/sites/")
-
-
-##Redo these with comparisons between overall and Eastern 
-elas_D1_ref_E<-total.elas_D1_all-total.elas_D1_E
-elas_D2_ref_E<-total.elas_D2_all-total.elas_D2_E
-elas_G_ref_E<-total.elas_G_all-total.elas_G_E
-elas_F_ref_E<-total.elas_F_all-total.elas_F_E
-
-elas_D1_ref_H<-total.elas_D1_all-total.elas_D1_H
-elas_D2_ref_H<-total.elas_D2_all-total.elas_D2_H
-elas_G_ref_H<-total.elas_G_all-total.elas_G_H
-elas_F_ref_H<-total.elas_F_all-total.elas_F_H
-
-elas_D1_ref_W<-total.elas_D1_all-total.elas_D1_W
-elas_D2_ref_W<-total.elas_D2_all-total.elas_D2_W
-elas_G_ref_W<-total.elas_G_all-total.elas_G_W
-elas_F_ref_W<-total.elas_F_all-total.elas_F_W
-
-
-jpeg('marginal_elasticity_height_ref.jpeg')
-par(mfrow=c(2,2), mar=c(5.1,5.1,4.1,2.1))
-plot(colSums(elas_D1_ref_W), xlab="Height (cm)", ylim=c(-.01, .01), ylab="Change in Elasticity", main="D1",  type='l', col=col_W_dark, cex=2, cex.axis=1.5, cex.lab=1.5, lwd=2)
-lines(colSums(elas_D1_ref_H), col=col_H_dark, type='l', lwd=2)
-lines(colSums(elas_D1_ref_E), col=col_E_dark, type='l', lwd=2)
-
-
-plot(colSums(elas_F_ref_H), ylim=c(-.01, 0.01),  xlab="Height (cm)", ylab= "Change in Elasticity", main="F", type='l', col=col_H_dark, cex=2, cex.axis=1.5, cex.lab=1.5, lwd=2)
-lines(colSums(elas_F_ref_E), type='l', col=col_E_dark, lwd=2)
-lines(colSums(elas_F_ref_W), type='l', col=col_W_dark, lwd=2)
-
-plot(colSums(elas_G_ref_H), ylim=c(-0.01, 0.01), xlab="Height (cm)", ylab="Change in Elasticity", main="G", type='l', col=col_H_dark, cex=2, cex.axis=1.5, cex.lab=1.5, lwd=2)
-lines(colSums(elas_G_ref_E), type='l', col=col_E_dark, lwd=2)
-lines(colSums(elas_G_ref_W), type='l', col=col_W_dark, lwd=2)
-
-plot(colSums(elas_D2_ref_H), ylim=c(-0.01, 0.01), xlab="Height (cm)", ylab="Change in Elasticity", main="D2", type='l', col=col_H_dark, cex=2, cex.axis=1.5, cex.lab=1.5, lwd=2)
-lines(colSums(elas_D2_ref_E), type='l', col=col_E_dark, lwd=2)
-lines(colSums(elas_D2_ref_W), type='l', col=col_W_dark, lwd=2)
-
-dev.off()
-
-###
-jpeg('marginal_elasticity_diam_ref.jpeg')
-par(mfrow=c(2,2), mar=c(5.1,5.1,4.1,2.1))
-plot(rowSums(elas_D1_ref_W), xlab="Diameter (mm) ", ylim=c(-.01, .01), ylab="Change in Elasticity", main="D1",  type='l', col=col_W_dark, cex=2, cex.axis=1.5, cex.lab=1.5, lwd=2)
-lines(rowSums(elas_D1_ref_H), col=col_H_dark, type='l', lwd=2)
-lines(rowSums(elas_D1_ref_E), col=col_E_dark, type='l', lwd=2)
-
-
-plot(rowSums(elas_F_ref_H), ylim=c(-.01, 0.01),  xlab="Diameter (mm)", ylab= "Change in Elasticity", main="F", type='l', col=col_H_dark, cex=2, cex.axis=1.5, cex.lab=1.5, lwd=2)
-lines(rowSums(elas_F_ref_E), type='l', col=col_E_dark, lwd=2)
-lines(rowSums(elas_F_ref_W), type='l', col=col_W_dark, lwd=2)
-
-plot(rowSums(elas_G_ref_H), ylim=c(-0.01, 0.01), xlab="Diameter (mm)", ylab="Change in Elasticity", main="G", type='l', col=col_H_dark, cex=2, cex.axis=1.5, cex.lab=1.5, lwd=2)
-lines(rowSums(elas_G_ref_E), type='l', col=col_E_dark, lwd=2)
-lines(rowSums(elas_G_ref_W), type='l', col=col_W_dark, lwd=2)
-
-plot(rowSums(elas_D2_ref_H), ylim=c(-0.01, 0.01), xlab="Diameter (mm)", ylab="Change in Elasticity", main="D2", type='l', col=col_H_dark, cex=2, cex.axis=1.5, cex.lab=1.5, lwd=2)
-lines(rowSums(elas_D2_ref_E), type='l', col=col_E_dark, lwd=2)
-lines(rowSums(elas_D2_ref_W), type='l', col=col_W_dark, lwd=2)
-
-dev.off()
-
-
-
-###
-
-
-jpeg('marginal_elasticity_diam_all.jpeg')
-par(mfrow=c(2,2), mar=c(5.1,6.1,4.1,2.1))
-par(ps=36)
-plot(rowSums(total.elas_D1_all), ylim=c(0, 0.07),xlab="Size", ylab="Elasticity", main="D1",  type='l', lwd=2, cex.axis=.5, cex.lab=1, xaxt='n')
-plot(rowSums(total.elas_F_all),  ylim=c(0, 0.07), xlab="Size", ylab= "Elasticity", main="F", type='l', lwd=2, cex.axis=.5, cex.lab=1, xaxt='n')
-plot(rowSums(total.elas_G_all), ylim=c(0, 0.07),  xlab="Size", ylab="Elasticity", main="G", type='l', lwd=2, cex.axis=.5, cex.lab=1, xaxt='n')
-plot(rowSums(total.elas_D2_all), ylim=c(0, 0.07),  xlab="Size", ylab="Elasticity", main="D2",  type='l', lwd=2, cex.axis=.5, cex.lab=1, xaxt='n')
-dev.off()
-
-jpeg('marginal_elasticity_diam_height_all.jpeg')
-par(mfrow=c(2,2), mar=c(5.1,6.1,4.1,2.1))
-par(ps=36)
-plot(rowSums(total.elas_D1_all), ylim=c(0, 0.07),xlab="Size", ylab="Elasticity", main="D1",  type='l', lwd=2, cex.axis=.5, cex.lab=1, xaxt='n')
-lines(colSums(total.elas_D1_all), type='l', lwd=2, col="red")
-plot(rowSums(total.elas_F_all),  ylim=c(0, 0.07), xlab="Size", ylab= "Elasticity", main="F", type='l', lwd=2, cex.axis=.5, cex.lab=1, xaxt='n')
-lines(colSums(total.elas_F_all), type='l', lwd=2, col="red")
-plot(rowSums(total.elas_G_all), ylim=c(0, 0.07),  xlab="Size", ylab="Elasticity", main="G", type='l', lwd=2, cex.axis=.5, cex.lab=1, xaxt='n')
-lines(colSums(total.elas_G_all), type='l', lwd=2, col="red")
-plot(rowSums(total.elas_D2_all), ylim=c(0, 0.07),  xlab="Size", ylab="Elasticity", main="D2",  type='l', lwd=2, cex.axis=.5, cex.lab=1, xaxt='n')
-lines(colSums(total.elas_D2_all), type='l', lwd=2, col="red")
-dev.off()
-
-
-
-
-
-
-
-###
-
-jpeg('marginal_elasticity_diam_lineage.jpeg')
-par(mfrow=c(2,2), mar=c(5.1,5.1,4.1,2.1))
-plot(rowSums(total.elas_D1_E), ylim=c(0, 0.07),xlab="Diameter (mm)", ylab="Elasticity", main="D1",  type='l', lwd=2, cex.axis=1.5, cex.lab=1.5, col=col_E_dark)
-lines(rowSums(total.elas_D1_W), type='l', lwd=2, col=col_W_dark)
-lines(rowSums(total.elas_D1_H), type='l', lwd=2, col=col_H_dark)
-
-plot(rowSums(total.elas_F_E),  ylim=c(0, 0.07), xlab="Diameter (mm)", ylab= "Elasticity", main="F", type='l', lwd=2, cex.axis=1.5, cex.lab=1.5, col=col_E_dark)
-lines(rowSums(total.elas_F_W), type='l', lwd=2, col=col_W_dark)
-lines(rowSums(total.elas_F_H), type='l', lwd=2, col=col_H_dark)
-
-plot(rowSums(total.elas_G_E), ylim=c(0, 0.07),  xlab="Diameter (mm)", ylab="Elasticity", main="G", type='l', lwd=2, cex.axis=1.5, cex.lab=1.5, col=col_E_dark)
-lines(rowSums(total.elas_G_W), type='l', lwd=2, col=col_W_dark)
-lines(rowSums(total.elas_G_H), type='l', lwd=2, col=col_H_dark)
-
-plot(rowSums(total.elas_D2_E), ylim=c(0, 0.07),  xlab="Diameter (mm)", ylab="Elasticity", main="D2",  type='l', lwd=2, cex.axis=1.5, cex.lab=1.5, col=col_E_dark)
-lines(rowSums(total.elas_D2_W), type='l', lwd=2, col=col_W_dark)
-lines(rowSums(total.elas_D2_H), type='l', lwd=2, col=col_H_dark)
-dev.off()
-
-###
-
-jpeg('marginal_elasticity_height_lineage.jpeg')
-par(mfrow=c(2,2), mar=c(5.1,5.1,4.1,2.1))
-plot(colSums(total.elas_D1_E), ylim=c(0, 0.07),xlab="Height (cm)", ylab="Elasticity", main="D1",  type='l', lwd=2, cex.axis=1.5, cex.lab=1.5, col=col_E_dark)
-lines(colSums(total.elas_D1_W), type='l', lwd=2, col=col_W_dark)
-lines(colSums(total.elas_D1_H), type='l', lwd=2, col=col_H_dark)
-
-plot(colSums(total.elas_F_E),  ylim=c(0, 0.07), xlab="Height (cm)", ylab= "Elasticity", main="F", type='l', lwd=2, cex.axis=1.5, cex.lab=1.5, col=col_E_dark)
-lines(colSums(total.elas_F_W), type='l', lwd=2, col=col_W_dark)
-lines(colSums(total.elas_F_H), type='l', lwd=2, col=col_H_dark)
-
-plot(colSums(total.elas_G_E), ylim=c(0, 0.07),  xlab="Height (cm)", ylab="Elasticity", main="G", type='l', lwd=2, cex.axis=1.5, cex.lab=1.5, col=col_E_dark)
-lines(colSums(total.elas_G_W), type='l', lwd=2, col=col_W_dark)
-lines(colSums(total.elas_G_H), type='l', lwd=2, col=col_H_dark)
-
-plot(colSums(total.elas_D2_E), ylim=c(0, 0.07),  xlab="Height (cm)", ylab="Elasticity", main="D2",  type='l', lwd=2, cex.axis=1.5, cex.lab=1.5, col=col_E_dark)
-lines(colSums(total.elas_D2_W), type='l', lwd=2, col=col_W_dark)
-lines(colSums(total.elas_D2_H), type='l', lwd=2, col=col_H_dark)
-dev.off()
 
