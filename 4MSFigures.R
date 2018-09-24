@@ -94,8 +94,8 @@ load("./Western/p.vec_W.RData")
 setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/D1_survival.eps", width=width.cm/2.54, 
            height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
- x11(width = width.cm/2.54, height = height.cm/2.54, 
-     pointsize = pointsize)
+ #x11(width = width.cm/2.54, height = height.cm/2.54, 
+  #   pointsize = pointsize)
 par(mar = c(3, 3, 2, 1), # Margins
     mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
     tcl = -0.3, # Length of axis tickmarks
@@ -318,7 +318,7 @@ dev.off()
 
 ###FIGURE 5: GRADUATION
 setEPS(horizontal=F, onefile=F, paper="special")
-postscript("./Figures/graduation.eps", width=width.cm/2.54, 
+postscript("./Figures/maturation.eps", width=width.cm/2.54, 
            height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
 # x11(width = width.cm/2.54, height = height.cm/2.54, 
 #     pointsize = pointsize)
@@ -339,7 +339,7 @@ b2<-p.vec_E[33]
 z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
 
 persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
-      theta=-30, zlim=c(0, 1.25), zlab="\n P(Graduation)", 
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Maturation)", 
       shade=0.1, nticks=4, xlab="\n Diameter (mm)", ylab="\n Height (cm)", 
       main="(a) Eastern and Hybrid", lwd=1)
 
@@ -350,7 +350,7 @@ b2<-p.vec_W[33]
 z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
 
 persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
-      theta=-30, zlim=c(0, 1.25), zlab="\n P(Graduation)",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Maturation)",
       shade=0.1, nticks=4, xlab="\n Diameter (mm)", ylab="\n Height (cm)",
       main=" (b) Western", lwd=1)
 
@@ -486,6 +486,8 @@ barplot(c(lambda_all, lambda_E, lambda_H, lambda_W),
         names.arg=c("Overall", "Eastern", "Hybrid", "Western"),
         ylim=c(1, 1.1), xpd=F)
 dev.off()
+
+
 
 #Figure 9: Barplot of contribution of kernel components to differences in lambda
 setEPS(horizontal=F, onefile=F, paper="special")
