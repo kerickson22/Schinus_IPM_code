@@ -373,7 +373,7 @@ total.contrib_D1_W<-apply(Kvals_contrib_D1_W, c(3,4), sum);
 total.contrib_D2_W<-apply(Kvals_contrib_D2_W, c(3,4), sum);
 total.contrib_F_W<-apply(Kvals_contrib_F_W, c(3,4), sum);
 total.contrib_G_W<-apply(Kvals_contrib_G_W, c(3,4), sum);
-save(total.contrib_D1_E, total.contrib_D2_W, total.contrib_F_W, total.contrib_G_W, 
+save(total.contrib_D1_W, total.contrib_D2_W, total.contrib_F_W, total.contrib_G_W, 
      file="./Western/total.contrib_W.RData")
 
 
@@ -439,23 +439,29 @@ save(total.contrib_D1_E, total.contrib_D2_W, total.contrib_F_W, total.contrib_G_
 # 
 # barplot(c(lambda_diff_W, lambda_diff_H, lambda_diff_E), col=c("red", "purple", "blue"))
 # 
-# W<-c( 
-# sum(rowSums(total.contrib_D1_W)), 
-# sum(rowSums(total.contrib_G_W)), 
-# sum(rowSums(total.contrib_F_W)), 
-# sum(rowSums(total.contrib_D2_W)) )
-# 
-# H<-c(
-# sum(rowSums(total.contrib_D1_H)), 
-# sum(rowSums(total.contrib_G_H)), 
-# sum(rowSums(total.contrib_F_H)), 
-# sum(rowSums(total.contrib_D2_H)) )
-# 
-# E<-c( 
-# sum(rowSums(total.contrib_D1_E)), 
-# sum(rowSums(total.contrib_G_E)), 
-# sum(rowSums(total.contrib_F_E)), 
-# sum(rowSums(total.contrib_D2_E)) )
+load("./Western/total.contrib_W.RData")
+ W<-c( 
+ sum(rowSums(total.contrib_D1_W)), 
+ sum(rowSums(total.contrib_G_W)), 
+ sum(rowSums(total.contrib_F_W)), 
+ sum(rowSums(total.contrib_D2_W)) )
+ save(W, file="./Western/W.RData")
+ 
+load("./Hybrid/total.contrib_H.RData")
+ H<-c(
+ sum(rowSums(total.contrib_D1_H)), 
+ sum(rowSums(total.contrib_G_H)), 
+ sum(rowSums(total.contrib_F_H)), 
+ sum(rowSums(total.contrib_D2_H)) )
+ save(H, file="./Hybrid/H.RData")
+ 
+ load("./Eastern/total.contrib_E.RData")
+ E<-c( 
+ sum(rowSums(total.contrib_D1_E)), 
+ sum(rowSums(total.contrib_G_E)), 
+ sum(rowSums(total.contrib_F_E)), 
+ sum(rowSums(total.contrib_D2_E)) )
+ save(E, file="./Eastern/E.RData")
 # 
 # 
 # x11()
