@@ -983,57 +983,55 @@ par(mar = c(3, 3, 2, 1), # Margins
     mfrow=c(4, 2))
 plot(x1_seedlings, rowSums(total.thing_D1), ylim=c(0, 0.006),
      xlim=c(0, 1.6), xlab="", ylab="", main="",  type='l', lwd=1, 
-     lty=5, cex.axis=1.5)
-text(0.2, 0.006, "Seedling", cex=1.5)
+     lty=1, cex.axis=1.5)
+text(0.2, 0.0055, "Seedling", cex=1.5)
 mtext(side=3, "(a) Contributions by diameter", line=1, cex=1.2, adj=0)
 mtext(side=2, "CV * elas", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
 
 plot(x1_adults, rowSums(total.thing_F), ylim=c(0, 0.006), xlim=c(1.6, 800), xlab="", 
-     ylab= "", main="", type='l', lwd=1, lty=5, cex.axis=1.5)
-text(65, 0.006, "Fertility", cex=1.5)
+     ylab= "", main="", type='l', lwd=1, lty=1, cex.axis=1.5)
+text(65, 0.0055, "Fertility", cex=1.5)
 mtext(side=2, "CV * elas", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
 plot(x1_seedlings, rowSums(total.thing_G), ylim= c(0, 0.006), xlim=c(0, 1.6), xlab="",
-     ylab="", main="", type='l', lwd=1, lty=5, cex.axis=1.5)
-text(0.2, 0.006, "Maturation", cex=1.5)
+     ylab="", main="", type='l', lwd=1, lty=1, cex.axis=1.5)
+text(0.2, 0.0055, "Maturation", cex=1.5)
 mtext(side=2, "CV * elas", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
 
 plot(x1_adults, rowSums(total.thing_D2), ylim= c(0, 0.006), xlim=c(1.6, 800), xlab=" ",
-     ylab="", main="",  type='l',  lwd=1, lty=5, cex.axis=1.5)
-text(65, 0.006, "Adult", cex=1.5)
+     ylab="", main="",  type='l',  lwd=1, lty=1, cex.axis=1.5)
+text(65, 0.0055, "Adult", cex=1.5)
 mtext(side=2, "CV * elas", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
 plot(x2_seedlings, colSums(total.thing_D1), ylim=c(0, 0.006), xlim=c(0, 16), xlab=" ", 
-     ylab="", main="",  type='l', lwd=1, lty=5, cex.axis=1.5)
-text(2, 0.006, "Seedling", cex=1.5)
+     ylab="", main="",  type='l', lwd=1, lty=1, cex.axis=1.5)
+text(2, 0.0055, "Seedling", cex=1.5)
 mtext(side=3, "(b) Contributions by height", line=1, cex=1.2, adj=0)
 mtext(side=2, "CV * elas", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 
 plot(x2_adults, colSums(total.thing_F), ylim=c(0, 0.006), xlim=c(16,800),  xlab=" ",
-     ylab= "", main="", type='l', lwd=1, lty=5, cex.axis=1.5)
-text(65, 0.006, "Fertility", cex=1.5)
+     ylab= "", main="", type='l', lwd=1, lty=1, cex.axis=1.5)
+text(65, 0.0055, "Fertility", cex=1.5)
 mtext(side=2, "CV * elas", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 
 
 plot(x2_seedlings, colSums(total.thing_G), ylim=c(0, 0.006), xlim=c(0, 16), xlab="",
-     ylab="", main="", type='l', lwd=1, lty=5, cex.axis=1.5)
-text(2, 0.015, "Maturation", cex=1.5)
+     ylab="", main="", type='l', lwd=1, lty=1, cex.axis=1.5)
+text(2, 0.0055, "Maturation", cex=1.5)
 mtext(side=2, "CV * elas", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 
 plot(x2_adults, colSums(total.thing_D2), ylim=c(0, 0.006), xlim=c(16, 800),  xlab=" ", 
-     ylab="", main="",  type='l',  lwd=1, lty=5, cex.axis=1.5)
-text(65, 0.006, "Adult", cex=1.5)
-legend(250, 0.006, lty=c(3, 1, 5), lwd=1, c("Western", "Hybrid", "Eastern"),
-       seg.len=2)
+     ylab="", main="",  type='l',  lwd=1, lty=1, cex.axis=1.5)
+text(65, 0.0055, "Adult", cex=1.5)
 mtext(side=2, "CV * elas", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 dev.off()
