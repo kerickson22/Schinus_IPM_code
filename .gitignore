@@ -59,3 +59,8 @@ Overall/ss_diam_overall
 Original Model/Overall/Kvals_D2_overall
 Original Model/Overall/Kvals_elas_F_overall
 Original Model/Overall/ss_diam_overall
+delta=0.19, tau_1=1/Overall/Kvals_D2_overall
+delta=0.19, tau_1=1/1demography_models.R
+delta=0.19, tau_1=1/2IPM_diameter_and_height.R
+delta=0.19, tau_1=1/3LTRE_analysis.R
+delta=0.19, tau_1=1/4MSFigures.R
