@@ -688,16 +688,16 @@ p.vec_W[36]<-sd_height
 ##### Some additional (fixed parameters)
 # TAU_1: Pre-dispersal seed survival 
 #Rethinking this parameter value: Isn't this already encapsulated in tau_2? 
-#p.vec_overall[37]<-0.002
-#p.vec_E[37]<-0.002
-#p.vec_H[37]<-0.002
-#p.vec_W[37]<-0.002
+p.vec_overall[37]<-0.002
+p.vec_E[37]<-0.002
+p.vec_H[37]<-0.002
+p.vec_W[37]<-0.002
 
-#At some point could write this out of the code, but for now will eliminate it by setting it to 1
-p.vec_overall[37]<- 1
-p.vec_E[37]<-1
-p.vec_H[37]<-1
-p.vec_W[37]<-1
+# #At some point could write this out of the code, but for now will eliminate it by setting it to 1
+# p.vec_overall[37]<- 1
+# p.vec_E[37]<-1
+# p.vec_H[37]<-1
+# p.vec_W[37]<-1
 
 #DELTA: Probability of dispersal 
 # p.vec_overall[38]<-0.005
