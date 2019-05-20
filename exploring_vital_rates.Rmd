@@ -1,0 +1,834 @@
+---
+title: "Exploring vital rate models"
+author: "Kelley Erickson"
+date: "May 16, 2019"
+output: html_document
+---
+<style type="text/css">
+.table {
+
+    width: 40%;
+
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+
+```
+# 0. Setup
+### Load the data 
+```{r, load data, message=FALSE}
+#Load demographic data
+demog<-read.csv("demography_15_clean.csv", head=T)
+library(AICcmodavg)
+library(fields)
+library(viridis)
+my.palette <- viridis(9)
+```
+
+This is a csv file where each row is a an individual.
+
+The column names are : 
+
+ * `Obs` : Observation number (each plant should have a different observation number; these were assigned post data entry when we discovered that some of the numbers for individuals were reused between sites
+ 
+ * `Site`: Which site (Big Cypress, Cape Canaveral, Chekika, Forty Pierce, Punta Gorda, Wild Turkey)
+ 
+ * `Plant ID`: The tag number of an individual (each individual in a site has a different number, but numbers were reused across sites)
+ 
+ * `Location`: SeedlingPlot (individual located in a seedling plot) or NA (individual not in seedling plot)
+ 
+ * `Date_i`: The date the census took place for censuses i = 1:7
+ * `Status_i`: One of four categories for censuses i=1:7:
+    * **alive**: individual was alive when censused
+    * **firstdead**: the individual was recorded as dead at this census and was alive at the                      last census 
+    * **missing**: the individual was not located at this census
+    * **prestudy**: the individual had not been tagged yet 
+    * **stilldead**: the individual was already marked dead at a previous census
+  * `Death_Cause_i`: One of three categories for censuses i = 1:7:
+    * **NA**: for individuals that died, there was no reason to suspect their deaths were due               to management actions
+    * **sprayed**: individual death attributed to being sprayed with herbicide (these                       individuals should be excluded)
+    * **fire**: individual death attributed to fire (these individuals should be excluded                  from analysis)
+ * `Rep_stat_i`: One of 4 categories for censuses  i = 1:7:
+    * **NA**: for individuals whose reproductive status is unknown at census i 
+    * **female**: for individuals who have produced fruit at any previous census up to an                  including census i 
+    * **male**: for individuals who have not produced fruit at any previous census (may have               observed male flowers)
+    * **pre-reproductive**: for individuals who have not produced fruit at any previous                   census 
+  * `Diam_i`: Diameter (in mm) of individual at census i 
+  * `Height_i`: Height (in cm) of individual at census i 
+  * `Max_i`: Maximum canopy width in cm of individual at census i 
+  * `Min_i`: Minimum canopy width in cm of individual at census i 
+  * `Multistem`: For each individual takes on one of two values: 
+    * **NA**: individuals that are not multistem
+    * **FLAG**: Individuals that are multistem
+    
+## Stack data 
+```{r stack data}
+#### Restructure the data in a few different ways: 
+
+
+Dates <- c(rep(2009, 1512), rep(2010, 1512), rep(2011, 1512), rep(2012, 1512), rep(2013, 1512), rep(2014, 1512))
+
+
+
+Death_Cause<-c(demog$Death_Cause_2, demog$Death_Cause_3, demog$Death_Cause_4, demog$Death_Cause_5, demog$Death_Cause_6, demog$Death_Cause_7)
+
+Status<-c(demog$Status_1, demog$Status_2, demog$Status_3, demog$Status_4, demog$Status_5, demog$Status_6, demog$Status_7)
+
+Diams<-cbind(demog$Diam_1, demog$Diam_2, demog$Diam_3, demog$Diam_4, demog$Diam_5, demog$Diam_6, demog$Diam_7) 
+
+row.names(Diams)<-demog$Plant_ID
+
+Heights<-cbind(demog$Height_1, demog$Height_2, demog$Height_3, demog$Height_4, demog$Height_5, demog$Height_6, demog$Height_7)
+
+row.names(Heights)<-demog$Plant_ID
+
+Mins<-cbind(demog$Min_1, demog$Min_2, demog$Min_3, demog$Min_4, demog$Min_5, demog$Min_6, demog$Min_7)
+
+row.names(Mins)<-demog$Plant_ID
+
+Maxs<-cbind(demog$Max_1, demog$Max_2, demog$Max_3, demog$Max_4, demog$Max_5, demog$Max_6, demog$Max_7)
+
+row.names(Maxs)<-demog$Plant_ID
+
+Diams_pooled<-rbind( cbind(Diams[,1], Diams[,2]), cbind(Diams[,2], Diams[,3]), cbind(Diams[, 3], Diams[,4]), cbind(Diams[,4], Diams[,5]), cbind(Diams[,5], Diams[,6]), cbind(Diams[, 6], Diams[, 7]))
+
+Diams_pooled<-data.frame(Diams_pooled[,1], Diams_pooled[,2])
+
+names(Diams_pooled)<-c("t", "t_plus_one")
+
+Sites_pooled<-rep(demog$Site, 6)
+
+ID_pooled<-rep(demog$Plant_ID, 6)
+
+Location<-rep(demog$Location, 6)
+
+Genetic_type_pooled<-rep(0, length(Sites_pooled))
+
+#code which sites are which biotype
+for (i in 1:length(Genetic_type_pooled)) { 
+	if (Sites_pooled[i]=="Big Cypress") Genetic_type_pooled[i]<-"hybrid"
+	else if (Sites_pooled[i]=="Cape Canaveral") Genetic_type_pooled[i]<-"hybrid"
+	else if (Sites_pooled[i]=="Chekika") Genetic_type_pooled[i]<-"eastern"
+	else if (Sites_pooled[i]=="Fort Pierce") Genetic_type_pooled[i]<-"eastern"
+	else if (Sites_pooled[i]=="Punta Gorda") Genetic_type_pooled[i]<-"western"
+	else Genetic_type_pooled[i]<-"western"
+	
+}
+
+
+
+Heights_pooled<-rbind( cbind(Heights[,1], Heights[,2]), cbind(Heights[,2], Heights[,3]), cbind(Heights[, 3], Heights[,4]), cbind(Heights[,4], Heights[,5]), cbind(Heights[,5], Heights[,6]), cbind(Heights[, 6], Heights[, 7]))
+
+Heights_pooled<-data.frame(Heights_pooled[,1], Heights_pooled[,2])
+names(Heights_pooled)<-c("t", "t_plus_one")
+
+
+
+#Finish for maxs and mins 
+
+Maxs_pooled<-rbind(cbind(Maxs[,1], Maxs[,2]), cbind(Maxs[,2], Maxs[,3]), 
+	cbind(Maxs[,3], Maxs[,4]), cbind(Maxs[,4], Maxs[,5]), 
+	cbind(Maxs[,5], Maxs[,6]), cbind(Maxs[,6], Maxs[,7]))
+	
+Maxs_pooled<-data.frame(Maxs_pooled[,1], Maxs_pooled[,2])
+names(Maxs_pooled)<-c("t", "t_plus_one")
+
+
+
+Mins_pooled<-rbind( cbind(Mins[,1], Mins[,2]), cbind(Mins[,2], Mins[,3]), 
+	cbind(Mins[,3], Mins[,4]), cbind(Mins[,4], Mins[,5]), 
+	cbind(Mins[, 5], Mins[,6]), cbind(Mins[,6], Mins[,7]))
+	
+Mins_pooled<-data.frame(Mins_pooled[,1], Mins_pooled[,2])
+names(Mins_pooled)<-c("t", "t_plus_one")
+
+
+
+
+###Use status matrix to get survival matrix
+statmat<-as.matrix(demog[, c(6, 14, 22, 30, 38, 46, 54)])
+survmat<-statmat
+survmat<- ifelse(survmat=="prestudy"|survmat=="missing"|survmat=="still_dead", NA, survmat)
+survmat<- ifelse(survmat =="tagged"|survmat=="alive", 1, 0)
+
+survmat_pooled<-rbind( cbind(survmat[,1], survmat[,2]), cbind(survmat[,2], survmat[,3]), cbind(survmat[, 3], survmat[,4]), cbind(survmat[,4], survmat[,5]), cbind(survmat[,5], survmat[,6]), cbind(survmat[, 6], survmat[, 7]))
+names(survmat_pooled)<-c("surv_t", "surv_t_plus_one")
+
+
+survmat_pooled_bysize<-cbind(Diams_pooled[, 1], survmat_pooled[,2])
+names(survmat_pooled_bysize)<-c("size_t", "surv_t_plus_one")
+
+
+
+#Use reproduction status matrix to get reproduction matrix
+repstatmat<-as.matrix(demog[, c(8, 16, 24, 32, 40, 48, 56)])
+repmat<-repstatmat
+repmat<- ifelse(repmat =="female", 1, 0)
+repmat_pooled<-rbind( cbind(repmat[,1], repmat[,2]), cbind(repmat[,2], repmat[,3]), cbind(repmat[, 3], repmat[,4]), cbind(repmat[,4], repmat[,5]), cbind(repmat[,5], repmat[,6]), cbind(repmat[, 6], repmat[, 7]))
+
+
+pooled<-cbind(ID_pooled, Sites_pooled, Location, Death_Cause, Genetic_type_pooled, Mins_pooled, Maxs_pooled, Diams_pooled, Heights_pooled, repmat_pooled, survmat_pooled, Dates)
+names(pooled)<-c("ID", "Site","Location", "Death_Cause", "Genetic_type", "Min_t", "Min_tplus1", "Max_t", "Max_tplus1", "Diameter_t", "Diameter_tplus1", "Height_t", "Height_tplus1", "Rep_t", "Rep_tplus1", "Surv_t", "Surv_tplus1", "Year")
+```
+
+## Investigate relationships among possible state variables 
+```{r, investigate state variables}
+predictors<-cbind(pooled$Min_t, pooled$Diameter_t, pooled$Height_t, pooled$Max_t)
+
+# What is the correlation amongst the predictor variables? 
+correlation<-cor(predictors[, 1:4], use="pairwise.complete.obs")
+colnames(correlation)<-c("Min", "Diameter", "Height", "Max")
+rownames(correlation)<-c("Min", "Diameter", "Height", "Max")
+
+correlation<-round(correlation, 2)
+print(correlation)
+#Over the entire dataset, there is the lowest correlation between diameter and height
+
+```
+
+## Exclude outliers 
+
+```{r, exclude outliers}
+#Remove individual deaths that were sprayed or fire or grinding
+restrict<-subset(pooled, is.na(Death_Cause))
+
+#Remove outliers (very large diameters)
+restrict2<-subset(restrict, Diameter_t<800)
+
+#Questioning why we did this? does this lead to model-eviction? 
+#Range of diameter: [0, 800]
+0.9*max(restrict2$Diameter_t) #700
+#Range of height:  [0, 800]
+0.9*max(restrict2$Height_t, na.rm=T) #800
+```
+
+## Divide dataset into size domains (seedlings and larges)
+```{r divide data}
+seedlings<-subset(restrict2, restrict2$Diameter_t<1.6)
+seedlings<-subset(seedlings, seedlings$Height_t<16)
+larges<-subset(restrict2, restrict2$Diameter_t>1.6)
+larges<-subset(larges, larges$Height_t>16)
+
+x1seq_larges<-seq(1.6, 800, length.out=50)
+x2seq_larges<-seq(16, 800, length.out=50)
+
+x1seq_seedlings<-seq(0, 1.6, length.out=50)
+x2seq_seedlings<-seq(0, 16, length.out=50)
+
+```
+# Exploratory Statistics 
+There are 1512 individuals 
+
+Big Cypress | Cape Canaveral | Chekika | Fort Pierce | Punta Gorda | Wild Turkey
+------------|----------------|---------|-------------|-------------|------------
+308         | 226            | 460     | 166         | 175         | 177        
+
+Eastern | Hybrid | Western 
+--------|--------|--------
+  626   | 534    | 352
+  
+```{r exploratory statistics}
+summary(seedlings$Site)
+summary(seedlings$Genetic_type)
+summary(as.factor(seedlings$Year))
+        
+summary(larges$Site)
+summary(larges$Genetic_type)
+summary(as.factor(larges$Year))
+
+```
+The number of deaths (0) by biotype:
+```{r deaths by biotype}
+table(seedlings$Surv_tplus1, seedlings$Genetic_type)
+table(larges$Surv_tplus1, larges$Genetic_type)
+```
+The number of deaths(0) by site:
+```{r deaths by site}
+table(seedlings$Surv_tplus1, seedlings$Site)
+table(larges$Surv_tplus1, larges$Site)
+
+```
+```{r deaths by year}
+table(seedlings$Surv_tplus1, seedlings$Year)
+table(larges$Surv_tplus1, larges$Year)
+
+```
+# Define some plotting variables: 
+
+```{r setup plotting}
+x1seq_seedlings<-seq(0, 1.6, length.out=50)
+
+x2seq_seedlings<-seq(0, 16, length.out=50)
+x1seq_larges <- seq(0, 800, length.out = 50 )
+x2seq_larges <- seq (0, 800, length.out = 50)
+
+invlogit<-function(x){exp(x)/(1+exp(x))}
+
+# Function to do an image plot of a matrix in the usual orientation, A(1,1) at top left  
+matrix.image=function(x,y,A,col=topo.colors(200),...) {
+	nx=length(x); ny=length(y); 
+	x1=c(1.5*x[1]-0.5*x[2],1.5*x[nx]-0.5*x[nx-1]); 
+	y1=c(1.5*y[1]-0.5*y[2],1.5*y[ny]-0.5*y[ny-1]); 
+	image.plot(list(x=x,y=y,z=t(A)),xlim=x1,ylim=rev(y1),col=col,bty="u",...);  
+}
+
+```
+# 1. Seedling Survival models 
+Choosing which state variables to use and whether to include terms for biotype, site or year
+(for the year effect, only including data from years where all sites were sampled, so AIC cannot be compared with other models) 
+
+* Diameter-only models: 
+    * s1: logit(S1) = b0 + b1(diameter)
+    * s2: logit(S1) = b0 + b1(diameter) + epsilon(biotype{E,H,W})
+    * s3: logit(S1) = b0 + b1(diameter) + epsilon(site{BC, CC, C, FP, PG, WT})
+    * s4: logit(S1) = b0 + b1(diameter) + epsilon(year{2010, 2011, 2012, 2013, 2014}
+* Height-only models
+    * s5: logit(S1) = b0 + b1(height)
+    * s6: logit(S1) = b0 + b1(height) + epsilon(biotype{E,H,W})
+    * s7: logit(S1) = b0 + b1(height) + epsilon(site{BC, CC, C, FP, PG, WT})
+    * s8: logit(S1) = b0 + b1(height) + epsilon(year{2010, 2011, 2012, 2013, 2014}
+* Diameter + Height models
+    * s9: logit(S1) = b0 + b1(diameter) + b2(height)
+    * s10: logit(S1) = b0 + b1(diameter) + b2(height) + epsilon(biotype{E,H,W})
+    * s11: logit(S1) = b0 + b1(diameter) + b2(height) + epsilon(site{BC, CC, C, FP, PG,WT})
+    * s12: loigt(S1) = b0 + b1(diameter) + b2(height) + epsilon(year{2010, 2011, 2012, 2013, 2014})
+
+### -Diameter-only models
+
+### -- s1: logit(S1) = b0 + b1(diameter) -----
+```{r s1}
+
+  s1 <- glm(seedlings$Surv_tplus1 ~ seedlings$Diameter_t, family = binomial)
+  summary(s1)
+
+plot(x1seq_seedlings, invlogit(s1$coeff[1] + s1$coeff[2]*x1seq_seedlings), type='l', ylim=c(0,1) , xlab = "Diameter (t)", ylab="P(Survival)")
+points(seedlings$Diameter_t, seedlings$Surv_tplus1)
+
+
+```
+
+### --s2: logit(S1) = b0 + b1(diameter) + epsilon(biotype{E,H,W})
+Western is not significantly different from Eastern
+```{r s2, fig.width=9, fig.height=4}
+  s2 <- glm(seedlings$Surv_tplus1 ~ seedlings$Diameter_t + seedlings$Genetic_type, family = binomial) 
+
+par(mfrow=c(1, 2))
+
+plot(x1seq_seedlings, invlogit(s2$coeff[1] + s2$coeff[2]*x1seq_seedlings), type='l', ylim=c(0,1) , xlab = "Diameter (t)", ylab="P(Survival)", main = "Eastern, Western")
+points(seedlings[seedlings$Genetic_type=="eastern" | seedlings$Genetic_type == "western", ]$Diameter_t, seedlings[seedlings$Genetic_type=="eastern" | seedlings$Genetic_type == "western", ]$Surv_tplus1)
+
+plot(x1seq_seedlings, invlogit(s2$coeff[1] + s2$coeff[2]*x1seq_seedlings + s2$coeff[3]), type='l', ylim=c(0,1) , xlab = "Diameter (mm)", ylab="P(Survival)", main = "Hybrid")
+points(seedlings[seedlings$Genetic_type=="hybrid", ]$Diameter_t, seedlings[seedlings$Genetic_type=="hybrid", ]$Surv_tplus1)
+
+
+ 
+```
+
+### --s3: logit(S1) = b0 + b1(diameter) + epsilon(biotype{BC, CC, C, FP, PG, WT})
+
+Big Cypress, Punta Gorda and Wild Turkey are not significantly different 
+```{r s3}
+  s3 <- glm(seedlings$Surv_tplus1 ~ seedlings$Diameter_t + seedlings$Site, family = 
+              binomial)
+  summary(s3)
+  
+  par(mfrow=c(2, 3))
+
+plot(x1seq_seedlings, invlogit(s3$coeff[1] + s3$coeff[2]*x1seq_seedlings), type='l', ylim=c(0,1) , xlab = "Diameter (t)", ylab="P(Survival)", main = "Big Cypress,Punta Gorda,Wild Turkey")
+points(seedlings[seedlings$Site=="Big Cypress" | seedlings$Site == "Punta Gorda" | seedlings$Site == "Wild Turkey", ]$Diameter_t, seedlings[seedlings$Site=="Big Cypress" | seedlings$Site == "Punta Gorda" | seedlings$Site == "Wild Turkey", ]$Surv_tplus1)
+
+plot(x1seq_seedlings, invlogit(s3$coeff[1] + s3$coeff[2]*x1seq_seedlings + s3$coeff[3]), type='l', ylim=c(0,1) , xlab = "Diameter (t)", ylab="P(Survival)", main = "Cape Canaveral")
+points(seedlings[seedlings$Site=="Cape Canaveral", ]$Diameter_t, seedlings[seedlings$Site=="Cape Canaveral", ]$Surv_tplus1)
+
+plot(x1seq_seedlings, invlogit(s3$coeff[1] + s3$coeff[2]*x1seq_seedlings + s3$coeff[4]), type='l', ylim=c(0,1) , xlab = "Diameter (t)", ylab="P(Survival)", main = "Chekika")
+points(seedlings[seedlings$Site=="Chekika", ]$Diameter_t, seedlings[seedlings$Site=="Chekika", ]$Surv_tplus1)
+
+plot(x1seq_seedlings, invlogit(s3$coeff[1] + s3$coeff[2]*x1seq_seedlings + s3$coeff[5]), type='l', ylim=c(0,1) , xlab = "Diameter (t)", ylab="P(Survival)", main = "Fort Pierce")
+points(seedlings[seedlings$Site=="Fort Pierce", ]$Diameter_t, seedlings[seedlings$Site=="Fort Pierce", ]$Surv_tplus1)
+
+plot(x1seq_seedlings, invlogit(s3$coeff[1] + s3$coeff[2]*x1seq_seedlings + s3$coeff[5]), type='l', ylim=c(0,1) , xlab = "Diameter (t)", ylab="P(Survival)", main = "Fort Pierce")
+points(seedlings[seedlings$Site=="Fort Pierce", ]$Diameter_t, seedlings[seedlings$Site=="Fort Pierce", ]$Surv_tplus1)
+
+
+```
+
+
+### --s4: logit(S1) = b0 + b1(diameter) + epsilon(year{2010, 2011, 2012, 2013}
+```{r s4} 
+seedlings2 <- subset(seedlings, seedlings$Year > 2009 & seedlings$Year <2014)
+seedlings2$Year <- as.factor(seedlings2$Year)
+s4 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Diameter_t + seedlings2$Year, family = binomial)
+summary(s4)
+
+
+par(mfrow=c(2,2))
+plot(x1seq_seedlings, invlogit(s4$coeff[1] + s4$coeff[2]*x1seq_seedlings ), type='l', ylim=c(0,1) , xlab = "Diameter (t)", ylab="P(Survival)", main = "2010")
+points(seedlings2[seedlings2$Year=="2010", ]$Diameter_t, seedlings2[seedlings2$Year=="2010", ]$Surv_tplus1)
+plot(x1seq_seedlings, invlogit(s4$coeff[1] + s4$coeff[2]*x1seq_seedlings + s4$coeff[3] ), type='l', ylim=c(0,1) , xlab = "Diameter (t)", ylab="P(Survival)", main = "2011")
+points(seedlings2[seedlings2$Year=="2011", ]$Diameter_t, seedlings2[seedlings2$Year=="2011", ]$Surv_tplus1)
+plot(x1seq_seedlings, invlogit(s4$coeff[1] + s4$coeff[2]*x1seq_seedlings + s4$coeff[4] ), type='l', ylim=c(0,1) , xlab = "Diameter (t)", ylab="P(Survival)", main = "2012")
+points(seedlings2[seedlings2$Year=="2012", ]$Diameter_t, seedlings2[seedlings2$Year=="2012", ]$Surv_tplus1)
+
+plot(x1seq_seedlings, invlogit(s4$coeff[1] + s4$coeff[2]*x1seq_seedlings + s4$coeff[5] ), type='l', ylim=c(0,1) , xlab = "Diameter (t)", ylab="P(Survival)", main = "2013")
+points(seedlings2[seedlings2$Year=="2013", ]$Diameter_t, seedlings2[seedlings2$Year=="2013", ]$Surv_tplus1)
+
+```
+
+### - Height-only models 
+### --s5: logit(S1) = b0 + b1(height) 
+```{r s5}
+  s5 <- glm(seedlings$Surv_tplus1 ~ seedlings$Height_t, family = binomial)
+  summary(s5)
+
+plot(x2seq_seedlings, invlogit(s5$coeff[1] + s5$coeff[2]*x2seq_seedlings), type='l', ylim=c(0,1) , xlab = "Height (cm)", ylab="P(Survival)")
+points(seedlings$Height_t, seedlings$Surv_tplus1)
+
+```
+### --s6: logit(S1) = b0 + b1(height) + epsilon(biotype{E,H,W})
+Eastern and Western are not significantly different. 
+```{r s6}
+ s6 <- glm(seedlings$Surv_tplus1 ~ seedlings$Height_t + seedlings$Genetic_type, family = binomial) 
+summary(s6)
+
+par(mfrow=c(1, 2))
+
+plot(x2seq_seedlings, invlogit(s6$coeff[1] + s6$coeff[2]*x2seq_seedlings), type='l', ylim=c(0,1) , xlab = "Height(cm)", ylab="P(Survival)", main = "Eastern, Western")
+points(seedlings[seedlings$Genetic_type=="eastern" | seedlings$Genetic_type == "western", ]$Height_t, seedlings[seedlings$Genetic_type=="eastern" | seedlings$Genetic_type == "western", ]$Surv_tplus1)
+
+plot(x2seq_seedlings, invlogit(s6$coeff[1] + s6$coeff[2]*x2seq_seedlings + s6$coeff[3]), type='l', ylim=c(0,1) , xlab = "Height(cm)", ylab="P(Survival)", main = "Hybrid")
+points(seedlings[seedlings$Genetic_type=="hybrid", ]$Height_t, seedlings[seedlings$Genetic_type=="hybrid", ]$Surv_tplus1)
+
+
+```
+### --s7: logit(S1) = b0 + b1(height) + epsilon(site{BC, CC, C, FP, PG, WT})
+Big Cypress, Chekika, Punta Gorda and Wild Turkey are not significantly different 
+```{r s7} 
+  s7 <- glm(seedlings$Surv_tplus1 ~ seedlings$Height_t + seedlings$Site, family = binomial)
+  summary(s7)
+  
+  par(mfrow=c(1,3))
+  plot(x2seq_seedlings, invlogit(s7$coeff[1] + s7$coeff[2]*x2seq_seedlings), type='l', ylim=c(0,1) , xlab = "Height(cm)", ylab="P(Survival)", main = "Remaining sites")
+points(seedlings[seedlings$Site!="Fort Pierce" & seedlings$Site!= "Cape Canaveral", ]$Height_t, seedlings[seedlings$Site!="Fort Pierce" & seedlings$Site != "Cape Canaveral", ]$Surv_tplus1)
+
+ plot(x2seq_seedlings, invlogit(s7$coeff[1] + s7$coeff[2]*x2seq_seedlings + s7$coeff[3]), type='l', ylim=c(0,1) , xlab = "Height(cm)", ylab="P(Survival)", main = "Cape Canaveral")
+points(seedlings[seedlings$Site== "Cape Canaveral", ]$Height_t, seedlings[seedlings$Site=="Cape Canaveral", ]$Surv_tplus1)
+
+ plot(x2seq_seedlings, invlogit(s7$coeff[1] + s7$coeff[2]*x2seq_seedlings + s7$coeff[5]), type='l', ylim=c(0,1) , xlab = "Height(cm)", ylab="P(Survival)", main = "Fort Pierce")
+points(seedlings[seedlings$Site== "Fort Pierce", ]$Height_t, seedlings[seedlings$Site=="Fort Pierce", ]$Surv_tplus1)
+
+  
+```
+### --s8: logit(S1) = b0 + b1(height) + epsilon(year{2010, 2011, 2012, 2013}
+```{r s8}
+s8 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Height_t + seedlings2$Year, family = binomial)
+summary(s8)
+
+
+par(mfrow=c(2,2))
+plot(x1seq_seedlings, invlogit(s8$coeff[1] + s8$coeff[2]*x2seq_seedlings ), type='l', ylim=c(0,1) , xlab = "Height(cm)", ylab="P(Survival)", main = "2010")
+points(seedlings2[seedlings2$Year=="2010", ]$Diameter_t, seedlings2[seedlings2$Year=="2010", ]$Surv_tplus1)
+
+plot(x1seq_seedlings, invlogit(s8$coeff[1] + s8$coeff[2]*x2seq_seedlings + s8$coeff[3] ), type='l', ylim=c(0,1) , xlab = "Height(cm)", ylab="P(Survival)", main = "2011")
+points(seedlings2[seedlings2$Year=="2011", ]$Diameter_t, seedlings2[seedlings2$Year=="2011", ]$Surv_tplus1)
+
+plot(x1seq_seedlings, invlogit(s8$coeff[1] + s8$coeff[2]*x2seq_seedlings +s8$coeff[4] ), type='l', ylim=c(0,1) , xlab = "Height(cm)", ylab="P(Survival)", main = "2012")
+points(seedlings2[seedlings2$Year=="2012", ]$Diameter_t, seedlings2[seedlings2$Year=="2012", ]$Surv_tplus1)
+
+plot(x1seq_seedlings, invlogit(s8$coeff[1] + s8$coeff[2]*x2seq_seedlings +s8$coeff[5] ), type='l', ylim=c(0,1) , xlab = "Height(cm)", ylab="P(Survival)", main = "2013")
+points(seedlings2[seedlings2$Year=="2013", ]$Diameter_t, seedlings2[seedlings2$Year=="2013", ]$Surv_tplus1)
+
+
+
+```
+### - Diameter + Height models 
+### --s9: logit(S1) = b0 + b1(diameter) + b2(height)
+```{r s9}
+  s9 <- glm(seedlings$Surv_tplus1 ~ seedlings$Diameter_t + seedlings$Height_t, family = 
+                binomial)
+  summary(s9)
+  
+ b0<- s9$coeff[1]
+ b1<- s9$coeff[2]
+ b2<- s9$coeff[3]
+
+
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", 
+      ylab="\n Height (cm)",  lwd=1, xaxs="i", 
+      main="", cex.main=1)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings$Diameter_t, seedlings$Height_t, seedlings$Surv_tplus1, pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+
+par(mar=c(5.1,4.1,4.1,6))
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, legend.lab = "P(Survival)")
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==1], seedlings$Height_t[seedlings$Surv_tplus1==1], pch=19)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==0], seedlings$Height_t[seedlings$Surv_tplus1==0], pch=1)
+legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
+```
+### --s10: logit(S1) = b0 + b1(diameter) + b2(height) + epsilon(biotype{E,H,W})
+Eastern and Western are not different 
+```{r s10}
+ s10 <- glm(seedlings$Surv_tplus1~ seedlings$Diameter_t + seedlings$Height_t +seedlings$Genetic_type,         family=binomial)
+summary(s10)
+par(mfrow=c(1,2))
+
+#E 
+b0 <- s10$coeff[1]
+b1 <- s10$coeff[2]
+b2 <- s10$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", 
+      ylab="\n Height (cm)",  lwd=1, xaxs="i", 
+      main="Eastern, Western", cex.main=1)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings$Diameter_t[seedlings$Genetic_type=="eastern" | seedlings$Genetic_type == "western"], seedlings$Height_t[seedlings$Genetic_type=="eastern" | seedlings$Genetic_type == "western"], seedlings$Surv_tplus1[seedlings$Genetic_type=="eastern" | seedlings$Genetic_type == "western"], pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+#H
+b0 <- s10$coeff[1] + s10$coeff[4]
+b1 <- s10$coeff[2]
+b2 <- s10$coeff[3]
+
+
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", 
+      ylab="\n Height (cm)",  lwd=1, xaxs="i", 
+      main="Hybrid", cex.main=1)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings$Diameter_t[seedlings$Genetic_type=="hybrid"], seedlings$Height_t[seedlings$Genetic_type=="hybrid"], seedlings$Surv_tplus1[seedlings$Genetic_type=="hybrid"], pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col="red")
+
+
+par(mfrow=c(1,2))
+#EASTERN
+b0 <- s10$coeff[1]
+b1 <- s10$coeff[2]
+b2 <- s10$coeff[3]
+
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+par(mfrow=c(1,3))
+par(mar=c(5.1,4.1,4.1,6))
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "Diameter (mm) ", ylab="Height (cm)", main="Eastern, Western",col=my.palette)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==1 & (seedlings$Genetic_type=="eastern" | seedlings$Genetic_type == "western")], seedlings$Height_t[seedlings$Surv_tplus1==1& (seedlings$Genetic_type=="eastern" | seedlings$Genetic_type == "western")], pch=19)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==0 & (seedlings$Genetic_type=="eastern" | seedlings$Genetic_type == "western")], seedlings$Height_t[seedlings$Surv_tplus1==0&(seedlings$Genetic_type=="eastern" | seedlings$Genetic_type == "western")], pch=1)
+legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
+
+
+#HYBRID
+b0 <- s10$coeff[1] + s10$coeff[4]
+b1 <- s10$coeff[2] 
+b2 <- s10$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "Diameter (mm) ", ylab="Height (cm)", main="Hybrid", col=my.palette)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==1 & seedlings$Genetic_type=="hybrid"], seedlings$Height_t[seedlings$Surv_tplus1==1& seedlings$Genetic_type=="hybrid"], pch=19)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==0 & seedlings$Genetic_type=="hybrid"], seedlings$Height_t[seedlings$Surv_tplus1==0&seedlings$Genetic_type=="hybrid"], pch=1)
+legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
+
+
+```
+### --s11: logit(S1) = logit(S1) = b0 + b1(diameter) + b2(height) + epsilon(site{BC, CC, C, FP, PG,WT})
+
+Big Cypress, Punta Gorda and Wild Turkey are not different 
+```{r s11}
+s11 <- glm(seedlings$Surv_tplus1 ~ seedlings$Diameter_t + seedlings$Height_t + 
+              seedlings$Site, family = binomial)
+summary(s11)
+ 
+par(mfrow=c(2,2)) 
+  #Big Cypress, Punta Gorda and Wild Turkey
+b0 <- s11$coeff[1]
+b1 <- s11$coeff[2]
+b2 <- s11$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", 
+      ylab="\n Height (cm)",  lwd=1, xaxs="i", 
+      main="BC, PG, WT", cex.main=1)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site=="Big Cypress" | seedlings$Site == "Punta Gorda" | seedlings$Site == "Wild Turkey"], seedlings$Height_t[seedlings$Site=="Big Cypress" | seedlings$Site == "Punta Gorda" | seedlings$Site == "Wild Turkey"], seedlings$Surv_tplus1[seedlings$Site=="Big Cypress" | seedlings$Site == "Punta Gorda" | seedlings$Site == "Wild Turkey"], pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#Cape Canaveral
+b0 <- s11$coeff[1] + s11$coeff[4]
+b1 <- s11$coeff[2] 
+b2 <- s11$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", 
+      ylab="\n Height (cm)",  lwd=1, xaxs="i", 
+      main="CC", cex.main=1)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site=="Cape Canaveral"], seedlings$Height_t[seedlings$Site=="Cape Canaveral"], seedlings$Surv_tplus1[seedlings$Site=="Cape Canaveral"], pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+
+#Chekika
+b0 <- s11$coeff[1] + s11$coeff[5]
+b1 <- s11$coeff[2] 
+b2 <- s11$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", 
+      ylab="\n Height (cm)",  lwd=1, xaxs="i", 
+      main="C", cex.main=1)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site=="Chekika"], seedlings$Height_t[seedlings$Site=="Chekika"], seedlings$Surv_tplus1[seedlings$Site=="Chekika"], pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#Fort Pierce
+b0 <- s11$coeff[1] + s11$coeff[6]
+b1 <- s11$coeff[2] 
+b2 <- s11$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", 
+      ylab="\n Height (cm)",  lwd=1, xaxs="i", 
+      main="FP", cex.main=1)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site=="Fort Pierce"], seedlings$Height_t[seedlings$Site=="Fort Pierce"], seedlings$Surv_tplus1[seedlings$Site=="Fort Pierce"], pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+####### Image plots 
+
+par(mfrow=c(2,2)) 
+#Big Cypress, Punta Gorda and Wild Turkey
+b0 <- s11$coeff[1]
+b1 <- s11$coeff[2]
+b2 <- s11$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "Diameter (mm) ", ylab="Height (cm)", main="BC, PG, WT", col=my.palette)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==1 & (seedlings$Site=="Big Cypress" |seedlings$Site == "Punta Gorda" | seedlings$Site == "Wild Turkey")], seedlings$Height_t[seedlings$Surv_tplus1==1& (seedlings$Site=="Big Cypress" |seedlings$Site == "Punta Gorda" | seedlings$Site == "Wild Turkey")], pch=19)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==0 & (seedlings$Site=="Big Cypress" |seedlings$Site == "Punta Gorda" | seedlings$Site == "Wild Turkey")], seedlings$Height_t[seedlings$Surv_tplus1==0&(seedlings$Site=="Big Cypress" |seedlings$Site == "Punta Gorda" | seedlings$Site == "Wild Turkey")], pch=1)
+legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
+
+
+#Cape Canaveral
+b0 <- s11$coeff[1] + s11$coeff[4]
+b1 <- s11$coeff[2] 
+b2 <- s11$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "Diameter (mm) ", ylab="Height (cm)", main="CC", col=my.palette)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==1 & seedlings$Site=="Cape Canaveral"], seedlings$Height_t[seedlings$Surv_tplus1==1& seedlings$Site=="Cape Canaveral"], pch=19)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==0 & seedlings$Site=="Cape Canaveral"], seedlings$Height_t[seedlings$Surv_tplus1==0&seedlings$Site=="Cape Canaveral"], pch=1)
+legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
+
+#Chekika
+b0 <- s11$coeff[1] + s11$coeff[5]
+b1 <- s11$coeff[2] 
+b2 <- s11$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "Diameter (mm) ", ylab="Height (cm)", main="C", col=my.palette)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==1 & seedlings$Site=="Chekika"], seedlings$Height_t[seedlings$Surv_tplus1==1& seedlings$Site=="Chekika"], pch=19)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==0 & seedlings$Site=="Chekika"], seedlings$Height_t[seedlings$Surv_tplus1==0&seedlings$Site=="Chekika"], pch=1)
+legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
+
+#Fort Pierce
+b0 <- s11$coeff[1] + s11$coeff[6]
+b1 <- s11$coeff[2] 
+b2 <- s11$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "Diameter (mm) ", ylab="Height (cm)", main="FP", col=my.palette)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==1 & seedlings$Site=="Fort Pierce"], seedlings$Height_t[seedlings$Surv_tplus1==1& seedlings$Site=="Fort Pierce"], pch=19)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==0 & seedlings$Site=="Fort Pierce"], seedlings$Height_t[seedlings$Surv_tplus1==0&seedlings$Site=="Fort Pierce"], pch=1)
+legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
+```
+### --s12: logit(S!) = b0 + b1(diameter) + b2(height) + epsilon(year{2010, 2011, 2012, 2013, 2014})
+```{r s12}
+s12 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Diameter_t + seedlings2$Height_t + 
+              seedlings2$Year, family = binomial)
+summary(s12)
+ 
+par(mfrow=c(2,2)) 
+#2010
+b0 <- s12$coeff[1]
+b1 <- s12$coeff[2]
+b2 <- s12$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", 
+      ylab="\n Height (cm)",  lwd=1, xaxs="i", 
+      main="2010", cex.main=1)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings$Diameter_t[seedlings2$Year=="2010"], seedlings$Height_t[seedlings2$Year =="2010"], seedlings$Surv_tplus1[seedlings2$Year=="2010"], pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#2011
+b0 <- s12$coeff[1] + s12$coeff[4]
+b1 <- s12$coeff[2]
+b2 <- s12$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", 
+      ylab="\n Height (cm)",  lwd=1, xaxs="i", 
+      main="2011", cex.main=1)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings$Diameter_t[seedlings2$Year=="2011"], seedlings$Height_t[seedlings2$Year =="2011"], seedlings$Surv_tplus1[seedlings2$Year=="2011"], pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+
+#2012
+b0 <- s12$coeff[1] + s12$coeff[5]
+b1 <- s12$coeff[2]
+b2 <- s12$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", 
+      ylab="\n Height (cm)",  lwd=1, xaxs="i", 
+      main="2012", cex.main=1)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings$Diameter_t[seedlings2$Year=="2012"], seedlings$Height_t[seedlings2$Year =="2012"], seedlings$Surv_tplus1[seedlings2$Year=="2012"], pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+
+#2013
+b0 <- s12$coeff[1] + s12$coeff[6]
+b1 <- s12$coeff[2]
+b2 <- s12$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
+      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
+      shade=0.1, nticks=4, xlab="\n Diameter (mm)", 
+      ylab="\n Height (cm)",  lwd=1, xaxs="i", 
+      main="2013", cex.main=1)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings$Diameter_t[seedlings2$Year=="2013"], seedlings$Height_t[seedlings2$Year =="2013"], seedlings$Surv_tplus1[seedlings2$Year=="2013"], pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+####### Image Plots 
+par(mfrow=c(2,2))
+#2010
+b0 <- s12$coeff[1] 
+b1 <- s12$coeff[2] 
+b2 <- s12$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "Diameter (mm) ", ylab="Height (cm)", main="2010", col=my.palette)
+points(seedlings2$Diameter_t[seedlings2$Surv_tplus1==1 & seedlings2$Year=="2010"], seedlings2$Height_t[seedlings2$Surv_tplus1==1& seedlings2$Year=="2010"], pch=19)
+points(seedlings2$Diameter_t[seedlings2$Surv_tplus1==0 & seedlings2$Year=="2010"], seedlings2$Height_t[seedlings2$Surv_tplus1==0&seedlings2$Year=="2010"], pch=1)
+legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
+
+#2011
+b0 <- s12$coeff[1] + s12$coeff[4]
+b1 <- s12$coeff[2] 
+b2 <- s12$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "Diameter (mm) ", ylab="Height (cm)", main="2011", col=my.palette)
+points(seedlings2$Diameter_t[seedlings2$Surv_tplus1==1 & seedlings2$Year=="2011"], seedlings2$Height_t[seedlings2$Surv_tplus1==1& seedlings2$Year=="2011"], pch=19)
+points(seedlings2$Diameter_t[seedlings2$Surv_tplus1==0 & seedlings2$Year=="2011"], seedlings2$Height_t[seedlings2$Surv_tplus1==0&seedlings2$Year=="2011"], pch=1)
+legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
+
+
+#2012
+b0 <- s12$coeff[1] +s12$coeff[5]
+b1 <- s12$coeff[2] 
+b2 <- s12$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "Diameter (mm) ", ylab="Height (cm)", main="2012", col=my.palette)
+points(seedlings2$Diameter_t[seedlings2$Surv_tplus1==1 & seedlings2$Year=="2012"], seedlings2$Height_t[seedlings2$Surv_tplus1==1& seedlings2$Year=="2012"], pch=19)
+points(seedlings2$Diameter_t[seedlings2$Surv_tplus1==0 & seedlings2$Year=="2012"], seedlings2$Height_t[seedlings2$Surv_tplus1==0&seedlings2$Year=="2012"], pch=1)
+legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
+
+
+#2013
+b0 <- s12$coeff[1] + s12$coeff[6]
+b1 <- s12$coeff[2] 
+b2 <- s12$coeff[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "Diameter (mm) ", ylab="Height (cm)", main="2013", col=my.palette)
+points(seedlings2$Diameter_t[seedlings2$Surv_tplus1==1 & seedlings2$Year=="2013"], seedlings2$Height_t[seedlings2$Surv_tplus1==1& seedlings2$Year=="2013"], pch=19)
+points(seedlings2$Diameter_t[seedlings2$Surv_tplus1==0 & seedlings2$Year=="2013"], seedlings2$Height_t[seedlings2$Surv_tplus1==0&seedlings2$Year=="2013"], pch=1)
+legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###- AIC
+```{r seedling survival aic}
+#For all models except year
+aictab(list(s1, s2, s3, s5, s6, s7, s9, s10, s11), modnames= c("s1", "s2", "s3", "s5", 
+                                                             "s6", "s7", "s9", "s10", "s11"))
+
+#For comparing among the models with year: 
+aictab(list(s4, s8, s12), modnames=c("s4", "s8", "s12"))
+
+```
+
+
