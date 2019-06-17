@@ -64,3 +64,9 @@ delta=0.19, tau_1=1/1demography_models.R
 delta=0.19, tau_1=1/2IPM_diameter_and_height.R
 delta=0.19, tau_1=1/3LTRE_analysis.R
 delta=0.19, tau_1=1/4MSFigures.R
+FP/Kvals_D2_FP
+BC/Kvals_D2_BC
+C/Kvals_D2_C
+CC/Kvals_D2_CC
+PG/Kvals_D2_PG
+WT/Kvals_D2_WT
