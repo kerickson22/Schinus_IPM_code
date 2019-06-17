@@ -1,12 +1,13 @@
 ---
 title: "AIC of all possible models"
 author: "Kelley D. Erickson"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_depth: 5
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 <style type="text/css">
 .table {
 
@@ -307,23 +308,25 @@ larges2 <- subset(larges, larges$Year > 2009 & larges$Year < 2014)
 larges2$Year <- as.factor(larges2$Year)
 ```
 
+### -- Seedling Survival Models 
 The models we are interested in selecting among are as follows: 
 
-s1_1: logit(S1) = b0 + b1*diameter
-s1_2: logit(S1) = b0 + b1*diameter + biotype effect
-s1_3: logit(S1) = b0 + b1*diameter + site effect
-s1_4: logit(S1) = b0 + b1*diameter + year effect
-s1_5: logit(S1) = b0 + b1*diameter + site effect + year effect
-s1_6: logit(S1) = b0 + b1*height 
-s1_7: logit(S1) = b0 + b1*height + biotype effect
-s1_8: logit(S1) = b0 + b1*height + site effect
-s1_9: logit(S1) = b0 + b1*height + year effect
-s1_10: logit(S1) = b0 + b1*height + site effect + year effect
-s1_11: logit(S1) = b0 + b1*diameter + b2*height 
-s1_12: logit(S1) = b0 + b1*diameter + b2*height + biotype effect
-s1_13: logit(S1) = b0 + b1*diameter + b2*height + site effect
-s1_14: logit(S1) = b0 + b1*diameter + b2*height + year effect
-s1_15: logit(S1) = b0 + b1*diameter + b2*height + site effect + year effect 
+* s1_1: logit(S1) = b0 + b1*diameter
+* s1_2: logit(S1) = b0 + b1*diameter + biotype effect
+* s1_3: logit(S1) = b0 + b1*diameter + site effect
+* s1_4: logit(S1) = b0 + b1*diameter + year effect
+* s1_5: logit(S1) = b0 + b1*diameter + site effect + year effect
+* s1_6: logit(S1) = b0 + b1*height 
+* s1_7: logit(S1) = b0 + b1*height + biotype effect
+* s1_8: logit(S1) = b0 + b1*height + site effect
+* s1_9: logit(S1) = b0 + b1*height + year effect
+* s1_10: logit(S1) = b0 + b1*height + site effect + year effect
+* s1_11: logit(S1) = b0 + b1*diameter + b2*height 
+* s1_12: logit(S1) = b0 + b1*diameter + b2*height + biotype effect
+* s1_13: logit(S1) = b0 + b1*diameter + b2*height + site effect
+* s1_14: logit(S1) = b0 + b1*diameter + b2*height + year effect
+* s1_15: logit(S1) = b0 + b1*diameter + b2*height + site effect + year effect 
+
 
 ```{r defining the models: seedling survival}
  s1_1 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Diameter_t, family = binomial)
@@ -347,6 +350,8 @@ s1_15 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Diameter_t + seedlings2$Height_
 aictab(list(s1_1, s1_2, s1_3, s1_4, s1_5, s1_6, s1_7, s1_8, s1_9, s1_10, s1_11, s1_12, s1_13, s1_14, s1_15), modnames = c("s1_1: diameter", "s1_2: diameter + biotype", "s1_3: diameter + site", "s1_4: diameter + year", "s1_5: diameter + site + year", "s1_6: height", "s1_7: height + biotype", "s1_8: height + site", "s1_9: height + year", "s1_10: height + site + year", "s1_11: diameter + height", "s1_12: diameter + height + biotype", "s1_13: diameter + height + site", "s1_14: diameter + height + year", "s1_15: diameter + height + site + year"))
 ```
 
+
+### -- Adult Survival Models 
 ```{r defining the models: adult survival}
  s2_1 <- glm(larges2$Surv_tplus1 ~ larges2$Diameter_t, family = binomial)
 s2_2 <- glm(larges2$Surv_tplus1 ~ larges2$Diameter_t + larges2$Genetic_type, family = binomial)
@@ -368,6 +373,9 @@ s2_15 <- glm(larges2$Surv_tplus1 ~ larges2$Diameter_t + larges2$Height_t + large
 
 aictab(list(s2_1, s2_2, s2_3, s2_4, s2_5, s2_6, s2_7, s2_8, s2_9, s2_10, s2_11, s2_12, s2_13, s2_14, s2_15), modnames = c("s2_1: diameter", "s2_2: diameter + biotype", "s2_3: diameter + site", "s2_4: diameter + year", "s2_5: diameter + site + year", "s2_6: height", "s2_7: height + biotype", "s2_8: height + site", "s2_9: height + year", "s2_10: height + site + year", "s2_11: diameter + height", "s2_12: diameter + height + biotype", "s2_13: diameter + height + site", "s2_14: diameter + height + year", "s2_15: diameter + height + site + year"))
 ```
+
+### -- Maturation Models 
+
 ```{r defining the models maturation}
 m_1 <- glm(seedlings2$grad_status ~ seedlings2$Diameter_t, family = binomial)
 m_2 <- glm(seedlings2$grad_status ~ seedlings2$Diameter_t + seedlings2$Genetic_type, family = binomial)
@@ -389,7 +397,9 @@ m_15 <- glm(seedlings2$grad_status ~ seedlings2$Diameter_t + seedlings2$Height_t
 
 aictab(list(m_1, m_2, m_3, m_4, m_5, m_6, m_7, m_8, m_9, m_10, m_11, m_12, m_13, m_14, m_15), modnames = c("m_1: diameter", "m_2: diameter + biotype", "m_3: diameter + site", "m_4: diameter + year", "m_5: diameter + site + year", "m_6: height", "m_7: height + biotype", "m_8: height + site", "m_9: height + year", "m_10: height + site + year", "m_11: diameter + height", "m_12: diameter + height + biotype", "m_13: diameter + height + site", "m_14: diameter + height + year", "m_15: diameter + height + site + year"))
 ```
-```{r defining the seedling growth models}
+### -- Seedling Growth Models  (can't compare)
+
+```{r defining the seedling growth models, eval = FALSE}
 g1_1 <- lm(seedlings2$Diameter_tplus1 ~ seedlings2$Diameter_t)
 g1_2 <- lm(seedlings2$Diameter_tplus1 ~ seedlings2$Diameter_t + seedlings2$Genetic_type)
 g1_3 <- lm(seedlings2$Diameter_tplus1 ~ seedlings2$Diameter_t + seedlings2$Site)

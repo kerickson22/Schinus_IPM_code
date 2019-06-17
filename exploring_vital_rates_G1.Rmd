@@ -2,7 +2,10 @@
 title: "Exploring vital rate models: D1 Growth"
 author: "Kelley Erickson"
 date: "May 16, 2019"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_depth: 5
 ---
 <style type="text/css">
 .table {
@@ -237,6 +240,8 @@ for (i in 1:length(seedlings$ID)) {
 
 seedlings<-cbind(seedlings, grad_status)
 
+seedlings_g<-subset(seedlings, seedlings$Diameter_tplus1<1.6)
+seedlings_g<-subset(seedlings_g, seedlings_g$Height_tplus1<16)
 ```
 # Exploratory Statistics 
 There are 1512 individuals 
@@ -319,7 +324,9 @@ Choosing which state variables to use and whether to include terms for biotype, 
 
 ### -- g1_1: mu_x= b0 + b1(diameter) -----
 ```{r m1}
-g1_1 <- lm(seedlings$Diameter_tplus1 ~ seedlings$Diameter_t)
+
+
+g1_1 <- lm(seedlings_g$Diameter_tplus1 ~ seedlings_g$Diameter_t)
 summary(g1_1)
 #Variance in Growth
 sd_x <- summary(g1_1)$sigma
@@ -335,7 +342,7 @@ preds5 <- g1_1$coefficients[1] + g1_1$coefficients[2]*x1seq_seedlings - 1*sd_x
 plot(x1seq_seedlings, g1_1$coeff[1] + g1_1$coeff[2]*x1seq_seedlings, type='l' , xlab = "Diameter at t (mm)", ylab="Diameter at t+1 (mm)")
 polygon(c(rev(x1seq_seedlings), x1seq_seedlings), c(rev(preds3), preds2), col = 'grey90', border = NA)
 polygon(c(rev(x1seq_seedlings), x1seq_seedlings), c(rev(preds5), preds4), col = 'grey80', border = NA)
-points(seedlings$Diameter_t, seedlings$Diameter_tplus1)
+points(seedlings_g$Diameter_t, seedlings_g$Diameter_tplus1)
 abline(g1_1)
 
 
@@ -345,7 +352,7 @@ abline(g1_1)
 Hybrid is not significantly different from Eastern
 ```{r m2, fig.width=9, fig.height=4}
 
-g1_2 <- lm(seedlings$Diameter_tplus1 ~ seedlings$Diameter_t + seedlings$Genetic_type)
+g1_2 <- lm(seedlings_g$Diameter_tplus1 ~ seedlings_g$Diameter_t + seedlings_g$Genetic_type)
 summary(g1_2)
 #Variance in Growth
 sd_x <- summary(g1_2)$sigma
@@ -360,7 +367,7 @@ preds5 <- g1_2$coefficients[1] + g1_2$coefficients[2]*x1seq_seedlings - 1*sd_x
 plot(x1seq_seedlings, g1_2$coeff[1] + g1_2$coeff[2]*x1seq_seedlings, type='l' , xlab = "Diameter at t (mm)", ylab="Diameter at t+1 (mm)")
 polygon(c(rev(x1seq_seedlings), x1seq_seedlings), c(rev(preds3), preds2), col = 'grey90', border = NA)
 polygon(c(rev(x1seq_seedlings), x1seq_seedlings), c(rev(preds5), preds4), col = 'grey80', border = NA)
-points(seedlings$Diameter_t[seedlings$Genetic_type == "eastern" | seedlings$Genetic_type == "hybrid"], seedlings$Diameter_tplus1[seedlings$Genetic_type == "eastern" | seedlings$Genetic_type == "hybrid"])
+points(seedlings_g$Diameter_t[seedlings_g$Genetic_type == "eastern" | seedlings_g$Genetic_type == "hybrid"], seedlings_g$Diameter_tplus1[seedlings_g$Genetic_type == "eastern" | seedlings_g$Genetic_type == "hybrid"])
 lines(x1seq_seedlings, g1_2$coeff[1] + g1_2$coeff[2]*x1seq_seedlings)
 
 #Western
@@ -378,7 +385,7 @@ polygon(c(rev(x1seq_seedlings), x1seq_seedlings), c(rev(preds3), preds2), col = 
         border = NA)
 polygon(c(rev(x1seq_seedlings), x1seq_seedlings), c(rev(preds5), preds4), col = 'grey80', 
         border = NA)
-points(seedlings$Diameter_t[seedlings$Genetic_type == "western"], seedlings$Diameter_tplus1[seedlings$Genetic_type == "western"])
+points(seedlings_g$Diameter_t[seedlings_g$Genetic_type == "western"], seedlings_g$Diameter_tplus1[seedlings_g$Genetic_type == "western"])
 lines(x1seq_seedlings, g1_2$coeff[1] + g1_2$coeff[2]*x1seq_seedlings + g1_2$coefficients[4])
 
 
@@ -392,7 +399,7 @@ lines(x1seq_seedlings, g1_2$coeff[1] + g1_2$coeff[2]*x1seq_seedlings + g1_2$coef
 Big Cypress, Cape Canaveral and Chekika are not different 
 ```{r g1_3}
  
-g1_3 <- lm(seedlings$Diameter_tplus1 ~ seedlings$Diameter_t + seedlings$Site)
+g1_3 <- lm(seedlings_g$Diameter_tplus1 ~ seedlings_g$Diameter_t + seedlings_g$Site)
 summary(g1_3)
 #Variance in Growth
 sd_x <- summary(g1_3)$sigma
@@ -407,7 +414,7 @@ preds5 <- g1_3$coefficients[1] + g1_3$coefficients[2]*x1seq_seedlings - 1*sd_x
 plot(x1seq_seedlings, g1_3$coeff[1] + g1_3$coeff[2]*x1seq_seedlings, type='l' , xlab = "Diameter at t (mm)", ylab="Diameter at t+1 (mm)", main = "BC, CC, C")
 polygon(c(rev(x1seq_seedlings), x1seq_seedlings), c(rev(preds3), preds2), col = 'grey90', border = NA)
 polygon(c(rev(x1seq_seedlings), x1seq_seedlings), c(rev(preds5), preds4), col = 'grey80', border = NA)
-points(seedlings$Diameter_t[seedlings$Site == "Big Cypress" | seedlings$Site == "Cape Canaveral" | seedlings$Site == "Chekika"], seedlings$Diameter_tplus1[seedlings$Site == "Big Cypress" | seedlings$Site == "Cape Canaveral" | seedlings$Site == "Chekika"])
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Big Cypress" | seedlings_g$Site == "Cape Canaveral" | seedlings_g$Site == "Chekika"], seedlings_g$Diameter_tplus1[seedlings_g$Site == "Big Cypress" | seedlings_g$Site == "Cape Canaveral" | seedlings_g$Site == "Chekika"])
 lines(x1seq_seedlings, g1_3$coeff[1] + g1_3$coeff[2]*x1seq_seedlings)
 
 #Fort Pierce
@@ -426,7 +433,7 @@ polygon(c(rev(x1seq_seedlings), x1seq_seedlings), c(rev(preds3), preds2), col = 
         border = NA)
 polygon(c(rev(x1seq_seedlings), x1seq_seedlings), c(rev(preds5), preds4), col = 'grey80', 
         border = NA)
-points(seedlings$Diameter_t[seedlings$Site == "Fort Pierce"], seedlings$Diameter_tplus1[seedlings$Site == "Fort Pierce"])
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Fort Pierce"], seedlings_g$Diameter_tplus1[seedlings_g$Site == "Fort Pierce"])
 lines(x1seq_seedlings, g1_3$coeff[1] + g1_3$coeff[2]*x1seq_seedlings + g1_3$coefficients[5])
 
 #Punta Gorda
@@ -445,7 +452,7 @@ polygon(c(rev(x1seq_seedlings), x1seq_seedlings), c(rev(preds3), preds2), col = 
         border = NA)
 polygon(c(rev(x1seq_seedlings), x1seq_seedlings), c(rev(preds5), preds4), col = 'grey80', 
         border = NA)
-points(seedlings$Diameter_t[seedlings$Site == "Punta Gorda"], seedlings$Diameter_tplus1[seedlings$Site == "Punta Gorda"])
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Punta Gorda"], seedlings_g$Diameter_tplus1[seedlings_g$Site == "Punta Gorda"])
 lines(x1seq_seedlings, g1_3$coeff[1] + g1_3$coeff[2]*x1seq_seedlings + g1_3$coefficients[6])
 
 #Wild Turkey
@@ -464,7 +471,7 @@ polygon(c(rev(x1seq_seedlings), x1seq_seedlings), c(rev(preds3), preds2), col = 
         border = NA)
 polygon(c(rev(x1seq_seedlings), x1seq_seedlings), c(rev(preds5), preds4), col = 'grey80', 
         border = NA)
-points(seedlings$Diameter_t[seedlings$Site == "Wild Turkey"], seedlings$Diameter_tplus1[seedlings$Site == "Wild Turkey"])
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Wild Turkey"], seedlings_g$Diameter_tplus1[seedlings_g$Site == "Wild Turkey"])
 lines(x1seq_seedlings, g1_3$coeff[1] + g1_3$coeff[2]*x1seq_seedlings + g1_3$coefficients[7])
 
 
@@ -510,6 +517,7 @@ abline(g1_5)
 
 
 ```
+
 ### --g1_6: mu_y = b0 + b1(height) + epsilon(biotype{E,H,W})
 Hybrid and Eastern are not different
 ```{r m6}
@@ -553,10 +561,11 @@ lines(x2seq_seedlings, g1_6$coeff[1] + g1_6$coeff[2]*x2seq_seedlings + g1_6$coef
 
 
 ```
+
 ### --g1_7: mu_y = b0 + b1(height) + epsilon(site{BC, CC, C, FP, PG, WT})
 Wild Turkey is the only site distict from all the rest (but how much of it is just that Wild Turkey has a much smaller sample size than the other sites?)
-```{r s7} 
- g1_7 <- lm(seedlings$Height_tplus1 ~ seedlings$Height_t + seedlings$Site)
+```{r g1_7} 
+ g1_7 <- lm(seedlings_g$Height_tplus1 ~ seedlings_g$Height_t + seedlings_g$Site)
 summary(g1_7)
 #Variance in Growth
 sd_x <- summary(g1_7)$sigma
@@ -571,17 +580,18 @@ preds5 <- g1_7$coefficients[1] + g1_7$coefficients[2]*x2seq_seedlings - 1*sd_x
 plot(x2seq_seedlings, g1_7$coeff[1] + g1_7$coeff[2]*x2seq_seedlings, type='l' , xlab = "Height at t (mm)", ylab="Height at t+1 (mm)", main = "BC, CC, C, FP, PG")
 polygon(c(rev(x2seq_seedlings), x2seq_seedlings), c(rev(preds3), preds2), col = 'grey90', border = NA)
 polygon(c(rev(x2seq_seedlings), x2seq_seedlings), c(rev(preds5), preds4), col = 'grey80', border = NA)
-points(seedlings$Height_t[seedlings$Site != "Wild Turkey"],
-       seedlings$Height_tplus1[seedlings$Site != "Wild Turkey"])
+points(seedlings_g$Height_t[seedlings_g$Site != "Wild Turkey"],
+       seedlings_g$Height_tplus1[seedlings_g$Site != "Wild Turkey"])
 lines(x2seq_seedlings, g1_7$coeff[1] + g1_7$coeff[2]*x2seq_seedlings)
 
 plot(x2seq_seedlings, g1_7$coeff[1] + g1_7$coeff[2]*x2seq_seedlings +g1_7$coeff[7], type='l' , xlab = "Height at t (mm)", ylab="Height at t+1 (mm)", main = "WT")
 polygon(c(rev(x2seq_seedlings), x2seq_seedlings), c(rev(preds3), preds2), col = 'grey90', border = NA)
 polygon(c(rev(x2seq_seedlings), x2seq_seedlings), c(rev(preds5), preds4), col = 'grey80', border = NA)
-points(seedlings$Height_t[seedlings$Site == "Wild Turkey"],
-       seedlings$Height_tplus1[seedlings$Site == "Wild Turkey"])
+points(seedlings_g$Height_t[seedlings_g$Site == "Wild Turkey"],
+       seedlings_g$Height_tplus1[seedlings_g$Site == "Wild Turkey"])
 lines(x2seq_seedlings, g1_7$coeff[1] + g1_7$coeff[2]*x2seq_seedlings + g1_7$coeff[7])
 ```
+
 ### --g1_8: mu_y = b0 + b1(height) + epsilon(year{2010, 2011, 2012, 2013}
 2013 is different from the rest of the years, although once again it could just be the smaller sample size. 
 ```{r g1_8}
@@ -618,6 +628,7 @@ lines(x2seq_seedlings, g1_8$coeff[1] + g1_8$coeff[2]*x2seq_seedlings + g1_8$coef
 
 ```
 ### - Diameter + Height models 
+
 ### --g1_9: mu_x = b0 + b1(diameter) + b2(height)
 #           mu_y = b3 + b4(diameter) + b5(height)
 #These models are actually doing a terrible job of predicting future diameter and height!
@@ -687,6 +698,7 @@ legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)
 #text (seedlings$Diameter_t , seedlings$Height_t , seedlings$Diameter_tplus1 )
 
 ```
+
 ### --g1_10: mu_x = b0 + b1(diameter) + b2(height) + epsilon(biotype{E,H,W})
              mu_y = b3 + b4(diameter) + b5(height) + epsilon(biotype{E,H,W})
 
@@ -883,14 +895,15 @@ legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)
 
 
 ```
+
 ### --g1_11: mu_x = b0 + b1(diameter) + b2(height) + epsilon(site{BC, CC, C, FP, PG,WT})
              mu_y = b0 + b1(diameter) + b2(height) + epsilon(site{BC, CC, C, FP, PG, WT})
 
 
 ```{r g1_11}
-g1_11 <-manova(cbind(seedlings$Diameter_tplus1, seedlings$Height_tplus1) ~ seedlings$Diameter_t+seedlings$Height_t + seedlings$Site)
+g1_11 <-manova(cbind(seedlings_g$Diameter_tplus1, seedlings_g$Height_tplus1) ~ seedlings_g$Diameter_t+seedlings_g$Height_t + seedlings_g$Site)
 summary(g1_11)
-sd_x<-summary(lm(seedlings$Diameter_tplus1 ~ seedlings$Diameter_t + seedlings$Height_t + seedlings$Site))$sigma
+sd_x<-summary(lm(seedlings_g$Diameter_tplus1 ~ seedlings_g$Diameter_t + seedlings_g$Height_t + seedlings_g$Site))$sigma
 
 ##Big Cypress
 #Grab parameters associated with future diameter
@@ -1004,7 +1017,7 @@ pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1_BC, ticktype="detailed",
       main="Big Cypress", cex.main=1)
 
 # from 3D to 2D coordinates
-mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site == "Big Cypress"], seedlings$Height_t[seedlings$Site == "Big Cypress"], seedlings$Diameter_tplus1[seedlings$Site == "Big Cypress"], pmat=pmat)
+mypoints <- trans3d(seedlings_g$Diameter_t[seedlings_g$Site == "Big Cypress"], seedlings_g$Height_t[seedlings_g$Site == "Big Cypress"], seedlings_g$Diameter_tplus1[seedlings_g$Site == "Big Cypress"], pmat=pmat)
 # plot in 2D space with pointsize related to distance
 points(mypoints, col=4)
 
@@ -1017,7 +1030,7 @@ pmat<-persp(x1seq_seedlings, x2seq_seedlings, z2_BC, ticktype="detailed",
       main="Big Cypress", cex.main=1)
 
 # from 3D to 2D coordinates
-mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site == "Big Cypress"], seedlings$Height_t[seedlings$Site == "Big Cypress"], seedlings$Height_tplus1[seedlings$Site =="Big Cypress"], pmat=pmat)
+mypoints <- trans3d(seedlings_g$Diameter_t[seedlings_g$Site == "Big Cypress"], seedlings_g$Height_t[seedlings_g$Site == "Big Cypress"], seedlings_g$Height_tplus1[seedlings_g$Site =="Big Cypress"], pmat=pmat)
 # plot in 2D space with pointsize related to distance
 points(mypoints, col=4)
 
@@ -1029,7 +1042,7 @@ pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1_CC, ticktype="detailed",
       main="Cape Canaveral", cex.main=1)
 
 # from 3D to 2D coordinates
-mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site == "Cape Canaveral"], seedlings$Height_t[seedlings$Site == "Cape Canaveral"], seedlings$Diameter_tplus1[seedlings$Site == "Cape Canaveral"], pmat=pmat)
+mypoints <- trans3d(seedlings_g$Diameter_t[seedlings_g$Site == "Cape Canaveral"], seedlings_g$Height_t[seedlings$Site == "Cape Canaveral"], seedlings_g$Diameter_tplus1[seedlings$Site == "Cape Canaveral"], pmat=pmat)
 # plot in 2D space with pointsize related to distance
 points(mypoints, col=4)
 
@@ -1054,7 +1067,7 @@ pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1_C, ticktype="detailed",
       main="Chekika", cex.main=1)
 
 # from 3D to 2D coordinates
-mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site == "Chekika"], seedlings$Height_t[seedlings$Site == "Chekika"], seedlings$Diameter_tplus1[seedlings$Site == "Chekika"], pmat=pmat)
+mypoints <- trans3d(seedlings_g$Diameter_t[seedlings_g$Site == "Chekika"], seedlings_g$Height_t[seedlings_g$Site == "Chekika"], seedlings_g$Diameter_tplus1[seedlings_g$Site == "Chekika"], pmat=pmat)
 # plot in 2D space with pointsize related to distance
 points(mypoints, col=4)
 
@@ -1067,7 +1080,7 @@ pmat<-persp(x1seq_seedlings, x2seq_seedlings, z2_C, ticktype="detailed",
       main="Chekika", cex.main=1)
 
 # from 3D to 2D coordinates
-mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site == "Chekika"], seedlings$Height_t[seedlings$Site == "Chekika"], seedlings$Height_tplus1[seedlings$Site =="Chekika"], pmat=pmat)
+mypoints <- trans3d(seedlings_g$Diameter_t[seedlings_g$Site == "Chekika"], seedlings_g$Height_t[seedlings_g$Site == "Chekika"], seedlings_g$Height_tplus1[seedlings_g$Site =="Chekika"], pmat=pmat)
 # plot in 2D space with pointsize related to distance
 points(mypoints, col=4)
 
@@ -1079,7 +1092,7 @@ pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1_FP, ticktype="detailed",
       main="Fort Pierce", cex.main=1)
 
 # from 3D to 2D coordinates
-mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site == "Fort Pierce"], seedlings$Height_t[seedlings$Site == "Fort Pierce"], seedlings$Diameter_tplus1[seedlings$Site == "Fort Pierce"], pmat=pmat)
+mypoints <- trans3d(seedlings_g$Diameter_t[seedlings_g$Site == "Fort Pierce"], seedlings_g$Height_t[seedlings_g$Site == "Fort Pierce"], seedlings_g$Diameter_tplus1[seedlings_g$Site == "Fort Pierce"], pmat=pmat)
 # plot in 2D space with pointsize related to distance
 points(mypoints, col=4)
 
@@ -1092,7 +1105,7 @@ pmat<-persp(x1seq_seedlings, x2seq_seedlings, z2_FP, ticktype="detailed",
       main="Fort Pierce", cex.main=1)
 
 # from 3D to 2D coordinates
-mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site == "Fort Pierce"], seedlings$Height_t[seedlings$Site == "Fort Pierce"], seedlings$Height_tplus1[seedlings$Site =="Fort Pierce"], pmat=pmat)
+mypoints <- trans3d(seedlings_g$Diameter_t[seedlings_g$Site == "Fort Pierce"], seedlings_g$Height_t[seedlings_g$Site == "Fort Pierce"], seedlings_g$Height_tplus1[seedlings_g$Site =="Fort Pierce"], pmat=pmat)
 # plot in 2D space with pointsize related to distance
 points(mypoints, col=4)
 
@@ -1104,7 +1117,7 @@ pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1_PG, ticktype="detailed",
       main="Punta Gorda", cex.main=1)
 
 # from 3D to 2D coordinates
-mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site == "Punta Gorda"], seedlings$Height_t[seedlings$Site == "Punta Gorda"], seedlings$Diameter_tplus1[seedlings$Site == "Punta Gorda"], pmat=pmat)
+mypoints <- trans3d(seedlings_g$Diameter_t[seedlings_g$Site == "Punta Gorda"], seedlings_g$Height_t[seedlings_g$Site == "Punta Gorda"], seedlings_g$Diameter_tplus1[seedlings_g$Site == "Punta Gorda"], pmat=pmat)
 # plot in 2D space with pointsize related to distance
 points(mypoints, col=4)
 
@@ -1117,7 +1130,7 @@ pmat<-persp(x1seq_seedlings, x2seq_seedlings, z2_PG, ticktype="detailed",
       main="Punta Gorda", cex.main=1)
 
 # from 3D to 2D coordinates
-mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site == "Punta Gorda"], seedlings$Height_t[seedlings$Site == "Punta Gorda"], seedlings$Height_tplus1[seedlings$Site =="Punta Gorda"], pmat=pmat)
+mypoints <- trans3d(seedlings_g$Diameter_t[seedlings_g$Site == "Punta Gorda"], seedlings_g$Height_t[seedlings_g$Site == "Punta Gorda"], seedlings_g$Height_tplus1[seedlings_g$Site =="Punta Gorda"], pmat=pmat)
 # plot in 2D space with pointsize related to distance
 points(mypoints, col=4)
 
@@ -1129,7 +1142,7 @@ pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1_WT, ticktype="detailed",
       main="Wild Turkey", cex.main=1)
 
 # from 3D to 2D coordinates
-mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site == "Wild Turkey"], seedlings$Height_t[seedlings$Site == "Wild Turkey"], seedlings$Diameter_tplus1[seedlings$Site == "Wild Turkey"], pmat=pmat)
+mypoints <- trans3d(seedlings_g$Diameter_t[seedlings_g$Site == "Wild Turkey"], seedlings_g$Height_t[seedlings_g$Site == "Wild Turkey"], seedlings_g$Diameter_tplus1[seedlings_g$Site == "Wild Turkey"], pmat=pmat)
 # plot in 2D space with pointsize related to distance
 points(mypoints, col=4)
 
@@ -1142,7 +1155,7 @@ pmat<-persp(x1seq_seedlings, x2seq_seedlings, z2_WT, ticktype="detailed",
       main="Wild Turkey", cex.main=1)
 
 # from 3D to 2D coordinates
-mypoints <- trans3d(seedlings$Diameter_t[seedlings$Site == "Wild Turkey"], seedlings$Height_t[seedlings$Site == "Wild Turkey"], seedlings$Height_tplus1[seedlings$Site =="Wild Turkey"], pmat=pmat)
+mypoints <- trans3d(seedlings_g$Diameter_t[seedlings_g$Site == "Wild Turkey"], seedlings_g$Height_t[seedlings_g$Site == "Wild Turkey"], seedlings_g$Height_tplus1[seedlings_g$Site =="Wild Turkey"], pmat=pmat)
 # plot in 2D space with pointsize related to distance
 points(mypoints, col=4)
 
@@ -1155,71 +1168,72 @@ coeff_bigger=.1
 #Big Cypress IMAGE PLOT
 #Future Diameter
 image.plot(x1seq_seedlings, x2seq_seedlings, z1_BC, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, legend.lab = "Diameter at t+1 (mm)", main = "Big Cypress")
-points(seedlings$Diameter_t[seedlings$Site == "Big Cypress"], seedlings$Height_t[seedlings$Site == "Big Cypress"], cex=seedlings$Diameter_tplus1[seedlings$Site == "Big Cypress"]*coeff_bigger,  pch=1)
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Big Cypress"], seedlings_g$Height_t[seedlings_g$Site == "Big Cypress"], cex=seedlings_g$Diameter_tplus1[seedlings_g$Site == "Big Cypress"]*coeff_bigger,  pch=1)
 legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(0.5,1, 1.5, 2,2.5, 3, 3.5,4), c("0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4"), xpd=T, horiz = T, title="Diameter at t +1 (mm)")
 
 #Future Height
 image.plot(x1seq_seedlings, x2seq_seedlings, z2_BC, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, main ="Big Cypress",legend.lab = "Height at t+1 (cm)")
-points(seedlings$Diameter_t[seedlings$Site == "Big Cypress"], seedlings$Height_t[seedlings$Site == "Big Cypress"], cex=seedlings$Height_tplus1[seedlings$Site == "Big Cypress"]*coeff_bigger,  pch=1, bg = "white")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Big Cypress"], seedlings_g$Height_t[seedlings_g$Site == "Big Cypress"], cex=seedlings_g$Height_tplus1[seedlings_g$Site == "Big Cypress"]*coeff_bigger,  pch=1, bg = "white")
 legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)*coeff_bigger,c("3", "8", "13", "23", "28", "33", "38", "44"), xpd=T, horiz = T, title="Height at t +1 (cm)")
 
 #Cape Canaveral IMAGE PLOT
 #Future Diameter
 image.plot(x1seq_seedlings, x2seq_seedlings, z1_CC, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, legend.lab = "Diameter at t+1 (mm)", main = "Cape Canaveral")
-points(seedlings$Diameter_t[seedlings$Site == "Cape Canaveral"], seedlings$Height_t[seedlings$Site == "Cape Canaveral"], cex=seedlings$Diameter_tplus1[seedlings$Site == "Cape Canaveral"]*coeff_bigger,  pch=1)
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Cape Canaveral"], seedlings_g$Height_t[seedlings_g$Site == "Cape Canaveral"], cex=seedlings_g$Diameter_tplus1[seedlings_g$Site == "Cape Canaveral"]*coeff_bigger,  pch=1)
 legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(0.5,1, 1.5, 2,2.5, 3, 3.5,4), c("0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4"), xpd=T, horiz = T, title="Diameter at t +1 (mm)")
 
 #Future Height
 image.plot(x1seq_seedlings, x2seq_seedlings, z2_CC, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, main ="Cape Canaveral",legend.lab = "Height at t+1 (cm)")
-points(seedlings$Diameter_t[seedlings$Site == "Cape Canaveral"], seedlings$Height_t[seedlings$Site == "Cape Canaveral"], cex=seedlings$Height_tplus1[seedlings$Site == "Cape Canaveral"]*coeff_bigger,  pch=1, bg = "white")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Cape Canaveral"], seedlings_g$Height_t[seedlings_g$Site == "Cape Canaveral"], cex=seedlings_g$Height_tplus1[seedlings_g$Site == "Cape Canaveral"]*coeff_bigger,  pch=1, bg = "white")
 legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)*coeff_bigger,c("3", "8", "13", "23", "28", "33", "38", "44"), xpd=T, horiz = T, title="Height at t +1 (cm)")
 
 #Chekika IMAGE PLOT
 #Future Diameter
 image.plot(x1seq_seedlings, x2seq_seedlings, z1_C, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, legend.lab = "Diameter at t+1 (mm)", main = "Chekika")
-points(seedlings$Diameter_t[seedlings$Site == "Chekika"], seedlings$Height_t[seedlings$Site == "Chekika"], cex=seedlings$Diameter_tplus1[seedlings$Site == "Chekika"]*coeff_bigger,  pch=1)
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Chekika"], seedlings_g$Height_t[seedlings_g$Site == "Chekika"], cex=seedlings_g$Diameter_tplus1[seedlings_g$Site == "Chekika"]*coeff_bigger,  pch=1)
 legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(0.5,1, 1.5, 2,2.5, 3, 3.5,4), c("0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4"), xpd=T, horiz = T, title="Diameter at t +1 (mm)")
 
 #Future Height
 image.plot(x1seq_seedlings, x2seq_seedlings, z2_C, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, main ="Chekika",legend.lab = "Height at t+1 (cm)")
-points(seedlings$Diameter_t[seedlings$Site == "Chekika"], seedlings$Height_t[seedlings$Site == "Chekika"], cex=seedlings$Height_tplus1[seedlings$Site == "Chekika"]*coeff_bigger,  pch=1, bg = "white")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Chekika"], seedlings_g$Height_t[seedlings_g$Site == "Chekika"], cex=seedlings_g$Height_tplus1[seedlings_g$Site == "Chekika"]*coeff_bigger,  pch=1, bg = "white")
 legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)*coeff_bigger,c("3", "8", "13", "23", "28", "33", "38", "44"), xpd=T, horiz = T, title="Height at t +1 (cm)")
 
 #Fort Pierce IMAGE PLOT
 #Future Diameter
 image.plot(x1seq_seedlings, x2seq_seedlings, z1_FP, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, legend.lab = "Diameter at t+1 (mm)", main = "Fort Pierce")
-points(seedlings$Diameter_t[seedlings$Site == "Fort Pierce"], seedlings$Height_t[seedlings$Site == "Fort Pierce"], cex=seedlings$Diameter_tplus1[seedlings$Site == "Fort Pierce"]*coeff_bigger,  pch=1)
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Fort Pierce"], seedlings_g$Height_t[seedlings_g$Site == "Fort Pierce"], cex=seedlings_g$Diameter_tplus1[seedlings_g$Site == "Fort Pierce"]*coeff_bigger,  pch=1)
 legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(0.5,1, 1.5, 2,2.5, 3, 3.5,4), c("0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4"), xpd=T, horiz = T, title="Diameter at t +1 (mm)")
 
 #Future Height
 image.plot(x1seq_seedlings, x2seq_seedlings, z2_FP, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, main ="Fort Pierce",legend.lab = "Height at t+1 (cm)")
-points(seedlings$Diameter_t[seedlings$Site == "Fort Pierce"], seedlings$Height_t[seedlings$Site == "Fort Pierce"], cex=seedlings$Height_tplus1[seedlings$Site == "Fort Pierce"]*coeff_bigger,  pch=1, bg = "white")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Fort Pierce"], seedlings_g$Height_t[seedlings_g$Site == "Fort Pierce"], cex=seedlings_g$Height_tplus1[seedlings_g$Site == "Fort Pierce"]*coeff_bigger,  pch=1, bg = "white")
 legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)*coeff_bigger,c("3", "8", "13", "23", "28", "33", "38", "44"), xpd=T, horiz = T, title="Height at t +1 (cm)")
 
 #Punta Gorda IMAGE PLOT
 #Future Diameter
 image.plot(x1seq_seedlings, x2seq_seedlings, z1_PG, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, legend.lab = "Diameter at t+1 (mm)", main = "Punta Gorda")
-points(seedlings$Diameter_t[seedlings$Site == "Punta Gorda"], seedlings$Height_t[seedlings$Site == "Punta Gorda"], cex=seedlings$Diameter_tplus1[seedlings$Site == "Punta Gorda"]*coeff_bigger,  pch=1)
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Punta Gorda"], seedlings_g$Height_t[seedlings_g$Site == "Punta Gorda"], cex=seedlings_g$Diameter_tplus1[seedlings_g$Site == "Punta Gorda"]*coeff_bigger,  pch=1)
 legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(0.5,1, 1.5, 2,2.5, 3, 3.5,4), c("0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4"), xpd=T, horiz = T, title="Diameter at t +1 (mm)")
 
 #Future Height
 image.plot(x1seq_seedlings, x2seq_seedlings, z2_PG, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, main ="Punta Gorda",legend.lab = "Height at t+1 (cm)")
-points(seedlings$Diameter_t[seedlings$Site == "Punta Gorda"], seedlings$Height_t[seedlings$Site == "Punta Gorda"], cex=seedlings$Height_tplus1[seedlings$Site == "Punta Gorda"]*coeff_bigger,  pch=1, bg = "white")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Punta Gorda"], seedlings_g$Height_t[seedlings_g$Site == "Punta Gorda"], cex=seedlings_g$Height_tplus1[seedlings_g$Site == "Punta Gorda"]*coeff_bigger,  pch=1, bg = "white")
 legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)*coeff_bigger,c("3", "8", "13", "23", "28", "33", "38", "44"), xpd=T, horiz = T, title="Height at t +1 (cm)")
 
 #Wild Turkey IMAGE PLOT
 #Future Diameter
 image.plot(x1seq_seedlings, x2seq_seedlings, z1_WT, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, legend.lab = "Diameter at t+1 (mm)", main = "Wild Turkey")
-points(seedlings$Diameter_t[seedlings$Site == "Wild Turkey"], seedlings$Height_t[seedlings$Site == "Wild Turkey"], cex=seedlings$Diameter_tplus1[seedlings$Site == "Wild Turkey"]*coeff_bigger,  pch=1)
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Wild Turkey"], seedlings_g$Height_t[seedlings_g$Site == "Wild Turkey"], cex=seedlings_g$Diameter_tplus1[seedlings_g$Site == "Wild Turkey"]*coeff_bigger,  pch=1)
 legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(0.5,1, 1.5, 2,2.5, 3, 3.5,4), c("0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4"), xpd=T, horiz = T, title="Diameter at t +1 (mm)")
 
 #Future Height
 image.plot(x1seq_seedlings, x2seq_seedlings, z2_WT, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, main ="Wild Turkey",legend.lab = "Height at t+1 (cm)")
-points(seedlings$Diameter_t[seedlings$Site == "Wild Turkey"], seedlings$Height_t[seedlings$Site == "Wild Turkey"], cex=seedlings$Height_tplus1[seedlings$Site == "Wild Turkey"]*coeff_bigger,  pch=1, bg = "white")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Wild Turkey"], seedlings_g$Height_t[seedlings_g$Site == "Wild Turkey"], cex=seedlings_g$Height_tplus1[seedlings_g$Site == "Wild Turkey"]*coeff_bigger,  pch=1, bg = "white")
 legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)*coeff_bigger,c("3", "8", "13", "23", "28", "33", "38", "44"), xpd=T, horiz = T, title="Height at t +1 (cm)")
 
 
 ```
+
 ### --g1_12: mu_x = b0 + b1(diameter) + b2(height) + epsilon(year{'10, '11, '12, '13, '14})
              mu_y = b3 + b4(diameter) + b5(height) + epsilon(year{'10, '11, '12, '13, '14})
       
@@ -1457,8 +1471,9 @@ legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)
 
 
 
+
 ###- AIC
-```{r seedling survival aic}
+```{r seedling survival aic, eval = FALSE}
 #AIC is not very useful here, since the different classes of models are modeling different things. And AIC cannot be computed for the models where both diameter and height are being modeled?
 
 #For all models including diameter only (no year)
