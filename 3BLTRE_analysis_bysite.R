@@ -42,9 +42,8 @@ h4=(800-16)/m4
  load("./PG/sens_PG.RData")
  load("./WT/sens_WT.RData")
  
- sens_avg <- (sens_BC + sens_CC + sens_C + sens_FP + sens_PG + sens_WT)/6
- save(sens_avg, file="sens_avg.RData")
- rm(sens_CC, sens_C, sens_FP, sens_PG, sens_WT)
+ #WRONG! Go back and calculate the sensitivity of the A_avg matrix 
+
  
 ################
 ###Big Cypress     #	

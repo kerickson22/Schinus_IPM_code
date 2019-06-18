@@ -921,8 +921,8 @@ sd_y <-summary(lm(seedlings$Height_tplus1 ~ seedlings$Diameter_t + seedlings$Hei
  
  
 
-z1_BC<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b )))
-z2_BC<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b3+ b4*a + b5*b)))
+z1_BC<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
+z2_BC<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
 
 ##Cape Canaveral
 #Grab parameters associated with future diameter
@@ -937,8 +937,8 @@ b3<-g1_11$coeff[1,2] + g1_11$coeff[4,2]
 b4<-g1_11$coeff[2,2]
 b5<-g1_11$coeff[3,2]
 
-z1_CC<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b )))
-z2_CC<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b3+ b4*a + b5*b)))
+z1_CC<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
+z2_CC<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
 
 ##Chekika
 #Grab parameters associated with future diameter
@@ -953,8 +953,8 @@ b3<-g1_11$coeff[1,2] + g1_11$coeff[5,2]
 b4<-g1_11$coeff[2,2]
 b5<-g1_11$coeff[3,2]
 
-z1_C<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b )))
-z2_C<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b3+ b4*a + b5*b)))
+z1_C<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
+z2_C<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
 
 ##Fort Pierce
 #Grab parameters associated with future diameter
@@ -969,8 +969,8 @@ b3<-g1_11$coeff[1,2] + g1_11$coeff[6,2]
 b4<-g1_11$coeff[2,2]
 b5<-g1_11$coeff[3,2]
 
-z1_FP<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b )))
-z2_FP<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b3+ b4*a + b5*b)))
+z1_FP<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
+z2_FP<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
 
 
 ##Punta Gorda
@@ -986,8 +986,8 @@ b3<-g1_11$coeff[1,2] + g1_11$coeff[7,2]
 b4<-g1_11$coeff[2,2]
 b5<-g1_11$coeff[3,2]
 
-z1_PG<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b )))
-z2_PG<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b3+ b4*a + b5*b)))
+z1_PG<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
+z2_PG<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
 
 ##Wild Turkey
 #Grab parameters associated with future diameter
@@ -1002,8 +1002,8 @@ b3<-g1_11$coeff[1,2] + g1_11$coeff[8,2]
 b4<-g1_11$coeff[2,2]
 b5<-g1_11$coeff[3,2]
 
-z1_WT<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b )))
-z2_WT<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b3+ b4*a + b5*b)))
+z1_WT<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
+z2_WT<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
 
 
 ##### 3D plots
