@@ -1,15 +1,21 @@
-# Constructs a integral projection model using diameter and height as two continuous
-# structuring state variables, where population transition probabilities are
-# modeled on two size domains.
+#***********************************
+# IPM: Diameter and Height by Site *
+#***********************************
 
-# This script is modified (by KDE and CCH) from the code provided by Ellner and Rees, 2006 that is available for download at: 
+#Constructs a integral projection model using diameter and height as
+# two continuous structuring state variables, where population transition
+# probabilities are modeled on two size domains.
+
+# This script is modified (by KDE and CCH) from the code provided by
+# Ellner and Rees, 2006 that is available for download at: 
 # https://www.jstor.org/stable/get_asset/10.1086/499438?supp_index=0&refreqid=excelsior%3Aa8885edea7fee9610a049fc3992a448a
 
-#Here, we expand on Ellner and Rees' code by modeling the population dynamics on two continuous size domains 
-# (See details in associated manuscript)
+# Here, we expand on Ellner and Rees' code by modeling the population
+# dynamics on two continuous size domains (See details in associated manuscript)
 
-# Due to the large size of the objects created, this code can be slow to run. 
-# To save disk space, whenever possible, large objects are saved and then removed from the workspace 
+# Due to the large size of the objects created, this code can be slow
+# to run. To save disk space, whenever possible, large objects are
+# saved and then removed from the workspace 
 
 #clear everything
 rm(list=ls(all=TRUE))
@@ -39,16 +45,15 @@ tol=1.e-8;
 
 
 
-# Function to do an image plot of a matrix in the usual orientation, A(1,1) at top left  
+# Function to do an image plot of a matrix in the usual orientation,
+# A(1,1) at top left  
 matrix.image=function(x,y,A,col=topo.colors(200),...) {
 	nx=length(x); ny=length(y); 
 	x1=c(1.5*x[1]-0.5*x[2],1.5*x[nx]-0.5*x[nx-1]); 
 	y1=c(1.5*y[1]-0.5*y[2],1.5*y[ny]-0.5*y[ny-1]); 
 	image(list(x=x,y=y,z=t(A)),xlim=x1,ylim=rev(y1),col=col,bty="u",...);  
 }
-#============================================================================================#
-# (I) Parameters and demographic functions for computing the kernel 
-#============================================================================================#
+# (I) Parameters and demographic functions for computing the kernel #####
 
 #p.vecs are defined externally in script 1demography_models.R
 load('./BC/p.vec_BC.RData')
@@ -58,8 +63,8 @@ load('./FP/p.vec_FP.RData')
 load('./PG/p.vec_PG.RData')
 load('./WT/p.vec_WT.RData')
 
-#============================================================================# 
-#  Define the kernels and iteration matrix:
+
+# Define the kernels and iteration matrix:
 #Domain 1: Seedling Domain
 #	for diam=diameter in range [0, 1.6]
 #	for height in range [0, 16]
@@ -71,21 +76,21 @@ load('./WT/p.vec_WT.RData')
 
 
 
-#Survival-Growth of Seedlings (in D1)
+## Survival-Growth of Seedlings (in D1)
 pyx1=function(diamp,heightp,diam, height, params) { (1-((exp(params[12]+params[13]*diam + params[14]*height)/(1+exp(params[12]+params[13]*diam + params[14]*height))
 )))*(exp(params[1]+params[2]*diam+params[3]*height)/(1+exp(params[1]+params[2]*diam+params[3]*height)))*dtnorm(diamp,mean=params[4] + params[5]*diam + params[6]*height,sd=params[7], lower=0, upper=1.6)*dtnorm(heightp,mean=params[8]+params[9]*diam + params[10]*height,sd=params[11], lower=0, upper=16)}
 
 
-#Survival-Growth of Larger Plants (in D2)
+# Survival-Growth of Larger Plants (in D2)
 #Note that D2 survival is multiplied by 0.997 to avoid 100% survival 
 
 pyx2=function(diamp,heightp,diam, height, params) { 0.997*(exp(params[19]+params[20]*diam+params[21]*height)/(1+exp(params[19]+params[20]*diam+params[21]*height)))*dtnorm(diamp,mean=params[22] + params[23]*diam + params[24]*height,sd=params[25], lower=1.6, upper=700)*dtnorm(heightp,mean=params[26]+params[27]*diam + params[28]*height,sd=params[29], lower=16, upper=800)}
 
 
-#Fecundity=P(fruiting)*# of Fruits Produced*P(survival of seeds)*Distribution of Seedling Diameters*Distribution of Seedling Heights
+# Fecundity=P(fruiting)*# of Fruits Produced*P(survival of seeds)*Distribution of Seedling Diameters*Distribution of Seedling Heights
 fyx=function(diamp,heightp,diam,height, params) {(exp(params[30]+params[31]*height)/(1+exp(params[30]+params[31]*height)))*(params[32]*diam*diam)*params[38]*params[37]*params[39]*dtnorm(diamp,mean=params[33],sd=params[34], lower=0, upper=1.6)*dtnorm(heightp,mean=params[35],sd=params[36], lower=0, upper=34)}
 
-#Graduation = P(graduation)*Distribution of Graduates Diams*Distribution of Graduates Heights
+#Maturation = P(maturation)*Distribution of Graduates Diams*Distribution of Graduates Heights
 gyx=function(diamp,heightp,diam,height, params) {((exp(params[1]+params[2]*diam+params[3]*height)/(1+exp(params[1]+params[2]*diam+params[3]*height))))*(exp(params[12]+params[13]*diam + params[14]*height)/(1+exp(params[12]+params[13]*diam + params[14]*height))
 )*dtnorm(diamp,mean=params[15],sd=params[16], lower=1.6, upper=700)*dtnorm(heightp,mean=params[17],sd=params[18], lower=16, upper=800)}
 
@@ -107,1013 +112,392 @@ h4=(800-16)/m4
 # though you can probably do better if you need to. The shortcuts here have 
 # been checked against the results from code that uses loops for everything. (comment from Ellner and Rees)
 
+ sites <- c("BC", "CC", "C", "FP", "PG", "WT")
  
-###Construct D1 (Seedling Domain):
-plop=function(i,j) {(j-1)*m1+i} # for putting values in proper place in A 
-Plop=outer(1:m1,1:m2,plop); 
-
-D1_BC=matrix(0,m1*m2,m1*m2); 
-D1_CC=matrix(0,m1*m2,m1*m2);
-D1_C=matrix(0,m1*m2,m1*m2); 
-D1_FP=matrix(0,m1*m2,m1*m2); 
-D1_PG=matrix(0,m1*m2,m1*m2); 
-D1_WT=matrix(0,m1*m2,m1*m2); 
+# Construct D1 (Seedling Domain): #####
  
-
-Kvals_D1_BC=array(0,c(m1,m2,m1,m2));  
-Kvals_D1_CC=array(0,c(m1,m2,m1,m2));  
-Kvals_D1_C=array(0,c(m1,m2,m1,m2));  
-Kvals_D1_FP=array(0,c(m1,m2,m1,m2));  
-Kvals_D1_PG=array(0,c(m1,m2,m1,m2));
-Kvals_D1_WT=array(0,c(m1,m2,m1,m2));  
-
-#Big Cypress
-for(i in 1:m1){
-	for(j in 1:m2){
-		for(k in 1:m1){
-				kvals=pyx1(y1[k],y2[1:m2],y1[i],y2[j], p.vec_BC)
-				D1_BC[Plop[k,1:m2],Plop[i,j]]=kvals
-				Kvals_D1_BC[k,1:m2,i,j]=kvals
-			
-	}}
-	cat(i,"\n"); 
-}
-D1_BC=D1_BC*h1*h2 #multiply D1 by widths
-save(D1_BC, file="./BC/D1_BC.RData")
-save(Kvals_D1_BC, file="./BC/Kvals_D1_BC.RData")
-rm(D1_BC, Kvals_D1_BC)
-#Cape Canaveral
-for(i in 1:m1){
-  for(j in 1:m2){
-    for(k in 1:m1){
-      kvals=pyx1(y1[k],y2[1:m2],y1[i],y2[j], p.vec_CC)
-      D1_CC[Plop[k,1:m2],Plop[i,j]]=kvals
-      Kvals_D1_CC[k,1:m2,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}
-D1_CC=D1_CC*h1*h2 #multiply D1 by widths
-save(D1_CC, file="./CC/D1_CC.RData")
-save(Kvals_D1_CC, file="./CC/Kvals_D1_CC.RData")
-rm(D1_CC, Kvals_D1_CC)
-#Chekika
-for(i in 1:m1){
-  for(j in 1:m2){
-    for(k in 1:m1){
-      kvals=pyx1(y1[k],y2[1:m2],y1[i],y2[j], p.vec_C)
-      D1_C[Plop[k,1:m2],Plop[i,j]]=kvals
-      Kvals_D1_C[k,1:m2,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}
-D1_C=D1_C*h1*h2 #multiply D1 by widths
-save(D1_C, file="./C/D1_C.RData")
-save(Kvals_D1_C, file="./C/Kvals_D1_C.RData")
-rm(D1_C, Kvals_D1_C)
-#Fort Pierce
-for(i in 1:m1){
-  for(j in 1:m2){
-    for(k in 1:m1){
-      kvals=pyx1(y1[k],y2[1:m2],y1[i],y2[j], p.vec_FP)
-      D1_FP[Plop[k,1:m2],Plop[i,j]]=kvals
-      Kvals_D1_FP[k,1:m2,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}
-D1_FP=D1_FP*h1*h2 #multiply D1 by widths
-save(D1_FP, file="./FP/D1_FP.RData")
-save(Kvals_D1_FP, file="./FP/Kvals_D1_FP.RData")
-rm(D1_FP, Kvals_D1_FP)
-#Punta Gorda
-for(i in 1:m1){
-  for(j in 1:m2){
-    for(k in 1:m1){
-      kvals=pyx1(y1[k],y2[1:m2],y1[i],y2[j], p.vec_PG)
-      D1_PG[Plop[k,1:m2],Plop[i,j]]=kvals
-      Kvals_D1_PG[k,1:m2,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}
-D1_PG=D1_PG*h1*h2 #multiply D1 by widths
-save(D1_PG, file="./PG/D1_PG.RData")
-save(Kvals_D1_PG, file="./PG/Kvals_D1_PG.RData")
-rm(D1_PG, Kvals_D1_PG)
-#Wild Turkey
-for(i in 1:m1){
-  for(j in 1:m2){
-    for(k in 1:m1){
-      kvals=pyx1(y1[k],y2[1:m2],y1[i],y2[j], p.vec_WT)
-      D1_WT[Plop[k,1:m2],Plop[i,j]]=kvals
-      Kvals_D1_WT[k,1:m2,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}
-D1_WT=D1_WT*h1*h2 #multiply D1 by widths
-save(D1_WT, file="./WT/D1_WT.RData")
-save(Kvals_D1_WT, file="./WT/Kvals_D1_WT.RData")
-rm(D1_WT, Kvals_D1_WT)
-
-
-
+ build_D1 = function(p.vec) {
+   plop=function(i,j) {(j-1)*m1+i} # for putting values in proper place in A 
+   Plop=outer(1:m1,1:m2,plop) 
+   
+   D1=matrix(0,m1*m2,m1*m2)
+   Kvals_D1=array(0,c(m1,m2,m1,m2))  
+   
+   for(i in 1:m1){
+     for(j in 1:m2){
+       for(k in 1:m1){
+         kvals=pyx1(y1[k],y2[1:m2],y1[i],y2[j], p.vec)
+         D1[Plop[k,1:m2],Plop[i,j]]=kvals
+         Kvals_D1[k,1:m2,i,j]=kvals
+         
+       }}
+     cat(i,"\n"); 
+   }
+   
+   D1=D1*h1*h2 #multiply D1 by widths
+   return(list(D1 = D1, Kvals_D1 = Kvals_D1))
+ }
+ 
+ #Big Cypress
+ thing <- build_D1(p.vec_BC)
+ saveRDS(thing$D1, file = "./BC/D1_BC.rds")
+ saveRDS(thing$Kvals_D1, file ="./BC/Kvals_D1_BC.rds" )
+ 
+ #Cape Canaveral
+ thing <- build_D1(p.vec_CC)
+ saveRDS(thing$D1, file = "./CC/D1_CC.rds")
+ saveRDS(thing$Kvals_D1, file ="./CC/Kvals_D1_CC.rds" )
+ 
+ #Chekika
+ thing <- build_D1(p.vec_C)
+ saveRDS(thing$D1, file = "./C/D1_C.rds")
+ saveRDS(thing$Kvals_D1, file ="./C/Kvals_D1_C.rds" )
+ 
+ #Fort Pierce
+ thing <- build_D1(p.vec_FP)
+ saveRDS(thing$D1, file = "./FP/D1_FP.rds")
+ saveRDS(thing$Kvals_D1, file ="./FP/Kvals_D1_FP.rds" )
+ 
+ #Punta Gorda
+ thing <- build_D1(p.vec_PG)
+ saveRDS(thing$D1, file = "./PG/D1_PG.rds")
+ saveRDS(thing$Kvals_D1, file ="./PG/Kvals_D1_PG.rds" )
+ 
+ #Wild Turkey
+ thing <- build_D1(p.vec_WT)
+ saveRDS(thing$D1, file = "./WT/D1_WT.rds")
+ saveRDS(thing$Kvals_D1, file ="./WT/Kvals_D1_WT.rds" )
 		
-###Construct D2 (Large Domain):
-plop=function(i,j) {(j-1)*m3+i} # for putting values in proper place in A 
-Plop=outer(1:m3,1:m4,plop); 
+# Construct D2 (Large Domain): #####
+ build_D2 = function(p.vec) {
+  plop=function(i,j) {(j-1)*m3+i} # for putting values in proper place in A 
+  Plop=outer(1:m3,1:m4,plop); 
 
-D2_BC=matrix(0,m3*m4,m3*m4);
-D2_CC=matrix(0,m3*m4,m3*m4)
-D2_C=matrix(0,m3*m4,m3*m4)
-D2_FP=matrix(0,m3*m4,m3*m4)
-D2_PG=matrix(0,m3*m4,m3*m4)
-D2_WT=matrix(0,m3*m4,m3*m4)
+  D2=matrix(0,m3*m4,m3*m4);
+  Kvals_D2=array(0,c(m3,m4,m3,m4));  
 
-Kvals_D2_BC=array(0,c(m3,m4,m3,m4));  
-Kvals_D2_CC=array(0,c(m3,m4,m3,m4)); 
-Kvals_D2_C=array(0,c(m3,m4,m3,m4)); 
-Kvals_D2_FP=array(0,c(m3,m4,m3,m4));
-Kvals_D2_PG=array(0,c(m3,m4,m3,m4));
-Kvals_D2_WT=array(0,c(m3,m4,m3,m4));
-
-#Big Cypress
-for(i in 1:m3){
-	for(j in 1:m4){
-		for(k in 1:m3){
-				kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec_BC)
-				D2_BC[Plop[k,1:m4],Plop[i,j]]=kvals
-				Kvals_D2_BC[k,1:m4,i,j]=kvals
+  for(i in 1:m3){
+	  for(j in 1:m4){
+		  for(k in 1:m3){
+			  	kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec)
+				  D2[Plop[k,1:m4],Plop[i,j]]=kvals
+				Kvals_D2[k,1:m4,i,j]=kvals
 			
-	}}
+	  }}
 	cat(i,"\n"); 
-}		
-D2_BC=D2_BC*h3*h4 #Multiply D2 by widths
-save(D2_BC, file="./BC/D2_BC.RData")
-save(Kvals_D2_BC, file="./BC/Kvals_D2_BC")
-rm(D2_BC, Kvals_D2_BC)
+  }		
+  D2=D2*h3*h4 #Multiply D2 by widths
+  return(list(D2 = D2, Kvals_D2 = Kvals_D2))
+ }
+ 
+ #Big Cypress
+ thing <- build_D2(p.vec_BC)
+ saveRDS(thing$D2, file = "./BC/D2_BC.rds")
+ saveRDS(thing$Kvals_D2, file ="./BC/Kvals_D2_BC.rds" )
+ #Cape Canaveral
+ thing <- build_D2(p.vec_CC)
+ saveRDS(thing$D2, file = "./CC/D2_CC.rds")
+ saveRDS(thing$Kvals_D2, file ="./CC/Kvals_D2_CC.rds" )
+ #Chekika
+ thing <- build_D2(p.vec_C)
+ saveRDS(thing$D2, file = "./C/D2_C.rds")
+ saveRDS(thing$Kvals_D2, file ="./C/Kvals_D2_C.rds" )
+ #Fort Pierce
+ thing <- build_D2(p.vec_FP)
+ saveRDS(thing$D2, file = "./FP/D2_FP.rds")
+ saveRDS(thing$Kvals_D2, file ="./FP/Kvals_D2_FP.rds" )
+ #Punta Gorda
+ thing <- build_D2(p.vec_PG)
+ saveRDS(thing$D2, file = "./PG/D2_PG.rds")
+ saveRDS(thing$Kvals_D2, file ="./PG/Kvals_D2_PG.rds" )
+ #Wild Turkey
+ thing <- build_D2(p.vec_WT)
+ saveRDS(thing$D2, file = "./WT/D2_WT.rds")
+ saveRDS(thing$Kvals_D2, file ="./WT/Kvals_D2_WT.rds" )
+ 
+# Construct F (Fertility): #####
+ build_F = function(p.vec) {
+  plop1=function(i, j) {(j-1)*m1 + i}
+  plop2=function(i, j) {(j-1)*m3 + i}
+  Plop1=outer(1:m1,1:m2,plop1); 
+  Plop2=outer(1:m3, 1:m4, plop2);
 
-#Cape Canaveral
-for(i in 1:m3){
-  for(j in 1:m4){
-    for(k in 1:m3){
-      kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec_CC)
-      D2_CC[Plop[k,1:m4],Plop[i,j]]=kvals
-      Kvals_D2_CC[k,1:m4,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}		
-D2_CC=D2_CC*h3*h4 #Multiply D2 by widths
-save(D2_CC, file="./CC/D2_CC.RData")
-save(Kvals_D2_CC, file="./CC/Kvals_D2_CC")
-rm(D2_CC, Kvals_D2_CC)
+  F=matrix(0,m1*m2,m3*m4); 
+  Kvals_F=array(0, c(m1, m2, m3, m4))
 
-#Chekika
-for(i in 1:m3){
-  for(j in 1:m4){
-    for(k in 1:m3){
-      kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec_C)
-      D2_C[Plop[k,1:m4],Plop[i,j]]=kvals
-      Kvals_D2_C[k,1:m4,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}		
-D2_C=D2_C*h3*h4 #Multiply D2 by widths
-save(D2_C, file="./C/D2_C.RData")
-save(Kvals_D2_C, file="./C/Kvals_D2_C")
-rm(D2_C, Kvals_D2_C)
+  for(i in 1:m3) {
+	  for (j in 1:m4) {
+		  for (k in 1:m1) {
+			  kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec)
+			  F[Plop1[k, 1:m2], Plop2[i,j]]=kvals
+			  Kvals_F[k, 1:m2, i, j]=kvals
+		  }}
+		  cat(i, "\n");
+  }
+  F=F*h1*h2
+  return(list(F = F, Kvals_F = Kvals_F))
+}
 
-#Fort Pierce
-for(i in 1:m3){
-  for(j in 1:m4){
-    for(k in 1:m3){
-      kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec_FP)
-      D2_FP[Plop[k,1:m4],Plop[i,j]]=kvals
-      Kvals_D2_FP[k,1:m4,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}		
-D2_FP=D2_FP*h3*h4 #Multiply D2 by widths
-save(D2_FP, file="./FP/D2_FP.RData")
-save(Kvals_D2_FP, file="./FP/Kvals_D2_FP")
-rm(D2_FP, Kvals_D2_FP)
-
-#Punta Gorda
-for(i in 1:m3){
-  for(j in 1:m4){
-    for(k in 1:m3){
-      kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec_PG)
-      D2_PG[Plop[k,1:m4],Plop[i,j]]=kvals
-      Kvals_D2_PG[k,1:m4,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}		
-D2_PG=D2_PG*h3*h4 #Multiply D2 by widths
-save(D2_PG, file="./PG/D2_PG.RData")
-save(Kvals_D2_PG, file="./PG/Kvals_D2_PG")
-rm(D2_PG, Kvals_D2_PG)
-
-#Wild Turkey
-for(i in 1:m3){
-  for(j in 1:m4){
-    for(k in 1:m3){
-      kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec_WT)
-      D2_WT[Plop[k,1:m4],Plop[i,j]]=kvals
-      Kvals_D2_WT[k,1:m4,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}		
-D2_WT=D2_WT*h3*h4 #Multiply D2 by widths
-save(D2_WT, file="./WT/D2_WT.RData")
-save(Kvals_D2_WT, file="./WT/Kvals_D2_WT")
-rm(D2_WT, Kvals_D2_WT)
+ #Big Cypress
+ thing <- build_F(p.vec_BC)
+ saveRDS(thing$F, file = "./BC/F_BC.rds")
+ saveRDS(thing$Kvals_F, file ="./BC/Kvals_F_BC.rds" )
+ #Cape Canaveral
+ thing <- build_F(p.vec_CC)
+ saveRDS(thing$F, file = "./CC/F_CC.rds")
+ saveRDS(thing$Kvals_F, file ="./CC/Kvals_F_CC.rds" )
+ #Chekika
+ thing <- build_F(p.vec_C)
+ saveRDS(thing$F, file = "./C/F_C.rds")
+ saveRDS(thing$Kvals_F, file ="./C/Kvals_F_C.rds" )
+ #Fort Pierce
+ thing <- build_F(p.vec_FP)
+ saveRDS(thing$F, file = "./FP/F_FP.rds")
+ saveRDS(thing$Kvals_F, file ="./FP/Kvals_F_FP.rds" )
+ #Punta Gorda
+ thing <- build_F(p.vec_PG)
+ saveRDS(thing$F, file = "./PG/F_PG.rds")
+ saveRDS(thing$Kvals_F, file ="./PG/Kvals_F_PG.rds" )
+ #Wild Turkey
+ thing <- build_F(p.vec_WT)
+ saveRDS(thing$F, file = "./WT/F_WT.rds")
+ saveRDS(thing$Kvals_F, file ="./WT/Kvals_F_WT.rds" )
+ 
 
 
+# Construct M (Maturation): #####
+ 
+build_G = function(p.vec) {
+  plop1=function(i, j) {(j-1)*m3 + i}
+  plop2=function(i, j) {(j-1)*m1 + i}
+  Plop1=outer(1:m3,1:m4,plop1); 
+  Plop2=outer(1:m1, 1:m2, plop2);
 
+  G=matrix(0,m3*m4,m1*m2); 
+  Kvals_G=array(0, c(m3, m4, m1, m2))
+    
+  for(i in 1:m1) {
+	  for (j in 1:m2) {
+		  for (k in 1:m3) {
+			  kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec)
+			  G[Plop1[k, 1:m4], Plop2[i,j]]=kvals
+			  Kvals_G[k, 1:m4, i, j]=kvals
+		  }}
+		  cat(i, "\n");
+  }
+  G=G*h3*h4
+  return(list(G = G, Kvals_G = Kvals_G))
+}
+ 
+ #Big Cypress
+ thing <- build_G(p.vec_BC)
+ saveRDS(thing$G, file = "./BC/G_BC.rds")
+ saveRDS(thing$Kvals_G, file ="./BC/Kvals_G_BC.rds" )
+ #Cape Canaveral
+ thing <- build_G(p.vec_CC)
+ saveRDS(thing$G, file = "./CC/G_CC.rds")
+ saveRDS(thing$Kvals_G, file ="./CC/Kvals_G_CC.rds" )
+ #Chekika
+ thing <- build_G(p.vec_C)
+ saveRDS(thing$G, file = "./C/G_C.rds")
+ saveRDS(thing$Kvals_G, file ="./C/Kvals_G_C.rds" )
+ #Fort Pierce
+ thing <- build_G(p.vec_FP)
+ saveRDS(thing$G, file = "./FP/G_FP.rds")
+ saveRDS(thing$Kvals_G, file ="./FP/Kvals_G_FP.rds" )
+ #Punta Gorda
+ thing <- build_G(p.vec_PG)
+ saveRDS(thing$G, file = "./PG/G_PG.rds")
+ saveRDS(thing$Kvals_G, file ="./PG/Kvals_G_PG.rds" )
+ #Wild Turkey
+ thing <- build_G(p.vec_WT)
+ saveRDS(thing$G, file = "./WT/G_WT.rds")
+ saveRDS(thing$Kvals_G, file ="./BC/Kvals_G_WT.rds" )
 
-
-
-
-
-
-###Construct F (Fertility):
-plop1=function(i, j) {(j-1)*m1 + i}
-plop2=function(i, j) {(j-1)*m3 + i}
-Plop1=outer(1:m1,1:m2,plop1); 
-Plop2=outer(1:m3, 1:m4, plop2);
-
-F_BC=matrix(0,m1*m2,m3*m4); 
-F_CC=matrix(0,m1*m2,m3*m4);
-F_C=matrix(0,m1*m2,m3*m4);
-F_FP=matrix(0,m1*m2,m3*m4);
-F_PG=matrix(0,m1*m2,m3*m4);
-F_WT=matrix(0,m1*m2,m3*m4);
-
-Kvals_F_BC=array(0, c(m1, m2, m3, m4))
-Kvals_F_CC=array(0, c(m1, m2, m3, m4))
-Kvals_F_C=array(0, c(m1, m2, m3, m4))
-Kvals_F_FP=array(0, c(m1, m2, m3, m4))
-Kvals_F_PG=array(0, c(m1, m2, m3, m4))
-Kvals_F_WT=array(0, c(m1, m2, m3, m4))
-
+rm(thing)
+gc()
+# Assemble the matrices #####
 
 #Big Cypress
-for(i in 1:m3) {
-	for (j in 1:m4) {
-		for (k in 1:m1) {
-			kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec_BC)
-			F_BC[Plop1[k, 1:m2], Plop2[i,j]]=kvals
-			Kvals_F_BC[k, 1:m2, i, j]=kvals
-		}}
-		cat(i, "\n");
-}
-F_BC=F_BC*h1*h2
-save(F_BC, file="./BC/F_BC.RData")
-save(Kvals_F_BC, file="./BC/Kvals_F_BC.RData")
-rm(F_BC, Kvals_F_BC)
-
-#Cape Canaveral
-for(i in 1:m3) {
-  for (j in 1:m4) {
-    for (k in 1:m1) {
-      kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec_CC)
-      F_CC[Plop1[k, 1:m2], Plop2[i,j]]=kvals
-      Kvals_F_CC[k, 1:m2, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-F_CC=F_CC*h1*h2
-save(F_CC, file="./CC/F_CC.RData")
-save(Kvals_F_CC, file="./CC/Kvals_F_CC.RData")
-rm(F_CC, Kvals_F_CC)
-
-#Chekika
-for(i in 1:m3) {
-  for (j in 1:m4) {
-    for (k in 1:m1) {
-      kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec_C)
-      F_C[Plop1[k, 1:m2], Plop2[i,j]]=kvals
-      Kvals_F_C[k, 1:m2, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-F_C=F_C*h1*h2
-save(F_C, file="./C/F_C.RData")
-save(Kvals_F_C, file="./C/Kvals_F_C.RData")
-rm(F_C, Kvals_F_C)
-
-#Fort Pierce
-for(i in 1:m3) {
-  for (j in 1:m4) {
-    for (k in 1:m1) {
-      kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec_FP)
-      F_FP[Plop1[k, 1:m2], Plop2[i,j]]=kvals
-      Kvals_F_FP[k, 1:m2, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-F_FP=F_FP*h1*h2
-save(F_FP, file="./FP/F_FP.RData")
-save(Kvals_F_FP, file="./FP/Kvals_F_FP.RData")
-rm(F_FP, Kvals_F_FP)
-
-#Punta Gorda
-for(i in 1:m3) {
-  for (j in 1:m4) {
-    for (k in 1:m1) {
-      kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec_PG)
-      F_PG[Plop1[k, 1:m2], Plop2[i,j]]=kvals
-      Kvals_F_PG[k, 1:m2, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-F_PG=F_PG*h1*h2
-save(F_PG, file="./PG/F_PG.RData")
-save(Kvals_F_PG, file="./PG/Kvals_F_PG.RData")
-rm(F_PG, Kvals_F_PG)
-
-#Wild Turkey
-for(i in 1:m3) {
-  for (j in 1:m4) {
-    for (k in 1:m1) {
-      kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec_WT)
-      F_WT[Plop1[k, 1:m2], Plop2[i,j]]=kvals
-      Kvals_F_WT[k, 1:m2, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-F_WT=F_WT*h1*h2
-save(F_WT, file="./WT/F_WT.RData")
-save(Kvals_F_WT, file="./WT/Kvals_F_WT.RData")
-rm(F_WT, Kvals_F_WT)
-
-
-
-###Construct G (Graduation):
-plop1=function(i, j) {(j-1)*m3 + i}
-plop2=function(i, j) {(j-1)*m1 + i}
-Plop1=outer(1:m3,1:m4,plop1); 
-Plop2=outer(1:m1, 1:m2, plop2);
-
-G_BC=matrix(0,m3*m4,m1*m2); 
-G_CC=matrix(0,m3*m4,m1*m2); 
-G_C=matrix(0,m3*m4,m1*m2); 
-G_FP=matrix(0,m3*m4,m1*m2); 
-G_PG=matrix(0,m3*m4,m1*m2);
-G_WT=matrix(0,m3*m4,m1*m2);
-
-Kvals_G_BC=array(0, c(m3, m4, m1, m2))
-Kvals_G_CC=array(0, c(m3, m4, m1, m2))
-Kvals_G_C=array(0, c(m3, m4, m1, m2))
-Kvals_G_FP=array(0, c(m3, m4, m1, m2))
-Kvals_G_PG=array(0, c(m3, m4, m1, m2))
-Kvals_G_WT=array(0, c(m3, m4, m1, m2))
-
-#Big Cypress
-for(i in 1:m1) {
-	for (j in 1:m2) {
-		for (k in 1:m3) {
-			kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec_BC)
-			G_BC[Plop1[k, 1:m4], Plop2[i,j]]=kvals
-			Kvals_G_BC[k, 1:m4, i, j]=kvals
-		}}
-		cat(i, "\n");
-}
-G_BC=G_BC*h3*h4
-save(G_BC, file="./BC/G_BC.RData")
-save(Kvals_G_BC, file="./BC/Kvals_G_BC.RData")
-rm(G_BC, Kvals_G_BC)
-
-#Cape Canaveral
-for(i in 1:m1) {
-  for (j in 1:m2) {
-    for (k in 1:m3) {
-      kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec_CC)
-      G_CC[Plop1[k, 1:m4], Plop2[i,j]]=kvals
-      Kvals_G_CC[k, 1:m4, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-G_CC=G_CC*h3*h4
-save(G_CC, file="./CC/G_CC.RData")
-save(Kvals_G_CC, file="./CC/Kvals_G_CC.RData")
-rm(G_CC, Kvals_G_CC)
-
-#Chekika
-for(i in 1:m1) {
-  for (j in 1:m2) {
-    for (k in 1:m3) {
-      kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec_C)
-      G_C[Plop1[k, 1:m4], Plop2[i,j]]=kvals
-      Kvals_G_C[k, 1:m4, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-G_C=G_C*h3*h4
-save(G_C, file="./C/G_C.RData")
-save(Kvals_G_C, file="./C/Kvals_G_C.RData")
-rm(G_C, Kvals_G_C)
-
-#Fort Pierce
-for(i in 1:m1) {
-  for (j in 1:m2) {
-    for (k in 1:m3) {
-      kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec_FP)
-      G_FP[Plop1[k, 1:m4], Plop2[i,j]]=kvals
-      Kvals_G_FP[k, 1:m4, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-G_FP=G_FP*h3*h4
-save(G_FP, file="./FP/G_FP.RData")
-save(Kvals_G_FP, file="./FP/Kvals_G_FP.RData")
-rm(G_FP, Kvals_G_FP)
-
-# Punta Gorda
-for(i in 1:m1) {
-  for (j in 1:m2) {
-    for (k in 1:m3) {
-      kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec_PG)
-      G_PG[Plop1[k, 1:m4], Plop2[i,j]]=kvals
-      Kvals_G_PG[k, 1:m4, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-G_PG=G_PG*h3*h4
-save(G_PG, file="./PG/G_PG.RData")
-save(Kvals_G_PG, file="./PG/Kvals_G_PG.RData")
-rm(G_PG, Kvals_G_PG)
-
-#Wild Turkey
-for(i in 1:m1) {
-  for (j in 1:m2) {
-    for (k in 1:m3) {
-      kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec_WT)
-      G_WT[Plop1[k, 1:m4], Plop2[i,j]]=kvals
-      Kvals_G_WT[k, 1:m4, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-G_WT=G_WT*h3*h4
-save(G_WT, file="./WT/G_WT.RData")
-save(Kvals_G_WT, file="./WT/Kvals_G_WT.RData")
-rm(G_WT, Kvals_G_WT)
-
-
-
-
-#Putting the matrices together:
-
-#Big Cypress
-rm(Plop, Plop1, Plop2, i, j, k, kvals ) #clear out workspace to maximize space available 
-load("./BC/D1_BC.RData")
-load("./BC/G_BC.RData")
+D1_BC <-readRDS("./BC/D1_BC.RData")
+G_BC <- readRDS("./BC/G_BC.RData")
 left_side<-rbind(D1_BC, G_BC)
 rm(D1_BC, G_BC)
-load("./BC/F_BC.RData")
-load("./BC/D2_BC.RData")
+F_BC <- readRDS("./BC/F_BC.RData")
+D2_BC <- readRDS("./BC/D2_BC.RData")
 right_side<-rbind(F_BC, D2_BC)
 rm(F_BC, D2_BC)
 A_BC<-cbind(left_side, right_side)
 save(A_BC, file="./BC/A_BC.RData")
+rm(A_BC)
 
 #Cape Canaveral
-load("./CC/D1_CC.RData")
-load("./CC/G_CC.RData")
+D1_CC <-readRDS("./CC/D1_CC.RData")
+G_CC <- readRDS("./CC/G_CC.RData")
 left_side<-rbind(D1_CC, G_CC)
 rm(D1_CC, G_CC)
-load("./CC/F_CC.RData")
-load("./CC/D2_CC.RData")
+F_CC <- readRDS("./CC/F_CC.RData")
+D2_CC <- readRDS("./CC/D2_CC.RData")
 right_side<-rbind(F_CC, D2_CC)
 rm(F_CC, D2_CC)
 A_CC<-cbind(left_side, right_side)
 save(A_CC, file="./CC/A_CC.RData")
+rm(A_CC)
 
 #Chekika
-load("./C/D1_C.RData")
-load("./C/G_C.RData")
+D1_C <-readRDS("./C/D1_C.RData")
+G_C <- readRDS("./C/G_C.RData")
 left_side<-rbind(D1_C, G_C)
 rm(D1_C, G_C)
-load("./C/F_C.RData")
-load("./C/D2_C.RData")
+F_C <- readRDS("./C/F_C.RData")
+D2_C <- readRDS("./C/D2_C.RData")
 right_side<-rbind(F_C, D2_C)
 rm(F_C, D2_C)
 A_C<-cbind(left_side, right_side)
 save(A_C, file="./C/A_C.RData")
+rm(A_C)
 
 #Fort Pierce
-load("./FP/D1_FP.RData")
-load("./FP/G_FP.RData")
+D1_FP <-readRDS("./FP/D1_FP.RData")
+G_FP <- readRDS("./FP/G_FP.RData")
 left_side<-rbind(D1_FP, G_FP)
 rm(D1_FP, G_FP)
-load("./FP/F_FP.RData")
-load("./FP/D2_FP.RData")
+F_FP <- readRDS("./FP/F_FP.RData")
+D2_FP <- readRDS("./FP/D2_FP.RData")
 right_side<-rbind(F_FP, D2_FP)
 rm(F_FP, D2_FP)
 A_FP<-cbind(left_side, right_side)
 save(A_FP, file="./FP/A_FP.RData")
+rm(A_FP)
 
 #Punta Gorda
-load("./PG/D1_PG.RData")
-load("./PG/G_PG.RData")
+D1_PG <-readRDS("./PG/D1_PG.RData")
+G_PG <- readRDS("./PG/G_PG.RData")
 left_side<-rbind(D1_PG, G_PG)
 rm(D1_PG, G_PG)
-load("./PG/F_PG.RData")
-load("./PG/D2_PG.RData")
+F_PG <- readRDS("./PG/F_PG.RData")
+D2_PG <- readRDS("./PG/D2_PG.RData")
 right_side<-rbind(F_PG, D2_PG)
 rm(F_PG, D2_PG)
 A_PG<-cbind(left_side, right_side)
 save(A_PG, file="./PG/A_PG.RData")
+rm(A_PG)
 
 #Wild Turkey
-load("./WT/D1_WT.RData")
-load("./WT/G_WT.RData")
+D1_WT <-readRDS("./WT/D1_WT.RData")
+G_WT <- readRDS("./WT/G_WT.RData")
 left_side<-rbind(D1_WT, G_WT)
 rm(D1_WT, G_WT)
-load("./WT/F_WT.RData")
-load("./WT/D2_WT.RData")
+F_WT <- readRDS("./WT/F_WT.RData")
+D2_WT <- readRDS("./WT/D2_WT.RData")
 right_side<-rbind(F_WT, D2_WT)
 rm(F_WT, D2_WT)
 A_WT<-cbind(left_side, right_side)
 save(A_WT, file="./WT/A_WT.RData")
+rm(A_WT)
 
 
+rm(left_side, right_side)
+rm(thing)
 
 
-#============================================================================# 
-#  Find lambda, w by iteration 
-#
+#  Find lambda, w by iteration #####
+
 #  Note: the Matrix package is used to iterate more quickly. The check  
 #  for convergence requires extracting matrix entries via the @x slot
 #  of a Matrix object. Matrix is S4-style -- see ?Matrix. 
-#============================================================================# 
+
+find_lambda = function(A) {
+
+  A2=Matrix(A); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
+
+  qmax=1000; lam=1; 
+  while(qmax>tol) {
+	  nt1=A2%*%nt;
+	  qmax=sum(abs((nt1-lam*nt)@x));  
+	  lam=sum(nt1@x); 
+	  nt@x=(nt1@x)/lam; #we're cheating here - don't tell Doug Bates.  
+	  cat(lam,qmax,"\n");
+  } 
+nt=matrix(nt@x,m1*m2+m3*m4,1); 
+#stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
+stable.dist=nt
+lam.stable=lam;
+
+# Check that the @bits worked as intended.   
+qmax=sum(abs(lam*nt-A%*%nt)); 
+cat("Convergence: ",qmax," should be less than ",tol,"\n");
+
+#Find the reproductive value function by iteration
+vt=Matrix(1,1,m1*m2+m3*m4); vt1=vt; 
+
+qmax=1000; lam=1; 
+while(qmax>tol) {
+  vt1=vt%*%A2;
+  qmax=sum(abs((vt1-lam*vt)@x));  
+  lam=sum(vt1@x); 
+  vt@x=(vt1@x)/lam;   
+  cat(lam,qmax,"\n");
+} 
+v=t(matrix(vt@x,1,m1*m2+m3*m4)); 
+lam.stable.t=lam; 
+
+return(list(lam.stable = lam.stable, stable.dist = stable.dist, v=v))
+}
 
 #Big Cypress
 load("./BC/A_BC.RData")
-A2=Matrix(A_BC); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
-
-qmax=1000; lam=1; 
-while(qmax>tol) {
-	nt1=A2%*%nt;
-	qmax=sum(abs((nt1-lam*nt)@x));  
-	lam=sum(nt1@x); 
-	nt@x=(nt1@x)/lam; #we're cheating here - don't tell Doug Bates.  
-	cat(lam,qmax,"\n");
-} 
-nt=matrix(nt@x,m1*m2+m3*m4,1); 
-#stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
-stable.dist=nt
-lam.stable=lam;
-
-# Check that the @bits worked as intended.   
-qmax=sum(abs(lam*nt-A_BC%*%nt)); 
-cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
-lam.stable_BC<-lam.stable
-stable.dist_BC<-stable.dist
-save(lam.stable_BC, file="./BC/lam.stable_BC.RData")
-save(stable.dist_BC, file="./BC/stable.dist_BC.RData")
-
-
-##Alternate calculation of rv:
-# 
-# A3=t(A2); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
-# 
-# qmax=1000; lam=1; 
-# while(qmax>tol) {
-# 	nt1=A3%*%nt;
-# 	qmax=sum(abs((nt1-lam*nt)@x));  
-# 	lam=sum(nt1@x); 
-# 	nt@x=(nt1@x)/lam;   
-# 	cat(lam,qmax,"\n");
-# } 
-# nt=matrix(nt@x,m1*m2+m3*m4,1); 
-# #stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
-# #stable.dist=nt
-# lam.stable.t=lam; 
-# 
-# 
-# # Check that the @bits worked as intended.   
-# qmax=sum(abs(lam*nt-t(A_overall)%*%nt)); 
-# cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
-
-
-
-
-
-
-#============================================================================# 
-#  Find reproductive value function by iteration.  
-#  Note that we use left-multiplication to do the transpose iteration,
-#  which is equivalent to using the transpose kernel. 
-#============================================================================# 
-vt=Matrix(1,1,m1*m2+m3*m4); vt1=vt; 
-
-qmax=1000; lam=1; 
-while(qmax>tol) {
-	vt1=vt%*%A2;
-	qmax=sum(abs((vt1-lam*vt)@x));  
-	lam=sum(vt1@x); 
-	vt@x=(vt1@x)/lam;   
-	cat(lam,qmax,"\n");
-} 
-v=t(matrix(vt@x,1,m1*m2+m3*m4)); 
-lam.stable.t=lam; 
-
-v_BC<-v
-save(v_BC, file="./BC/v_BC.RData")
-
-rm(A_overall, A2, A3, nt, nt1, stable.dist, stable.dist_overall, v, v_overall, vt, vt1,
-   lam.stable, lam.stable_overall, lam.stable.t, qmax)
-
+thing <- find_lambda(A_BC)
+saveRDS(thing$lam.stable, file = "./BC/lam.stable_BC.rds")
+saveRDS(thing$stable.dist, file = "./BC/stable.dist_BC.rds")
+saveRDS(thing$v, file = "./BC/v_BC.rds")
+rm(A_BC)
 
 #Cape Canaveral
 load("./CC/A_CC.RData")
-A2=Matrix(A_CC); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
-
-qmax=1000; lam=1; 
-while(qmax>tol) {
-  nt1=A2%*%nt;
-  qmax=sum(abs((nt1-lam*nt)@x));  
-  lam=sum(nt1@x); 
-  nt@x=(nt1@x)/lam; #we're cheating here - don't tell Doug Bates.  
-  cat(lam,qmax,"\n");
-} 
-nt=matrix(nt@x,m1*m2+m3*m4,1); 
-#stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
-stable.dist=nt
-lam.stable=lam;
-
-# Check that the @bits worked as intended.   
-qmax=sum(abs(lam*nt-A_BC%*%nt)); 
-cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
-lam.stable_CC<-lam.stable
-stable.dist_CC<-stable.dist
-save(lam.stable_CC, file="./CC/lam.stable_CC.RData")
-save(stable.dist_CC, file="./CC/stable.dist_CC.RData")
-
-
-##Alternate calculation of rv:
-# 
-# A3=t(A2); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
-# 
-# qmax=1000; lam=1; 
-# while(qmax>tol) {
-# 	nt1=A3%*%nt;
-# 	qmax=sum(abs((nt1-lam*nt)@x));  
-# 	lam=sum(nt1@x); 
-# 	nt@x=(nt1@x)/lam;   
-# 	cat(lam,qmax,"\n");
-# } 
-# nt=matrix(nt@x,m1*m2+m3*m4,1); 
-# #stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
-# #stable.dist=nt
-# lam.stable.t=lam; 
-# 
-# 
-# # Check that the @bits worked as intended.   
-# qmax=sum(abs(lam*nt-t(A_overall)%*%nt)); 
-# cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
-
-
-
-
-
-
-#============================================================================# 
-#  Find reproductive value function by iteration.  
-#  Note that we use left-multiplication to do the transpose iteration,
-#  which is equivalent to using the transpose kernel. 
-#============================================================================# 
-vt=Matrix(1,1,m1*m2+m3*m4); vt1=vt; 
-
-qmax=1000; lam=1; 
-while(qmax>tol) {
-  vt1=vt%*%A2;
-  qmax=sum(abs((vt1-lam*vt)@x));  
-  lam=sum(vt1@x); 
-  vt@x=(vt1@x)/lam;   
-  cat(lam,qmax,"\n");
-} 
-v=t(matrix(vt@x,1,m1*m2+m3*m4)); 
-lam.stable.t=lam; 
-
-v_CC<-v
-save(v_CC, file="./CC/v_CC.RData")
+thing <- find_lambda(A_CC)
+saveRDS(thing$lam.stable, file = "./CC/lam.stable_CC.rds")
+saveRDS(thing$stable.dist, file = "./CC/stable.dist_CC.rds")
+saveRDS(thing$v, file = "./CC/v_CC.rds")
+rm(A_CC)
 
 #Chekika
 load("./C/A_C.RData")
-A2=Matrix(A_C); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
-
-qmax=1000; lam=1; 
-while(qmax>tol) {
-  nt1=A2%*%nt;
-  qmax=sum(abs((nt1-lam*nt)@x));  
-  lam=sum(nt1@x); 
-  nt@x=(nt1@x)/lam; #we're cheating here - don't tell Doug Bates.  
-  cat(lam,qmax,"\n");
-} 
-nt=matrix(nt@x,m1*m2+m3*m4,1); 
-#stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
-stable.dist=nt
-lam.stable=lam;
-
-# Check that the @bits worked as intended.   
-qmax=sum(abs(lam*nt-A_C%*%nt)); 
-cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
-lam.stable_C<-lam.stable
-stable.dist_C<-stable.dist
-save(lam.stable_C, file="./C/lam.stable_C.RData")
-save(stable.dist_C, file="./C/stable.dist_C.RData")
-
-
-##Alternate calculation of rv:
-# 
-# A3=t(A2); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
-# 
-# qmax=1000; lam=1; 
-# while(qmax>tol) {
-# 	nt1=A3%*%nt;
-# 	qmax=sum(abs((nt1-lam*nt)@x));  
-# 	lam=sum(nt1@x); 
-# 	nt@x=(nt1@x)/lam;   
-# 	cat(lam,qmax,"\n");
-# } 
-# nt=matrix(nt@x,m1*m2+m3*m4,1); 
-# #stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
-# #stable.dist=nt
-# lam.stable.t=lam; 
-# 
-# 
-# # Check that the @bits worked as intended.   
-# qmax=sum(abs(lam*nt-t(A_overall)%*%nt)); 
-# cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
-
-
-
-
-
-
-#============================================================================# 
-#  Find reproductive value function by iteration.  
-#  Note that we use left-multiplication to do the transpose iteration,
-#  which is equivalent to using the transpose kernel. 
-#============================================================================# 
-vt=Matrix(1,1,m1*m2+m3*m4); vt1=vt; 
-
-qmax=1000; lam=1; 
-while(qmax>tol) {
-  vt1=vt%*%A2;
-  qmax=sum(abs((vt1-lam*vt)@x));  
-  lam=sum(vt1@x); 
-  vt@x=(vt1@x)/lam;   
-  cat(lam,qmax,"\n");
-} 
-v=t(matrix(vt@x,1,m1*m2+m3*m4)); 
-lam.stable.t=lam; 
-
-v_C<-v
-save(v_C, file="./C/v_C.RData")
-
+thing <- find_lambda(A_C)
+saveRDS(thing$lam.stable, file = "./C/lam.stable_C.rds")
+saveRDS(thing$stable.dist, file = "./C/stable.dist_C.rds")
+saveRDS(thing$v, file = "./C/v_C.rds")
+rm(A_C)
 
 #Fort Pierce
 load("./FP/A_FP.RData")
-A2=Matrix(A_FP); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
-
-qmax=1000; lam=1; 
-while(qmax>tol) {
-  nt1=A2%*%nt;
-  qmax=sum(abs((nt1-lam*nt)@x));  
-  lam=sum(nt1@x); 
-  nt@x=(nt1@x)/lam; #we're cheating here - don't tell Doug Bates.  
-  cat(lam,qmax,"\n");
-} 
-nt=matrix(nt@x,m1*m2+m3*m4,1); 
-#stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
-stable.dist=nt
-lam.stable=lam;
-
-# Check that the @bits worked as intended.   
-qmax=sum(abs(lam*nt-A_FP%*%nt)); 
-cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
-lam.stable_FP<-lam.stable
-stable.dist_FP<-stable.dist
-save(lam.stable_FP, file="./FP/lam.stable_FP.RData")
-save(stable.dist_FP, file="./FP/stable.dist_FP.RData")
-
-
-##Alternate calculation of rv:
-# 
-# A3=t(A2); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
-# 
-# qmax=1000; lam=1; 
-# while(qmax>tol) {
-# 	nt1=A3%*%nt;
-# 	qmax=sum(abs((nt1-lam*nt)@x));  
-# 	lam=sum(nt1@x); 
-# 	nt@x=(nt1@x)/lam;   
-# 	cat(lam,qmax,"\n");
-# } 
-# nt=matrix(nt@x,m1*m2+m3*m4,1); 
-# #stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
-# #stable.dist=nt
-# lam.stable.t=lam; 
-# 
-# 
-# # Check that the @bits worked as intended.   
-# qmax=sum(abs(lam*nt-t(A_overall)%*%nt)); 
-# cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
-
-
-
-
-
-
-#============================================================================# 
-#  Find reproductive value function by iteration.  
-#  Note that we use left-multiplication to do the transpose iteration,
-#  which is equivalent to using the transpose kernel. 
-#============================================================================# 
-vt=Matrix(1,1,m1*m2+m3*m4); vt1=vt; 
-
-qmax=1000; lam=1; 
-while(qmax>tol) {
-  vt1=vt%*%A2;
-  qmax=sum(abs((vt1-lam*vt)@x));  
-  lam=sum(vt1@x); 
-  vt@x=(vt1@x)/lam;   
-  cat(lam,qmax,"\n");
-} 
-v=t(matrix(vt@x,1,m1*m2+m3*m4)); 
-lam.stable.t=lam; 
-
-v_FP<-v
-save(v_FP, file="./FP/v_FP.RData")
-
-
+thing <- find_lambda(A_FP)
+saveRDS(thing$lam.stable, file = "./FP/lam.stable_FP.rds")
+saveRDS(thing$stable.dist, file = "./FP/stable.dist_FP.rds")
+saveRDS(thing$v, file = "./FP/v_FP.rds")
+rm(A_FP)
 
 #Punta Gorda
 load("./PG/A_PG.RData")
-A2=Matrix(A_PG); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
-
-qmax=1000; lam=1; 
-while(qmax>tol) {
-  nt1=A2%*%nt;
-  qmax=sum(abs((nt1-lam*nt)@x));  
-  lam=sum(nt1@x); 
-  nt@x=(nt1@x)/lam; #we're cheating here - don't tell Doug Bates.  
-  cat(lam,qmax,"\n");
-} 
-nt=matrix(nt@x,m1*m2+m3*m4,1); 
-#stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
-stable.dist=nt
-lam.stable=lam;
-
-# Check that the @bits worked as intended.   
-qmax=sum(abs(lam*nt-A_PG%*%nt)); 
-cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
-lam.stable_PG<-lam.stable
-stable.dist_PG<-stable.dist
-save(lam.stable_PG, file="./PG/lam.stable_PG.RData")
-save(stable.dist_PG, file="./PG/stable.dist_PG.RData")
-
-
-##Alternate calculation of rv:
-# 
-# A3=t(A2); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
-# 
-# qmax=1000; lam=1; 
-# while(qmax>tol) {
-# 	nt1=A3%*%nt;
-# 	qmax=sum(abs((nt1-lam*nt)@x));  
-# 	lam=sum(nt1@x); 
-# 	nt@x=(nt1@x)/lam;   
-# 	cat(lam,qmax,"\n");
-# } 
-# nt=matrix(nt@x,m1*m2+m3*m4,1); 
-# #stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
-# #stable.dist=nt
-# lam.stable.t=lam; 
-# 
-# 
-# # Check that the @bits worked as intended.   
-# qmax=sum(abs(lam*nt-t(A_overall)%*%nt)); 
-# cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
-
-
-
-
-
-
-#============================================================================# 
-#  Find reproductive value function by iteration.  
-#  Note that we use left-multiplication to do the transpose iteration,
-#  which is equivalent to using the transpose kernel. 
-#============================================================================# 
-vt=Matrix(1,1,m1*m2+m3*m4); vt1=vt; 
-
-qmax=1000; lam=1; 
-while(qmax>tol) {
-  vt1=vt%*%A2;
-  qmax=sum(abs((vt1-lam*vt)@x));  
-  lam=sum(vt1@x); 
-  vt@x=(vt1@x)/lam;   
-  cat(lam,qmax,"\n");
-} 
-v=t(matrix(vt@x,1,m1*m2+m3*m4)); 
-lam.stable.t=lam; 
-
-v_PG<-v
-save(v_PG, file="./PG/v_PG.RData")
+thing <- find_lambda(A_PG)
+saveRDS(thing$lam.stable, file = "./PG/lam.stable_PG.rds")
+saveRDS(thing$stable.dist, file = "./PG/stable.dist_PG.rds")
+saveRDS(thing$v, file = "./PG/v_PG.rds")
+rm(A_PG)
 
 #Wild Turkey
 load("./WT/A_WT.RData")
-A2=Matrix(A_WT); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
-
-qmax=1000; lam=1; 
-while(qmax>tol) {
-  nt1=A2%*%nt;
-  qmax=sum(abs((nt1-lam*nt)@x));  
-  lam=sum(nt1@x); 
-  nt@x=(nt1@x)/lam; #we're cheating here - don't tell Doug Bates.  
-  cat(lam,qmax,"\n");
-} 
-nt=matrix(nt@x,m1*m2+m3*m4,1); 
-#stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
-stable.dist=nt
-lam.stable=lam;
-
-# Check that the @bits worked as intended.   
-qmax=sum(abs(lam*nt-A_WT%*%nt)); 
-cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
-lam.stable_WT<-lam.stable
-stable.dist_WT<-stable.dist
-save(lam.stable_WT, file="./WT/lam.stable_WT.RData")
-save(stable.dist_WT, file="./WT/stable.dist_WT.RData")
-
-
-##Alternate calculation of rv:
-# 
-# A3=t(A2); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
-# 
-# qmax=1000; lam=1; 
-# while(qmax>tol) {
-# 	nt1=A3%*%nt;
-# 	qmax=sum(abs((nt1-lam*nt)@x));  
-# 	lam=sum(nt1@x); 
-# 	nt@x=(nt1@x)/lam;   
-# 	cat(lam,qmax,"\n");
-# } 
-# nt=matrix(nt@x,m1*m2+m3*m4,1); 
-# #stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
-# #stable.dist=nt
-# lam.stable.t=lam; 
-# 
-# 
-# # Check that the @bits worked as intended.   
-# qmax=sum(abs(lam*nt-t(A_overall)%*%nt)); 
-# cat("Convergence: ",qmax," should be less than ",tol,"\n"); 
+thing <- find_lambda(A_WT)
+saveRDS(thing$lam.stable, file = "./WT/lam.stable_WT.rds")
+saveRDS(thing$stable.dist, file = "./WT/stable.dist_WT.rds")
+saveRDS(thing$v, file = "./WT/v_WT.rds")
+rm(A_WT)
 
 
 
 
 
-
-#============================================================================# 
-#  Find reproductive value function by iteration.  
-#  Note that we use left-multiplication to do the transpose iteration,
-#  which is equivalent to using the transpose kernel. 
-#============================================================================# 
-vt=Matrix(1,1,m1*m2+m3*m4); vt1=vt; 
-
-qmax=1000; lam=1; 
-while(qmax>tol) {
-  vt1=vt%*%A2;
-  qmax=sum(abs((vt1-lam*vt)@x));  
-  lam=sum(vt1@x); 
-  vt@x=(vt1@x)/lam;   
-  cat(lam,qmax,"\n");
-} 
-v=t(matrix(vt@x,1,m1*m2+m3*m4)); 
-lam.stable.t=lam; 
-
-v_WT<-v
-save(v_WT, file="./WT/v_WT.RData")
-
-
-
-
-#####################################
-####
-#### ELASTICITY AND SENSITIVITY
-####
-#####################################
+# Elasticity and Sensitivity #####
 
 
 
@@ -1132,256 +516,206 @@ save(v_WT, file="./WT/v_WT.RData")
 #cat("Integrated elasticity=",sum(h1*h2*h1*h2*elas_D1)," Should =1","\n"); 
 
 
-####Method: Compute elasticity matrix first then separate:
+#Method: Compute elasticity matrix first then separate:
+
+elasticity = function(v, stable.dist, A, lam.stable) {
+  v.dot.w<-sum(t(v)%*%stable.dist)
+  norm_v<-v/v.dot.w
+  #check<-t(norm_v)%*%stable.dist #should be 1
+
+  rv<-norm_v
+
+  sens<-norm_v%*%t(stable.dist)
+  elas<-sens*A/lam.stable
+  return(list(sens=sens, elas=elas))
+} 
 
 #Big Cypress
-load("./BC/v_BC.RData")
-load("./BC/stable.dist_BC.RData")
+v_BC <- readRDS("./BC/v_BC.rds")
+stable.dist_BC <- readRDS("./BC/stable.dist_BC.rds")
 load("./BC/A_BC.RData")
-load("./BC/lam.stable_BC.RData")
-
-v.dot.w_BC<-sum(t(v_BC)%*%stable.dist_BC)
-norm_v_BC<-v_BC/v.dot.w_BC
-check_BC<-t(norm_v_BC)%*%stable.dist_BC #should be 1
-
-rv_BC<-norm_v_BC
-
-sens_BC<-norm_v_BC%*%t(stable.dist_BC)
-elas_BC<-sens_BC*A_BC/lam.stable_BC
-save(sens_BC, file="./BC/sens_BC.RData")
-save(elas_BC, file="./BC/elas_BC.RData")
-
-#plot(colSums(elas[1:m1*m2,]))
-
-#Break the elasticity matrix back into its component parts: 
-elas_D1_BC<-elas_BC[1:(m1*m2), 1:(m1*m2)]
-elas_G_BC<-elas_BC[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
-elas_F_BC<-elas_BC[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-elas_D2_BC<-elas_BC[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
-
-sens_D1_BC<-sens_BC[1:(m1*m2), 1:(m1*m2)]
-sens_G_BC<-sens_BC[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
-sens_F_BC<-sens_BC[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-sens_D2_BC<-sens_BC[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
-
-
-save(elas_D1_BC, file="./BC/elas_D1_BC.RData")
-save(elas_G_BC, file="./BC/elas_G_BC.RData")
-save(elas_F_BC, file="./BC/elas_F_BC.RData")
-save(elas_D2_BC, file="./BC/elas_D2_BC.RData")
-save(sens_D1_BC, file="./BC/sens_D1_BC.RData")
-save(sens_G_BC, file="./BC/sens_G_BC.RData")
-save(sens_F_BC, file="./BC/sens_F_BC.RData")
-save(sens_D2_BC, file="./BC/sens_D2_BC.RData")
-
+lam.stable_BC <- readRDS("./BC/lam.stable_BC.rds")
+thing <- elasticity(v_BC, stable.dist_BC, A_BC, lam.stable_BC)
+rm(v_BC, stable.dist_BC, A_BC, lam.stable_BC)
+saveRDS(thing$sens, file="./BC/sens_BC.rds")
+saveRDS(thing$elas, file="./BC/elas_BC.rds")
 
 #Cape Canaveral
-load("./CC/v_CC.RData")
-load("./CC/stable.dist_CC.RData")
+v_CC <- readRDS("./CC/v_CC.rds")
+stable.dist_CC <- readRDS("./CC/stable.dist_CC.rds")
 load("./CC/A_CC.RData")
-load("./CC/lam.stable_CC.RData")
-
-v.dot.w_CC<-sum(t(v_CC)%*%stable.dist_CC)
-norm_v_CC<-v_CC/v.dot.w_CC
-check_CC<-t(norm_v_CC)%*%stable.dist_CC #should be 1
-
-rv_CC<-norm_v_CC
-
-sens_CC<-norm_v_CC%*%t(stable.dist_CC)
-elas_CC<-sens_CC*A_CC/lam.stable_CC
-save(sens_CC, file="./CC/sens_CC.RData")
-save(elas_CC, file="./CC/elas_CC.RData")
-
-#plot(colSums(elas[1:m1*m2,]))
-
-#Break the elasticity matrix back into its component parts: 
-elas_D1_CC<-elas_CC[1:(m1*m2), 1:(m1*m2)]
-elas_G_CC<-elas_CC[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
-elas_F_CC<-elas_CC[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-elas_D2_CC<-elas_CC[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
-
-sens_D1_CC<-sens_CC[1:(m1*m2), 1:(m1*m2)]
-sens_G_CC<-sens_CC[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
-sens_F_CC<-sens_CC[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-sens_D2_CC<-sens_CC[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
-
-
-save(elas_D1_CC, file="./CC/elas_D1_CC.RData")
-save(elas_G_CC, file="./CC/elas_G_CC.RData")
-save(elas_F_CC, file="./CC/elas_F_CC.RData")
-save(elas_D2_CC, file="./CC/elas_D2_CC.RData")
-save(sens_D1_CC, file="./CC/sens_D1_CC.RData")
-save(sens_G_CC, file="./CC/sens_G_CC.RData")
-save(sens_F_CC, file="./CC/sens_F_CC.RData")
-save(sens_D2_CC, file="./CC/sens_D2_CC.RData")
+lam.stable_CC <- readRDS("./CC/lam.stable_CC.rds")
+thing <- elasticity(v_CC, stable.dist_CC, A_CC, lam.stable_CC)
+rm(v_CC, stable.dist_CC, A_CC, lam.stable_CC)
+saveRDS(thing$sens, file="./CC/sens_CC.rds")
+saveRDS(thing$elas, file="./CC/elas_CC.rds")
 
 #Chekika
-load("./C/v_C.RData")
-load("./C/stable.dist_C.RData")
+v_C <- readRDS("./C/v_C.rds")
+stable.dist_C <- readRDS("./C/stable.dist_C.rds")
 load("./C/A_C.RData")
-load("./C/lam.stable_C.RData")
-
-v.dot.w_C<-sum(t(v_C)%*%stable.dist_C)
-norm_v_C<-v_C/v.dot.w_C
-check_C<-t(norm_v_C)%*%stable.dist_C #should be 1
-
-rv_C<-norm_v_C
-
-sens_C<-norm_v_C%*%t(stable.dist_C)
-elas_C<-sens_C*A_C/lam.stable_C
-save(sens_C, file="./C/sens_C.RData")
-save(elas_C, file="./C/elas_C.RData")
-
-#plot(colSums(elas[1:m1*m2,]))
-
-#Break the elasticity matrix back into its component parts: 
-elas_D1_C<-elas_C[1:(m1*m2), 1:(m1*m2)]
-elas_G_C<-elas_C[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
-elas_F_C<-elas_C[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-elas_D2_C<-elas_C[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
-
-sens_D1_C<-sens_C[1:(m1*m2), 1:(m1*m2)]
-sens_G_C<-sens_C[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
-sens_F_C<-sens_C[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-sens_D2_C<-sens_C[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
-
-
-save(elas_D1_C, file="./C/elas_D1_C.RData")
-save(elas_G_C, file="./C/elas_G_C.RData")
-save(elas_F_C, file="./C/elas_F_C.RData")
-save(elas_D2_C, file="./C/elas_D2_C.RData")
-save(sens_D1_C, file="./C/sens_D1_C.RData")
-save(sens_G_C, file="./C/sens_G_C.RData")
-save(sens_F_C, file="./C/sens_F_C.RData")
-save(sens_D2_C, file="./C/sens_D2_C.RData")
+lam.stable_C <- readRDS("./C/lam.stable_C.rds")
+thing <- elasticity(v_C, stable.dist_C, A_C, lam.stable_C)
+rm(v_C, stable.dist_C, A_C, lam.stable_C)
+saveRDS(thing$sens, file="./C/sens_C.rds")
+saveRDS(thing$elas, file="./C/elas_C.rds")
 
 #Fort Pierce
-load("./FP/v_FP.RData")
-load("./FP/stable.dist_FP.RData")
+v_FP <- readRDS("./FP/v_FP.rds")
+stable.dist_FP <- readRDS("./FP/stable.dist_FP.rds")
 load("./FP/A_FP.RData")
-load("./FP/lam.stable_FP.RData")
-
-v.dot.w_FP<-sum(t(v_FP)%*%stable.dist_FP)
-norm_v_FP<-v_FP/v.dot.w_FP
-check_FP<-t(norm_v_FP)%*%stable.dist_FP #should be 1
-
-rv_FP<-norm_v_FP
-
-sens_FP<-norm_v_FP%*%t(stable.dist_FP)
-elas_FP<-sens_FP*A_FP/lam.stable_FP
-save(sens_FP, file="./FP/sens_FP.RData")
-save(elas_FP, file="./FP/elas_FP.RData")
-
-#plot(colSums(elas[1:m1*m2,]))
-
-#Break the elasticity matrix back into its component parts: 
-elas_D1_FP<-elas_FP[1:(m1*m2), 1:(m1*m2)]
-elas_G_FP<-elas_FP[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
-elas_F_FP<-elas_FP[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-elas_D2_FP<-elas_FP[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
-
-sens_D1_FP<-sens_FP[1:(m1*m2), 1:(m1*m2)]
-sens_G_FP<-sens_FP[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
-sens_F_FP<-sens_FP[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-sens_D2_FP<-sens_FP[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
-
-
-save(elas_D1_FP, file="./FP/elas_D1_FP.RData")
-save(elas_G_FP, file="./FP/elas_G_FP.RData")
-save(elas_F_FP, file="./FP/elas_F_FP.RData")
-save(elas_D2_FP, file="./FP/elas_D2_FP.RData")
-save(sens_D1_FP, file="./FP/sens_D1_FP.RData")
-save(sens_G_FP, file="./FP/sens_G_FP.RData")
-save(sens_F_FP, file="./FP/sens_F_FP.RData")
-save(sens_D2_FP, file="./FP/sens_D2_FP.RData")
-
+lam.stable_FP <- readRDS("./FP/lam.stable_FP.rds")
+thing <- elasticity(v_FP, stable.dist_FP, A_FP, lam.stable_FP)
+rm(v_FP, stable.dist_FP, A_FP, lam.stable_FP)
+saveRDS(thing$sens, file="./FP/sens_FP.rds")
+saveRDS(thing$elas, file="./FP/elas_FP.rds")
 
 #Punta Gorda
-load("./PG/v_PG.RData")
-load("./PG/stable.dist_PG.RData")
+v_PG <- readRDS("./PG/v_PG.rds")
+stable.dist_PG <- readRDS("./PG/stable.dist_PG.rds")
 load("./PG/A_PG.RData")
-load("./PG/lam.stable_PG.RData")
-
-v.dot.w_PG<-sum(t(v_PG)%*%stable.dist_PG)
-norm_v_PG<-v_PG/v.dot.w_PG
-check_PG<-t(norm_v_PG)%*%stable.dist_PG #should be 1
-
-rv_PG<-norm_v_PG
-
-sens_PG<-norm_v_PG%*%t(stable.dist_PG)
-elas_PG<-sens_PG*A_PG/lam.stable_PG
-save(sens_PG, file="./PG/sens_PG.RData")
-save(elas_PG, file="./PG/elas_PG.RData")
-
-#plot(colSums(elas[1:m1*m2,]))
-
-#Break the elasticity matrix back into its component parts: 
-elas_D1_PG<-elas_PG[1:(m1*m2), 1:(m1*m2)]
-elas_G_PG<-elas_PG[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
-elas_F_PG<-elas_PG[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-elas_D2_PG<-elas_PG[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
-
-sens_D1_PG<-sens_PG[1:(m1*m2), 1:(m1*m2)]
-sens_G_PG<-sens_PG[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
-sens_F_PG<-sens_PG[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-sens_D2_PG<-sens_PG[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
-
-
-save(elas_D1_PG, file="./PG/elas_D1_PG.RData")
-save(elas_G_PG, file="./PG/elas_G_PG.RData")
-save(elas_F_PG, file="./PG/elas_F_PG.RData")
-save(elas_D2_PG, file="./PG/elas_D2_PG.RData")
-save(sens_D1_PG, file="./PG/sens_D1_PG.RData")
-save(sens_G_PG, file="./PG/sens_G_PG.RData")
-save(sens_F_PG, file="./PG/sens_F_PG.RData")
-save(sens_D2_PG, file="./PG/sens_D2_PG.RData")
+lam.stable_PG <- readRDS("./PG/lam.stable_PG.rds")
+thing <- elasticity(v_PG, stable.dist_PG, A_PG, lam.stable_PG)
+rm(v_PG, stable.dist_PG, A_PG, lam.stable_PG)
+saveRDS(thing$sens, file="./PG/sens_PG.rds")
+saveRDS(thing$elas, file="./PG/elas_PG.rds")
 
 #Wild Turkey
-load("./WT/v_WT.RData")
-load("./WT/stable.dist_WT.RData")
+v_WT <- readRDS("./WT/v_WT.rds")
+stable.dist_WT <- readRDS("./WT/stable.dist_WT.rds")
 load("./WT/A_WT.RData")
-load("./WT/lam.stable_WT.RData")
+lam.stable_WT <- readRDS("./WT/lam.stable_WT.rds")
+thing <- elasticity(v_WT, stable.dist_WT, A_WT, lam.stable_WT)
+rm(v_WT, stable.dist_WT, A_WT, lam.stable_WT)
+saveRDS(thing$sens, file="./WT/sens_WT.rds")
+saveRDS(thing$elas, file="./WT/elas_WT.rds")
 
-v.dot.w_WT<-sum(t(v_WT)%*%stable.dist_WT)
-norm_v_WT<-v_WT/v.dot.w_WT
-check_WT<-t(norm_v_WT)%*%stable.dist_WT #should be 1
 
-rv_WT<-norm_v_WT
 
-sens_WT<-norm_v_WT%*%t(stable.dist_WT)
-elas_WT<-sens_WT*A_WT/lam.stable_WT
-save(sens_WT, file="./WT/sens_WT.RData")
-save(elas_WT, file="./WT/elas_WT.RData")
-
-#plot(colSums(elas[1:m1*m2,]))
-
+decompose = function (mat) {
 #Break the elasticity matrix back into its component parts: 
-elas_D1_WT<-elas_WT[1:(m1*m2), 1:(m1*m2)]
-elas_G_WT<-elas_WT[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
-elas_F_WT<-elas_WT[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-elas_D2_WT<-elas_WT[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
+  mat_D1<-mat[1:(m1*m2), 1:(m1*m2)]
+  mat_G<-mat[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
+  mat_F<-mat[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
+  mat_D2<-mat[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
+  return(list(mat_D1 = mat_D1, mat_G = mat_G, mat_F = mat_F, mat_D2 = mat_D2))
+}
 
-sens_D1_WT<-sens_WT[1:(m1*m2), 1:(m1*m2)]
-sens_G_WT<-sens_WT[((m1*m2)+1):(m1*m2+m3*m4), 1:(m1*m2)]
-sens_F_WT<-sens_WT[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3*m4)]
-sens_D2_WT<-sens_WT[((m1*m2)+1):(m1*m2+m3*m4), ((m1*m2)+1):(m1*m2 + m3*m4)]
+#Big Cypress
+elas_BC <- readRDS("./BC/elas_BC.rds")
+thing <- decompose(elas_BC)
+saveRDS(thing$mat_D1, file="./BC/elas_D1_BC.rds")
+saveRDS(thing$mat_G, file="./BC/elas_G_BC.rds")
+saveRDS(thing$mat_F, file="./BC/elas_F_BC.rds")
+saveRDS(thing$mat_D2, file="./BC/elas_D2_BC.rds")
+rm(elas_BC)
+sens_BC <- readRDS("./BC/sens_BC.rds")
+thing <- decompose(sens_BC)
+saveRDS(thing$mat_D1, file="./BC/sens_D1_BC.rds")
+saveRDS(thing$mat_G, file="./BC/sens_G_BC.rds")
+saveRDS(thing$mat_F, file="./BC/sens_F_BC.rds")
+saveRDS(thing$mat_D2, file="./BC/sens_D2_BC.rds")
+rm(sens_BC)
+
+#Cape Canaveral
+elas_CC <- readRDS("./CC/elas_CC.rds")
+thing <- decompose(elas_CC)
+saveRDS(thing$mat_D1, file="./CC/elas_D1_CC.rds")
+saveRDS(thing$mat_G, file="./CC/elas_G_CC.rds")
+saveRDS(thing$mat_F, file="./CC/elas_F_CC.rds")
+saveRDS(thing$mat_D2, file="./CC/elas_D2_CC.rds")
+rm(elas_CC)
+sens_CC <- readRDS("./CC/sens_CC.rds")
+thing <- decompose(sens_CC)
+saveRDS(thing$mat_D1, file="./CC/sens_D1_CC.rds")
+saveRDS(thing$mat_G, file="./CC/sens_G_CC.rds")
+saveRDS(thing$mat_F, file="./CC/sens_F_CC.rds")
+saveRDS(thing$mat_D2, file="./CC/sens_D2_CC.rds")
+rm(sens_CC)
+
+#Chekika
+elas_C <- readRDS("./C/elas_C.rds")
+thing <- decompose(elas_C)
+saveRDS(thing$mat_D1, file="./C/elas_D1_C.rds")
+saveRDS(thing$mat_G, file="./C/elas_G_C.rds")
+saveRDS(thing$mat_F, file="./C/elas_F_C.rds")
+saveRDS(thing$mat_D2, file="./C/elas_D2_C.rds")
+rm(elas_C)
+sens_C <- readRDS("./C/sens_C.rds")
+thing <- decompose(sens_C)
+saveRDS(thing$mat_D1, file="./C/sens_D1_C.rds")
+saveRDS(thing$mat_G, file="./C/sens_G_C.rds")
+saveRDS(thing$mat_F, file="./C/sens_F_C.rds")
+saveRDS(thing$mat_D2, file="./C/sens_D2_C.rds")
+rm(sens_C)
+
+#Fort Pierce
+elas_FP <- readRDS("./FP/elas_FP.rds")
+thing <- decompose(elas_FP)
+saveRDS(thing$mat_D1, file="./FP/elas_D1_FP.rds")
+saveRDS(thing$mat_G, file="./FP/elas_G_FP.rds")
+saveRDS(thing$mat_F, file="./FP/elas_F_FP.rds")
+saveRDS(thing$mat_D2, file="./FP/elas_D2_FP.rds")
+rm(elas_FP)
+sens_FP <- readRDS("./FP/sens_FP.rds")
+thing <- decompose(sens_FP)
+saveRDS(thing$mat_D1, file="./FP/sens_D1_FP.rds")
+saveRDS(thing$mat_G, file="./FP/sens_G_FP.rds")
+saveRDS(thing$mat_F, file="./FP/sens_F_FP.rds")
+saveRDS(thing$mat_D2, file="./FP/sens_D2_FP.rds")
+rm(sens_FP)
+
+#Punta Gorda
+elas_PG <- readRDS("./PG/elas_PG.rds")
+thing <- decompose(elas_PG)
+saveRDS(thing$mat_D1, file="./PG/elas_D1_PG.rds")
+saveRDS(thing$mat_G, file="./PG/elas_G_PG.rds")
+saveRDS(thing$mat_F, file="./PG/elas_F_PG.rds")
+saveRDS(thing$mat_D2, file="./PG/elas_D2_PG.rds")
+rm(elas_PG)
+sens_PG <- readRDS("./PG/sens_PG.rds")
+thing <- decompose(sens_PG)
+saveRDS(thing$mat_D1, file="./PG/sens_D1_PG.rds")
+saveRDS(thing$mat_G, file="./PG/sens_G_PG.rds")
+saveRDS(thing$mat_F, file="./PG/sens_F_PG.rds")
+saveRDS(thing$mat_D2, file="./PG/sens_D2_PG.rds")
+rm(sens_PG)
+
+#Wild Turkey
+elas_WT <- readRDS("./WT/elas_WT.rds")
+thing <- decompose(elas_WT)
+saveRDS(thing$mat_D1, file="./WT/elas_D1_WT.rds")
+saveRDS(thing$mat_G, file="./WT/elas_G_WT.rds")
+saveRDS(thing$mat_F, file="./WT/elas_F_WT.rds")
+saveRDS(thing$mat_D2, file="./WT/elas_D2_WT.rds")
+rm(elas_WT)
+sens_WT <- readRDS("./WT/sens_WT.rds")
+thing <- decompose(sens_WT)
+saveRDS(thing$mat_D1, file="./WT/sens_D1_WT.rds")
+saveRDS(thing$mat_G, file="./WT/sens_G_WT.rds")
+saveRDS(thing$mat_F, file="./WT/sens_F_WT.rds")
+saveRDS(thing$mat_D2, file="./WT/sens_D2_WT.rds")
+rm(sens_WT)
 
 
-save(elas_D1_WT, file="./WT/elas_D1_WT.RData")
-save(elas_G_WT, file="./WT/elas_G_WT.RData")
-save(elas_F_WT, file="./WT/elas_F_WT.RData")
-save(elas_D2_WT, file="./WT/elas_D2_WT.RData")
-save(sens_D1_WT, file="./WT/sens_D1_WT.RData")
-save(sens_G_WT, file="./WT/sens_G_WT.RData")
-save(sens_F_WT, file="./WT/sens_F_WT.RData")
-save(sens_D2_WT, file="./WT/sens_D2_WT.RData")
+# Convert elasticity components to Kvals #####
 
+toKvals_D1 = function(elas_D1) {
+  plop=function(i,j) {(j-1)*m1+i} # for putting values in proper place in array
+  Plop=outer(1:m1,1:m2,plop); 
 
-
-
-########
-###Now go back to unpack the elasticity matrices into components:
-########
+  Kvals_elas_D1=array(0,c(m1,m2,m1,m2));  
+  for(i in 1:m1){
+	  for(j in 1:m2){
+		  for(k in 1:m1){
+				  kvals= elas_D1[Plop[k,1:m2],Plop[i,j]]
+				  Kvals_elas_D1[k,1:m2,i,j]=kvals
+			
+	  }}
+	  cat(i,"\n"); 
+  }
+  return(Kvals_elas_D1)
+}
 
 load("./BC/elas_D1_BC.RData")
 load("./CC/elas_D1_CC.RData")
@@ -1390,97 +724,48 @@ load("./FP/elas_D1_FP.RData")
 load("./PG/elas_D1_PG.RData")
 load("./WT/elas_D1_WT.RData")
 
-
-plop=function(i,j) {(j-1)*m1+i} # for putting values in proper place in array
-Plop=outer(1:m1,1:m2,plop); 
-
-Kvals_elas_D1_BC=array(0,c(m1,m2,m1,m2));  
-Kvals_elas_D1_CC=array(0,c(m1,m2,m1,m2)); 
-Kvals_elas_D1_C=array(0,c(m1,m2,m1,m2)); 
-Kvals_elas_D1_FP=array(0,c(m1,m2,m1,m2)); 
-Kvals_elas_D1_PG=array(0,c(m1,m2,m1,m2)); 
-Kvals_elas_D1_WT=array(0,c(m1,m2,m1,m2));  
-
-#Big Cypress
-for(i in 1:m1){
-	for(j in 1:m2){
-		for(k in 1:m1){
-				kvals= elas_D1_BC[Plop[k,1:m2],Plop[i,j]]
-				Kvals_elas_D1_BC[k,1:m2,i,j]=kvals
-			
-	}}
-	cat(i,"\n"); 
-}
+Kvals_elas_D1_BC <- toKvals_D1(elas_D1_BC)
 save(Kvals_elas_D1_BC, file="./BC/Kvals_elas_D1_BC.RData")
-
-#Cape Canaveral
-for(i in 1:m1){
-  for(j in 1:m2){
-    for(k in 1:m1){
-      kvals= elas_D1_CC[Plop[k,1:m2],Plop[i,j]]
-      Kvals_elas_D1_CC[k,1:m2,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}
+Kvals_elas_D1_CC <- toKvals_D1(elas_D1_CC)
 save(Kvals_elas_D1_CC, file="./CC/Kvals_elas_D1_CC.RData")
-
-#Chekika
-for(i in 1:m1){
-  for(j in 1:m2){
-    for(k in 1:m1){
-      kvals= elas_D1_C[Plop[k,1:m2],Plop[i,j]]
-      Kvals_elas_D1_C[k,1:m2,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}
+Kvals_elas_D1_C <- toKvals_D1(elas_D1_C)
 save(Kvals_elas_D1_C, file="./C/Kvals_elas_D1_C.RData")
-
-#Fort Pierce
-for(i in 1:m1){
-  for(j in 1:m2){
-    for(k in 1:m1){
-      kvals= elas_D1_FP[Plop[k,1:m2],Plop[i,j]]
-      Kvals_elas_D1_FP[k,1:m2,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}
+Kvals_elas_D1_FP <- toKvals_D1(elas_D1_FP)
 save(Kvals_elas_D1_FP, file="./FP/Kvals_elas_D1_FP.RData")
-
-#Punta Gorda
-for(i in 1:m1){
-  for(j in 1:m2){
-    for(k in 1:m1){
-      kvals= elas_D1_PG[Plop[k,1:m2],Plop[i,j]]
-      Kvals_elas_D1_PG[k,1:m2,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}
+Kvals_elas_D1_PG <- toKvals_D1(elas_D1_PG)
 save(Kvals_elas_D1_PG, file="./PG/Kvals_elas_D1_PG.RData")
-
-#Wild Turkey
-for(i in 1:m1){
-  for(j in 1:m2){
-    for(k in 1:m1){
-      kvals= elas_D1_WT[Plop[k,1:m2],Plop[i,j]]
-      Kvals_elas_D1_WT[k,1:m2,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}
+Kvals_elas_D1_WT <- toKvals_D1(elas_D1_WT)
 save(Kvals_elas_D1_WT, file="./WT/Kvals_elas_D1_WT.RData")
 
 
 
-rm(Kvals_elas_D1_BC, Kvals_elas_D1_CC, Kvals_elas_D1_C, Kvals_elas_D1_FP, Kvals_elaS_D1_PG,
-   Kvals_elas_D1_WT, i, j, k, kvals, 
-   elas_D1_BC, elas_D1_CC, elas_D1_C, elas_D1_FP, elas_D1_PG, elas_D1_WT, Plop)
 
+rm(Kvals_elas_D1_BC, Kvals_elas_D1_CC, Kvals_elas_D1_C, Kvals_elas_D1_FP,
+   Kvals_elas_D1_PG, Kvals_elas_D1_WT)
+rm(elas_D1_BC, elas_D1_CC, elas_D1_C, elas_D1_FP, elas_D1_PG, elas_D1_WT)
 
 ###Construct D2 (Large Domain):
+
+
+toKvals_D2 = function(elas_D2) {
+  plop=function(i,j) {(j-1)*m3+i} # for putting values in proper place in A 
+  Plop=outer(1:m3,1:m4,plop); 
+
+
+  Kvals_elas_D2=array(0,c(m3,m4,m3,m4));  
+
+  for(i in 1:m3){
+	  for(j in 1:m4){
+		  for(k in 1:m3){
+				  kvals= elas_D2[Plop[k,1:m4],Plop[i,j]]
+			  	Kvals_elas_D2[k,1:m4,i,j]=kvals
+			  
+	  }}
+	  cat(i,"\n"); 
+  }		
+  return(Kvals_elas_D2)
+}
+
 
 load("./BC/elas_D2_BC.RData")
 load("./CC/elas_D2_CC.RData")
@@ -1489,191 +774,94 @@ load("./FP/elas_D2_FP.RData")
 load("./PG/elas_D2_PG.RData")
 load("./WT/elas_D2_WT.RData")
 
-plop=function(i,j) {(j-1)*m3+i} # for putting values in proper place in A 
-Plop=outer(1:m3,1:m4,plop); 
-
-
-Kvals_elas_D2_BC=array(0,c(m3,m4,m3,m4));  
-Kvals_elas_D2_CC=array(0,c(m3,m4,m3,m4));
-Kvals_elas_D2_C=array(0,c(m3,m4,m3,m4));
-Kvals_elas_D2_FP=array(0,c(m3,m4,m3,m4));
-Kvals_elas_D2_PG=array(0,c(m3,m4,m3,m4));
-Kvals_elas_D2_WT=array(0,c(m3,m4,m3,m4));
-
-#Big Cypress
-for(i in 1:m3){
-	for(j in 1:m4){
-		for(k in 1:m3){
-				kvals= elas_D2_BC[Plop[k,1:m4],Plop[i,j]]
-				Kvals_elas_D2_BC[k,1:m4,i,j]=kvals
-			
-	}}
-	cat(i,"\n"); 
-}		
-
+Kvals_elas_D2_BC <- toKvals_D2(elas_D2_BC)
 save(Kvals_elas_D2_BC, file="./BC/Kvals_elas_D2_BC.RData")
-
-#Cape Canaveral
-for(i in 1:m3){
-  for(j in 1:m4){
-    for(k in 1:m3){
-      kvals= elas_D2_CC[Plop[k,1:m4],Plop[i,j]]
-      Kvals_elas_D2_CC[k,1:m4,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}		
-
+Kvals_elas_D2_CC <- toKvals_D2(elas_D2_CC)
 save(Kvals_elas_D2_CC, file="./CC/Kvals_elas_D2_CC.RData")
-
-#Chekika
-for(i in 1:m3){
-  for(j in 1:m4){
-    for(k in 1:m3){
-      kvals= elas_D2_C[Plop[k,1:m4],Plop[i,j]]
-      Kvals_elas_D2_C[k,1:m4,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}		
-
+Kvals_elas_D2_C <- toKvals_D2(elas_D2_C)
 save(Kvals_elas_D2_C, file="./C/Kvals_elas_D2_C.RData")
-
-#Fort Pierce
-for(i in 1:m3){
-  for(j in 1:m4){
-    for(k in 1:m3){
-      kvals= elas_D2_FP[Plop[k,1:m4],Plop[i,j]]
-      Kvals_elas_D2_FP[k,1:m4,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}		
-
+Kvals_elas_D2_FP <- toKvals_D2(elas_D2_FP)
 save(Kvals_elas_D2_FP, file="./FP/Kvals_elas_D2_FP.RData")
-
-#Punta Gorda
-for(i in 1:m3){
-  for(j in 1:m4){
-    for(k in 1:m3){
-      kvals= elas_D2_PG[Plop[k,1:m4],Plop[i,j]]
-      Kvals_elas_D2_PG[k,1:m4,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}		
-
+Kvals_elas_D2_PG <- toKvals_D2(elas_D2_PG)
 save(Kvals_elas_D2_PG, file="./PG/Kvals_elas_D2_PG.RData")
-
-#Wild Turkey
-for(i in 1:m3){
-  for(j in 1:m4){
-    for(k in 1:m3){
-      kvals= elas_D2_WT[Plop[k,1:m4],Plop[i,j]]
-      Kvals_elas_D2_WT[k,1:m4,i,j]=kvals
-      
-    }}
-  cat(i,"\n"); 
-}		
-
+Kvals_elas_D2_WT <- toKvals_D2(elas_D2_WT)
 save(Kvals_elas_D2_WT, file="./WT/Kvals_elas_D2_WT.RData")
 
-
-rm(elas_D2_BC, elas_D2_C, elas_D2_CC, elas_D2_FP, elas_D2_PG, elas_D2_WT, Plop)
-
+rm(elas_D2_BC, elas_D2_CC, elas_D2_C, elas_D2_FP, elas_D2_PG, elas_D2_WT)
+rm(Kvals_elas_D2_BC, Kvals_elas_D2_CC, Kvals_elas_D2_C, Kvals_elas_D2_FP,
+   Kvals_elas_D2_PG, Kvals_elas_D2_WT)
 ###Construct F (Fecundity):
-load("./BC/elas_F_BC.RData")
-load("./CC/elas_F_CC.RData")
-load("./C/elas_F_C.RData")
-load("./FP/elas_F_FP.RData")
-load("./PG/elas_F_PG.RData")
-load("./WT/elas_F_WT.RData")
 
-plop1=function(i, j) {(j-1)*m1 + i}
-plop2=function(i, j) {(j-1)*m3 + i}
-Plop1=outer(1:m1,1:m2,plop1); 
-Plop2=outer(1:m3, 1:m4, plop2);
+toKvals_F = function(elas_F) {
+  plop1=function(i, j) {(j-1)*m1 + i}
+  plop2=function(i, j) {(j-1)*m3 + i}
+  Plop1=outer(1:m1,1:m2,plop1); 
+  Plop2=outer(1:m3, 1:m4, plop2);
 
-Kvals_elas_F_BC=array(0, c(m1, m2, m3, m4))
-Kvals_elas_F_CC=array(0, c(m1, m2, m3, m4))
-Kvals_elas_F_C=array(0, c(m1, m2, m3, m4))
-Kvals_elas_F_FP=array(0, c(m1, m2, m3, m4))
-Kvals_elas_F_PG=array(0, c(m1, m2, m3, m4))
-Kvals_elas_F_WT=array(0, c(m1, m2, m3, m4))
+  Kvals_elas_F=array(0, c(m1, m2, m3, m4))
 
-
-#Big Cypress
-for(i in 1:m3) {
-	for (j in 1:m4) {
-		for (k in 1:m1) {
-			kvals=elas_F_BC[Plop1[k, 1:m2], Plop2[i,j]]
-			Kvals_elas_F_BC[k, 1:m2, i, j]=kvals
-		}}
-		cat(i, "\n");
+  for(i in 1:m3) {
+	  for (j in 1:m4) {
+		  for (k in 1:m1) {
+		  	kvals=elas_F[Plop1[k, 1:m2], Plop2[i,j]]
+			  Kvals_elas_F[k, 1:m2, i, j]=kvals
+		  }}
+		  cat(i, "\n");
+  }
+  return(Kvals_elas_F)
 }
+
+
+
+elas_F_BC <- readRDS("./BC/elas_F_BC.rds")
+elas_F_CC <- readRDS("./CC/elas_F_CC.rds")
+elas_F_C  <- readRDS("./C/elas_F_C.rds")
+elas_F_FP <- readRDS("./FP/elas_F_FP.rds")
+elas_F_PG <- readRDS("./PG/elas_F_PG.rds")
+elas_F_WT <- readRDS("./WT/elas_F_WT.rds")
+
+
+Kvals_elas_F_BC <- toKvals_F(elas_F_BC)
 save(Kvals_elas_F_BC, file="./BC/Kvals_elas_F_BC.RData")
 
-#Cape Canaveral
-for(i in 1:m3) {
-  for (j in 1:m4) {
-    for (k in 1:m1) {
-      kvals=elas_F_CC[Plop1[k, 1:m2], Plop2[i,j]]
-      Kvals_elas_F_CC[k, 1:m2, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
+Kvals_elas_F_CC <- toKvals_F(elas_F_CC)
 save(Kvals_elas_F_CC, file="./CC/Kvals_elas_F_CC.RData")
-
-#Chekika
-for(i in 1:m3) {
-  for (j in 1:m4) {
-    for (k in 1:m1) {
-      kvals=elas_F_C[Plop1[k, 1:m2], Plop2[i,j]]
-      Kvals_elas_F_C[k, 1:m2, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
+Kvals_elas_F_C <- toKvals_F(elas_F_C)
 save(Kvals_elas_F_C, file="./C/Kvals_elas_F_C.RData")
-
-#Fort Pierce
-for(i in 1:m3) {
-  for (j in 1:m4) {
-    for (k in 1:m1) {
-      kvals=elas_F_FP[Plop1[k, 1:m2], Plop2[i,j]]
-      Kvals_elas_F_FP[k, 1:m2, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
+Kvals_elas_F_FP <- toKvals_F(elas_F_FP)
 save(Kvals_elas_F_FP, file="./FP/Kvals_elas_F_FP.RData")
-
-#Punta Gorda
-for(i in 1:m3) {
-  for (j in 1:m4) {
-    for (k in 1:m1) {
-      kvals=elas_F_PG[Plop1[k, 1:m2], Plop2[i,j]]
-      Kvals_elas_F_PG[k, 1:m2, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
+Kvals_elas_F_PG <- toKvals_F(elas_F_PG)
 save(Kvals_elas_F_PG, file="./PG/Kvals_elas_F_PG.RData")
-
-#Wild Turkey
-for(i in 1:m3) {
-  for (j in 1:m4) {
-    for (k in 1:m1) {
-      kvals=elas_F_WT[Plop1[k, 1:m2], Plop2[i,j]]
-      Kvals_elas_F_WT[k, 1:m2, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
+Kvals_elas_F_WT <- toKvals_F(elas_F_WT)
 save(Kvals_elas_F_WT, file="./WT/Kvals_elas_F_WT.RData")
 
-
+rm(elas_F_BC, elas_F_CC, elas_F_C, elas_F_FP, elas_F_PG, elas_F_WT)
+rm(Kvals_elas_F_BC, Kvals_elas_F_CC, Kvals_elas_F_C, Kvals_elas_F_FP,
+   Kvals_elas_F_PG, Kvals_elas_F_WT)
 
 
 
 
 ###Construct G (Graduation):
+
+toKvals_G = function(elas_G) {
+  plop1=function(i, j) {(j-1)*m3 + i}
+  plop2=function(i, j) {(j-1)*m1 + i}
+  Plop1=outer(1:m3,1:m4,plop1); 
+  Plop2=outer(1:m1, 1:m2, plop2);
+
+  Kvals_elas_G=array(0, c(m3, m4, m1, m2))
+
+  for(i in 1:m1) {
+	  for (j in 1:m2) {
+		  for (k in 1:m3) {
+			  kvals=elas_G[Plop1[k, 1:m4], Plop2[i,j]]
+			  Kvals_elas_G[k, 1:m4, i, j]=kvals
+		  }}
+		  cat(i, "\n");
+  }
+  return(Kvals_elas_G)
+}
 
 load("./BC/elas_G_BC.RData")
 load("./CC/elas_G_CC.RData")
@@ -1682,106 +870,39 @@ load("./FP/elas_G_FP.RData")
 load("./PG/elas_G_PG.RData")
 load("./WT/elas_G_WT.RData")
 
-plop1=function(i, j) {(j-1)*m3 + i}
-plop2=function(i, j) {(j-1)*m1 + i}
-Plop1=outer(1:m3,1:m4,plop1); 
-Plop2=outer(1:m1, 1:m2, plop2);
-
-Kvals_elas_G_BC=array(0, c(m3, m4, m1, m2))
-Kvals_elas_G_CC=array(0, c(m3, m4, m1, m2))
-Kvals_elas_G_C=array(0, c(m3, m4, m1, m2))
-Kvals_elas_G_FP=array(0, c(m3, m4, m1, m2))
-Kvals_elas_G_PG=array(0, c(m3, m4, m1, m2))
-Kvals_elas_G_WT=array(0, c(m3, m4, m1, m2))
-
-#Big Cypress
-for(i in 1:m1) {
-	for (j in 1:m2) {
-		for (k in 1:m3) {
-			kvals=elas_G_BC[Plop1[k, 1:m4], Plop2[i,j]]
-			Kvals_elas_G_BC[k, 1:m4, i, j]=kvals
-		}}
-		cat(i, "\n");
-}
-
+Kvals_elas_G_BC <- toKvals_G(elas_G_BC)
 save(Kvals_elas_G_BC, file="./BC/Kvals_elas_G_BC.RData")
-
-#Cape Canaveral
-for(i in 1:m1) {
-  for (j in 1:m2) {
-    for (k in 1:m3) {
-      kvals=elas_G_CC[Plop1[k, 1:m4], Plop2[i,j]]
-      Kvals_elas_G_CC[k, 1:m4, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-
+Kvals_elas_G_CC <- toKvals_G(elas_G_CC)
 save(Kvals_elas_G_CC, file="./CC/Kvals_elas_G_CC.RData")
-#Chekika
-for(i in 1:m1) {
-  for (j in 1:m2) {
-    for (k in 1:m3) {
-      kvals=elas_G_C[Plop1[k, 1:m4], Plop2[i,j]]
-      Kvals_elas_G_C[k, 1:m4, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-
+Kvals_elas_G_C <- toKvals_G(elas_G_C)
 save(Kvals_elas_G_C, file="./C/Kvals_elas_G_C.RData")
-
-#Fort Pierce
-for(i in 1:m1) {
-  for (j in 1:m2) {
-    for (k in 1:m3) {
-      kvals=elas_G_FP[Plop1[k, 1:m4], Plop2[i,j]]
-      Kvals_elas_G_FP[k, 1:m4, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-
+Kvals_elas_G_FP <- toKvals_G(elas_G_FP)
 save(Kvals_elas_G_FP, file="./FP/Kvals_elas_G_FP.RData")
-
-#Punta Gorda
-for(i in 1:m1) {
-  for (j in 1:m2) {
-    for (k in 1:m3) {
-      kvals=elas_G_PG[Plop1[k, 1:m4], Plop2[i,j]]
-      Kvals_elas_G_PG[k, 1:m4, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-
+Kvals_elas_G_PG <- toKvals_G(elas_G_PG)
 save(Kvals_elas_G_PG, file="./PG/Kvals_elas_G_PG.RData")
-
-#Wild Turkey
-for(i in 1:m1) {
-  for (j in 1:m2) {
-    for (k in 1:m3) {
-      kvals=elas_G_WT[Plop1[k, 1:m4], Plop2[i,j]]
-      Kvals_elas_G_WT[k, 1:m4, i, j]=kvals
-    }}
-  cat(i, "\n");
-}
-
+Kvals_elas_G_WT <- toKvals_G(elas_G_WT)
 save(Kvals_elas_G_WT, file="./WT/Kvals_elas_G_WT.RData")
 
+rm(elas_G_BC, elas_G_CC, elas_G_C, elas_G_FP, elas_G_PG, elas_G_WT)
+rm(Kvals_elas_G_BC, Kvals_elas_G_CC, Kvals_elas_G_C, Kvals_elas_G_FP,
+   Kvals_elas_G_PG, Kvals_elas_G_WT)
 
 
 
-#####Create Total Elasticity Pieces 
+# Create Total Elasticity Pieces #####
 load("./BC/Kvals_elas_D1_BC.RData")
 load("./BC/Kvals_elas_D2_BC.RData")
 load("./BC/Kvals_elas_F_BC.RData")
 load("./BC/Kvals_elas_G_BC.RData")
-##############
-#Big Cypress
+
+# Big Cypress
 total.elas_D1_BC<-apply(Kvals_elas_D1_BC, c(3,4), sum);
 total.elas_D2_BC<-apply(Kvals_elas_D2_BC, c(3,4), sum);
 total.elas_F_BC<-apply(Kvals_elas_F_BC, c(3,4), sum);
 total.elas_G_BC<-apply(Kvals_elas_G_BC, c(3,4), sum);
 save(total.elas_D1_BC, total.elas_D2_BC, total.elas_F_BC, total.elas_G_BC, 
      file="./BC/total.elas.RData")
-##############
+
 #Cape Canaveral
 load("./CC/Kvals_elas_D1_CC.RData")
 load("./CC/Kvals_elas_D2_CC.RData")
@@ -1795,7 +916,7 @@ total.elas_G_CC<-apply(Kvals_elas_G_CC, c(3,4), sum);
 save(total.elas_D1_CC, total.elas_D2_CC, total.elas_F_CC, total.elas_G_CC, 
      file="./CC/total.elas.RData")
 
-##############
+
 # Chekika
 load("./C/Kvals_elas_D1_C.RData")
 load("./C/Kvals_elas_D2_C.RData")
@@ -1809,7 +930,6 @@ total.elas_G_C<-apply(Kvals_elas_G_C, c(3,4), sum);
 save(total.elas_D1_C, total.elas_D2_C, total.elas_F_C, total.elas_G_C, 
      file="./C/total.elas.RData")
 
-##############
 #Fort Pierce
 load("./FP/Kvals_elas_D1_FP.RData")
 load("./FP/Kvals_elas_D2_FP.RData")
@@ -1823,7 +943,6 @@ total.elas_G_FP<-apply(Kvals_elas_G_FP, c(3,4), sum);
 save(total.elas_D1_FP, total.elas_D2_FP, total.elas_F_FP, total.elas_G_FP, 
      file="./FP/total.elas.RData")
 
-##############
 #Punta Gorda
 load("./PG/Kvals_elas_D1_PG.RData")
 load("./PG/Kvals_elas_D2_PG.RData")
@@ -1837,7 +956,7 @@ total.elas_G_PG<-apply(Kvals_elas_G_PG, c(3,4), sum);
 save(total.elas_D1_PG, total.elas_D2_PG, total.elas_F_PG, total.elas_G_PG, 
      file="./PG/total.elas.RData")
 
-##############
+
 #Wild Turkey
 load("./WT/Kvals_elas_D1_WT.RData")
 load("./WT/Kvals_elas_D2_WT.RData")
@@ -1855,7 +974,7 @@ save(total.elas_D1_WT, total.elas_D2_WT, total.elas_F_WT, total.elas_G_WT,
 
 
 
-
+# Separate rv and ssd #####
 #Separate:
 load("./BC/v_BC.RData")
 load("./CC/v_CC.RData")
