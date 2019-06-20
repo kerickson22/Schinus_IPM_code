@@ -151,80 +151,143 @@ decompose = function (mat) {
   return(list(mat_D1 = mat_D1, mat_G = mat_G, mat_F = mat_F, mat_D2 = mat_D2))
 }
 
+load("./BC/C_BC.RData")
+load("./CC/C_CC.RData")
+load("./C/C_C.RData")
+load("./FP/C_FP.RData")
+load("./PG/C_PG.RData")
+load("./WT/C_WT.RData")
+
 #Big Cypress
 thing <- decompose(C_BC)
-saveRDS(thing$D1, file="./BC/C_D1_BC.rds")
-saveRDS(thing$G, file="./BC/C_G_BC.rds")
-saveRDS(thing$F, file="./BC/C_F_BC.rds")
-saveRDS(thing$D2, file="./BC/C_D2_BC.rds")
+saveRDS(thing$mat_D1, file="./BC/C_D1_BC.rds")
+saveRDS(thing$mat_G, file="./BC/C_G_BC.rds")
+saveRDS(thing$mat_F, file="./BC/C_F_BC.rds")
+saveRDS(thing$mat_D2, file="./BC/C_D2_BC.rds")
 #Cape Canaveral
 thing <- decompose(C_CC)
-saveRDS(thing$D1, file="./CC/C_D1_CC.rds")
-saveRDS(thing$G, file="./CC/C_G_CC.rds")
-saveRDS(thing$F, file="./CC/C_F_CC.rds")
-saveRDS(thing$D2, file="./CC/C_D2_CC.rds")
+saveRDS(thing$mat_D1, file="./CC/C_D1_CC.rds")
+saveRDS(thing$mat_G, file="./CC/C_G_CC.rds")
+saveRDS(thing$mat_F, file="./CC/C_F_CC.rds")
+saveRDS(thing$mat_D2, file="./CC/C_D2_CC.rds")
 #Chekika
 thing <- decompose(C_C)
-saveRDS(thing$D1, file="./C/C_D1_C.rds")
-saveRDS(thing$G, file="./C/C_G_C.rds")
-saveRDS(thing$F, file="./C/C_F_C.rds")
-saveRDS(thing$D2, file="./C/C_D2_C.rds")
+saveRDS(thing$mat_D1, file="./C/C_D1_C.rds")
+saveRDS(thing$mat_G, file="./C/C_G_C.rds")
+saveRDS(thing$mat_F, file="./C/C_F_C.rds")
+saveRDS(thing$mat_D2, file="./C/C_D2_C.rds")
 #Fort Pierce
 thing <- decompose(C_FP)
-saveRDS(thing$D1, file="./FP/C_D1_FP.rds")
-saveRDS(thing$G, file="./FP/C_G_FP.rds")
-saveRDS(thing$F, file="./FP/C_F_FP.rds")
-saveRDS(thing$D2, file="./FP/C_D2_FP.rds")
+saveRDS(thing$mat_D1, file="./FP/C_D1_FP.rds")
+saveRDS(thing$mat_G, file="./FP/C_G_FP.rds")
+saveRDS(thing$mat_F, file="./FP/C_F_FP.rds")
+saveRDS(thing$mat_D2, file="./FP/C_D2_FP.rds")
 #Punta Gorda
 thing <- decompose(C_PG)
-saveRDS(thing$D1, file="./PG/C_D1_PG.rds")
-saveRDS(thing$G, file="./PG/C_G_PG.rds")
-saveRDS(thing$F, file="./PG/C_F_PG.rds")
-saveRDS(thing$D2, file="./PG/C_D2_PG.rds")
+saveRDS(thing$mat_D1, file="./PG/C_D1_PG.rds")
+saveRDS(thing$mat_G, file="./PG/C_G_PG.rds")
+saveRDS(thing$mat_F, file="./PG/C_F_PG.rds")
+saveRDS(thing$mat_D2, file="./PG/C_D2_PG.rds")
 #Wild Turkey
 thing <- decompose(C_WT)
-saveRDS(thing$D1, file="./WT/C_D1_WT.rds")
-saveRDS(thing$G, file="./WT/C_G_WT.rds")
-saveRDS(thing$F, file="./WT/C_F_WT.rds")
-saveRDS(thing$D2, file="./WT/C_D2_WT.rds")
+saveRDS(thing$mat_D1, file="./WT/C_D1_WT.rds")
+saveRDS(thing$mat_G, file="./WT/C_G_WT.rds")
+saveRDS(thing$mat_F, file="./WT/C_F_WT.rds")
+saveRDS(thing$mat_D2, file="./WT/C_D2_WT.rds")
 
+rm(C_BC, C_C, C_CC, C_FP, C_PG, C_WT)
 
 # Unpack decomposed matrix into pieces #####
-toKvals_D1 = function(elas_D1) {
+toKvals_D1 = function(C_D1) {
   plop=function(i,j) {(j-1)*m1+i} # for putting values in proper place in array
   Plop=outer(1:m1,1:m2,plop); 
   
-  Kvals_elas_D1=array(0,c(m1,m2,m1,m2));  
+  Kvals_contrib_D1=array(0,c(m1,m2,m1,m2));  
   for(i in 1:m1){
     for(j in 1:m2){
       for(k in 1:m1){
-        kvals= elas_D1[Plop[k,1:m2],Plop[i,j]]
-        Kvals_elas_D1[k,1:m2,i,j]=kvals
+        kvals= C_D1[Plop[k,1:m2],Plop[i,j]]
+        Kvals_contrib_D1[k,1:m2,i,j]=kvals
         
       }}
     cat(i,"\n"); 
   }
-  return(Kvals_elas_D1)
+  return(Kvals_contrib_D1)
 }
 
-toKvals_D2 = function(elas_D2) {
+#Big Cypress
+C_D1_BC <-readRDS("./BC/C_D1_BC.rds")
+Kvals_contrib_D1_BC <- toKvals_D1(C_D1_BC)
+save(Kvals_contrib_D1_BC, file="./BC/Kvals_contrib_D1_BC.RData")
+#Cape Canaveral
+C_D1_CC <-readRDS("./CC/C_D1_CC.rds")
+Kvals_contrib_D1_CC <- toKvals_D1(C_D1_CC)
+save(Kvals_contrib_D1_CC, file="./CC/Kvals_contrib_D1_CC.RData")
+#Chekika
+C_D1_C <- readRDS("./C/C_D1_C.rds")
+Kvals_contrib_D1_C <- toKvals_D1(C_D1_C)
+save(Kvals_contrib_D1_C, file="./C/Kvals_contrib_D1_C.RData")
+#Fort Pierce
+C_D1_FP <- readRDS("./FP/C_D1_FP.rds")
+Kvals_contrib_D1_FP <- toKvals_D1(C_D1_FP)
+save(Kvals_contrib_D1_FP, file="./FP/Kvals_contrib_D1_FP.RData")
+#Punta Gorda
+C_D1_PG <- readRDS("./PG/C_D1_PG.rds")
+Kvals_contrib_D1_PG <- toKvals_D1(C_D1_PG)
+save(Kvals_contrib_D1_PG, file="./PG/Kvals_contrib_D1_PG.RData")
+#Wild Turkey
+C_D1_WT <- readRDS("./WT/C_D1_WT.rds")
+Kvals_contrib_D1_WT <- toKvals_D1(C_D1_WT)
+save(Kvals_contrib_D1_WT, file="./WT/Kvals_contrib_D1_WT.RData")
+
+
+
+
+
+toKvals_D2 = function(contrib_D2) {
   plop=function(i,j) {(j-1)*m3+i} # for putting values in proper place in A 
   Plop=outer(1:m3,1:m4,plop); 
   
   
-  Kvals_elas_D2=array(0,c(m3,m4,m3,m4));  
+  Kvals_contrib_D2=array(0,c(m3,m4,m3,m4));  
   
   for(i in 1:m3){
     for(j in 1:m4){
       for(k in 1:m3){
-        kvals= elas_D2[Plop[k,1:m4],Plop[i,j]]
-        Kvals_elas_D2[k,1:m4,i,j]=kvals
+        kvals= contrib_D2[Plop[k,1:m4],Plop[i,j]]
+        Kvals_contrib_D2[k,1:m4,i,j]=kvals
         
       }}
     cat(i,"\n"); 
   }		
-  return(Kvals_elas_D2)
+  return(Kvals_contrib_D2)
 }
+
+
+#Big Cypress
+C_D2_BC <-readRDS("./BC/C_D2_BC.rds")
+Kvals_contrib_D2_BC <- toKvals_D2(C_D2_BC)
+save(Kvals_contrib_D2_BC, file="./BC/Kvals_contrib_D2_BC.RData")
+#Cape Canaveral
+C_D2_CC <-readRDS("./CC/C_D2_CC.rds")
+Kvals_contrib_D2_CC <- toKvals_D2(C_D2_CC)
+save(Kvals_contrib_D2_CC, file="./CC/Kvals_contrib_D2_CC.RData")
+#Chekika
+C_D2_C <- readRDS("./C/C_D2_C.rds")
+Kvals_contrib_D2_C <- toKvals_D2(C_D2_C)
+save(Kvals_contrib_D2_C, file="./C/Kvals_contrib_D2_C.RData")
+#Fort Pierce
+C_D2_FP <- readRDS("./FP/C_D2_FP.rds")
+Kvals_contrib_D2_FP <- toKvals_D2(C_D2_FP)
+save(Kvals_contrib_D2_FP, file="./FP/Kvals_contrib_D2_FP.RData")
+#Punta Gorda
+C_D2_PG <- readRDS("./PG/C_D2_PG.rds")
+Kvals_contrib_D2_PG <- toKvals_D2(C_D2_PG)
+save(Kvals_contrib_D2_PG, file="./PG/Kvals_contrib_D2_PG.RData")
+#Wild Turkey
+C_D2_WT <- readRDS("./WT/C_D2_WT.rds")
+Kvals_contrib_D2_WT <- toKvals_D2(C_D2_WT)
+save(Kvals_contrib_D2_WT, file="./WT/Kvals_contrib_D2_WT.RData")
 
 toKvals_F = function(elas_F) {
   plop1=function(i, j) {(j-1)*m1 + i}
@@ -245,6 +308,32 @@ toKvals_F = function(elas_F) {
   return(Kvals_elas_F)
 }
 
+#Big Cypress
+C_F_BC <-readRDS("./BC/C_F_BC.rds")
+Kvals_contrib_F_BC <- toKvals_F(C_F_BC)
+save(Kvals_contrib_F_BC, file="./BC/Kvals_contrib_F_BC.RData")
+#Cape Canaveral
+C_F_CC <-readRDS("./CC/C_F_CC.rds")
+Kvals_contrib_F_CC <- toKvals_F(C_F_CC)
+save(Kvals_contrib_F_CC, file="./CC/Kvals_contrib_F_CC.RData")
+#Chekika
+C_F_C <- readRDS("./C/C_F_C.rds")
+Kvals_contrib_F_C <- toKvals_F(C_F_C)
+save(Kvals_contrib_F_C, file="./C/Kvals_contrib_F_C.RData")
+#Fort Pierce
+C_F_FP <- readRDS("./FP/C_F_FP.rds")
+Kvals_contrib_F_FP <- toKvals_F(C_F_FP)
+save(Kvals_contrib_F_FP, file="./FP/Kvals_contrib_F_FP.RData")
+#Punta Gorda
+C_F_PG <- readRDS("./PG/C_F_PG.rds")
+Kvals_contrib_F_PG <- toKvals_F(C_F_PG)
+save(Kvals_contrib_F_PG, file="./PG/Kvals_contrib_F_PG.RData")
+#Wild Turkey
+C_F_WT <- readRDS("./WT/C_F_WT.rds")
+Kvals_contrib_F_WT <- toKvals_F(C_F_WT)
+save(Kvals_contrib_F_WT, file="./WT/Kvals_contrib_F_WT.RData")
+
+
 toKvals_G = function(elas_G) {
   plop1=function(i, j) {(j-1)*m3 + i}
   plop2=function(i, j) {(j-1)*m1 + i}
@@ -264,8 +353,34 @@ toKvals_G = function(elas_G) {
   return(Kvals_elas_G)
 }
 
-# Convert to totals: #####
+#Big Cypress
+C_G_BC <-readRDS("./BC/C_G_BC.rds")
+Kvals_contrib_G_BC <- toKvals_G(C_G_BC)
+save(Kvals_contrib_G_BC, file="./BC/Kvals_contrib_G_BC.RData")
+#Cape Canaveral
+C_G_CC <-readRDS("./CC/C_G_CC.rds")
+Kvals_contrib_G_CC <- toKvals_G(C_G_CC)
+save(Kvals_contrib_G_CC, file="./CC/Kvals_contrib_G_CC.RData")
+#Chekika
+C_G_C <- readRDS("./C/C_G_C.rds")
+Kvals_contrib_G_C <- toKvals_G(C_G_C)
+save(Kvals_contrib_G_C, file="./C/Kvals_contrib_G_C.RData")
+#Fort Pierce
+C_G_FP <- readRDS("./FP/C_G_FP.rds")
+Kvals_contrib_G_FP <- toKvals_G(C_G_FP)
+save(Kvals_contrib_G_FP, file="./FP/Kvals_contrib_G_FP.RData")
+#Punta Gorda
+C_G_PG <- readRDS("./PG/C_G_PG.rds")
+Kvals_contrib_G_PG <- toKvals_G(C_G_PG)
+save(Kvals_contrib_G_PG, file="./PG/Kvals_contrib_G_PG.RData")
+#Wild Turkey
+C_G_WT <- readRDS("./WT/C_G_WT.rds")
+Kvals_contrib_G_WT <- toKvals_G(C_G_WT)
+save(Kvals_contrib_G_WT, file="./WT/Kvals_contrib_G_WT.RData")
 
+
+# Convert to totals: #####
+#Big Cypress
 total.contrib_D1_BC<-apply(Kvals_contrib_D1_BC, c(3,4), sum);
 total.contrib_D2_BC<-apply(Kvals_contrib_D2_BC, c(3,4), sum);
 total.contrib_F_BC<-apply(Kvals_contrib_F_BC, c(3,4), sum);
@@ -273,41 +388,102 @@ total.contrib_G_BC<-apply(Kvals_contrib_G_BC, c(3,4), sum);
 save(total.contrib_D1_BC, total.contrib_D2_BC, total.contrib_F_BC, total.contrib_G_BC, 
      file="./BC/total.contrib_BC.RData")
 
+#Cape Canaveral
+total.contrib_D1_CC<-apply(Kvals_contrib_D1_CC, c(3,4), sum);
+total.contrib_D2_CC<-apply(Kvals_contrib_D2_CC, c(3,4), sum);
+total.contrib_F_CC<-apply(Kvals_contrib_F_CC, c(3,4), sum);
+total.contrib_G_CC<-apply(Kvals_contrib_G_CC, c(3,4), sum);
+save(total.contrib_D1_CC, total.contrib_D2_CC, total.contrib_F_CC, total.contrib_G_CC, 
+     file="./CC/total.contrib_CC.RData")
+
+#Chekika
+total.contrib_D1_C<-apply(Kvals_contrib_D1_C, c(3,4), sum);
+total.contrib_D2_C<-apply(Kvals_contrib_D2_C, c(3,4), sum);
+total.contrib_F_C<-apply(Kvals_contrib_F_C, c(3,4), sum);
+total.contrib_G_C<-apply(Kvals_contrib_G_C, c(3,4), sum);
+save(total.contrib_D1_C, total.contrib_D2_C, total.contrib_F_C, total.contrib_G_C, 
+     file="./C/total.contrib_C.RData")
+
+#Fort Pierce
+total.contrib_D1_FP<-apply(Kvals_contrib_D1_FP, c(3,4), sum);
+total.contrib_D2_FP<-apply(Kvals_contrib_D2_FP, c(3,4), sum);
+total.contrib_F_FP<-apply(Kvals_contrib_F_FP, c(3,4), sum);
+total.contrib_G_FP<-apply(Kvals_contrib_G_FP, c(3,4), sum);
+save(total.contrib_D1_FP, total.contrib_D2_FP, total.contrib_F_FP, total.contrib_G_FP, 
+     file="./FP/total.contrib_FP.RData")
+
+#Punta Gorda
+total.contrib_D1_PG<-apply(Kvals_contrib_D1_PG, c(3,4), sum);
+total.contrib_D2_PG<-apply(Kvals_contrib_D2_PG, c(3,4), sum);
+total.contrib_F_PG<-apply(Kvals_contrib_F_PG, c(3,4), sum);
+total.contrib_G_PG<-apply(Kvals_contrib_G_PG, c(3,4), sum);
+save(total.contrib_D1_PG, total.contrib_D2_PG, total.contrib_F_PG, total.contrib_G_PG, 
+     file="./PG/total.contrib_PG.RData")
+
+#Wild Turkey
+total.contrib_D1_WT<-apply(Kvals_contrib_D1_WT, c(3,4), sum);
+total.contrib_D2_WT<-apply(Kvals_contrib_D2_WT, c(3,4), sum);
+total.contrib_F_WT<-apply(Kvals_contrib_F_WT, c(3,4), sum);
+total.contrib_G_WT<-apply(Kvals_contrib_G_WT, c(3,4), sum);
+save(total.contrib_D1_WT, total.contrib_D2_WT, total.contrib_F_WT, total.contrib_G_WT, 
+     file="./WT/total.contrib_WT.RData")
 
 
+#Collapse contributions by site: #####
 
-#Collapse contributions by site: #####	
-load("./Western/total.contrib_W.RData")
- W<-c( 
- sum(rowSums(total.contrib_D1_W)), 
- sum(rowSums(total.contrib_G_W)), 
- sum(rowSums(total.contrib_F_W)), 
- sum(rowSums(total.contrib_D2_W)) )
- save(W, file="./Western/W.RData")
+
+ BC<-c( 
+ sum(rowSums(total.contrib_D1_BC)), 
+ sum(rowSums(total.contrib_G_BC)), 
+ sum(rowSums(total.contrib_F_BC)), 
+ sum(rowSums(total.contrib_D2_BC)) )
+ save(BC, file="./BC/BC.RData")
  
-load("./Hybrid/total.contrib_H.RData")
- H<-c(
- sum(rowSums(total.contrib_D1_H)), 
- sum(rowSums(total.contrib_G_H)), 
- sum(rowSums(total.contrib_F_H)), 
- sum(rowSums(total.contrib_D2_H)) )
- save(H, file="./Hybrid/H.RData")
  
- load("./Eastern/total.contrib_E.RData")
- E<-c( 
- sum(rowSums(total.contrib_D1_E)), 
- sum(rowSums(total.contrib_G_E)), 
- sum(rowSums(total.contrib_F_E)), 
- sum(rowSums(total.contrib_D2_E)) )
- save(E, file="./Eastern/E.RData")
-
-
+ CC<-c( 
+   sum(rowSums(total.contrib_D1_CC)), 
+   sum(rowSums(total.contrib_G_CC)), 
+   sum(rowSums(total.contrib_F_CC)), 
+   sum(rowSums(total.contrib_D2_CC)) )
+ save(CC, file="./CC/CC.RData")
+ 
+ C<-c( 
+   sum(rowSums(total.contrib_D1_C)), 
+   sum(rowSums(total.contrib_G_C)), 
+   sum(rowSums(total.contrib_F_C)), 
+   sum(rowSums(total.contrib_D2_C)) )
+ save(C, file="./C/C.RData")
+ 
+ FP<-c( 
+   sum(rowSums(total.contrib_D1_FP)), 
+   sum(rowSums(total.contrib_G_FP)), 
+   sum(rowSums(total.contrib_F_FP)), 
+   sum(rowSums(total.contrib_D2_FP)) )
+ save(FP, file="./FP/FP.RData")
+ 
+ PG<-c( 
+   sum(rowSums(total.contrib_D1_PG)), 
+   sum(rowSums(total.contrib_G_PG)), 
+   sum(rowSums(total.contrib_F_PG)), 
+   sum(rowSums(total.contrib_D2_PG)) )
+ save(PG, file="./PG/PG.RData")
+ 
+ 
+ WT<-c( 
+   sum(rowSums(total.contrib_D1_WT)), 
+   sum(rowSums(total.contrib_G_WT)), 
+   sum(rowSums(total.contrib_F_WT)), 
+   sum(rowSums(total.contrib_D2_WT)) )
+ save(WT, file="./WT/WT.RData")
 # Calculate matrices of coefficients of variation #####
 
 	
-load("./Eastern/D1_E.RData")
-load("./Hybrid/D1_H.RData")
-load("./Western/D1_W.RData")
+D1_BC<-readRDS("./BC/D1_BC.rds")
+D1_CC <- readRDS("./CC/D1_CC.rds")
+D1_C<-readRDS("./C/D1_C.rds")
+D1_FP<-readRDS("./FP/D1_FP.rds")
+D1_PG<-readRDS("./PG/D1_PG.rds")
+D1_WT<-readRDS("./WT/D1_WT.rds")
 	
 CV<-function(x) {
 	return(sd(x)/mean(x))
@@ -321,68 +497,82 @@ cv_D1<-matrix(nrow=(m1*m2), ncol=(m1*m2))
 
 for(i in 1:(m1*m2)) {
 	for(j in 1:(m1*m2)) {
-		cv_D1[i,j]<-CV(c(D1_E[i,j], D1_W[i,j], D1_H[i,j]))
+		cv_D1[i,j]<-CV(c(D1_BC[i,j], D1_CC[i,j], D1_C[i,j], D1_FP[i,j], 
+		                 D1_PG[i,j], D1_WT[i,j]))
 		if(is.na(cv_D1[i,j])) {cv_D1[i,j]<-0}
 	}
 }
 
 
-D1_avg=(D1_E+D1_H+D1_W)/3
-rm(D1_E, D1_H, D1_W)
+D1_avg=(D1_BC + D1_CC + D1_C + D1_FP + D1_PG + D1_WT)/6
+rm(D1_BC, D1_CC, D1_C, D1_FP, D1_PG, D1_WT)
 
 #G
-load("./Eastern/G_E.RData")
-load("./Hybrid/G_H.RData")
-load("./Western/G_W.RData")
+G_BC<-readRDS("./BC/G_BC.rds")
+G_CC<-readRDS("./CC/G_CC.rds")
+G_C <- readRDS("./C/G_C.rds")
+G_FP <- readRDS("./FP/G_FP.rds")
+G_PG <- readRDS("./PG/G_PG.rds")
+G_WT <- readRDS("./WT/G_WT.rds")
 
 cv_G<-matrix(nrow=(m3*m4), ncol=(m1*m2))
 
 
 for(i in 1:(m3*m4)) {
 	for(j in 1:(m1*m2)) {
-		cv_G[i,j]<-CV(c(G_E[i,j], G_W[i,j], G_H[i,j]))
+		cv_G[i,j]<-CV(c(G_BC[i,j], G_CC[i,j], G_C[i,j], G_FP[i,j],
+		                G_PG[i,j], G_WT[i,j]))
 		if(is.na(cv_G[i,j])) {cv_G[i,j]<-0}
 	}
 }
 
-G_avg<-(G_E+G_H+G_W)/3
+G_avg<-(G_BC+G_CC+G_C + G_FP + G_PG + G_WT)/6
 
-rm(G_E)
-rm(G_H)
-rm(G_W)
+rm(G_BC, G_CC, G_C, G_FP, G_PG, G_WT)
 
 #F
-load("./Eastern/F_E.RData")
-load("./Hybrid/F_H.RData")
-load("./Western/F_W.RData")
+F_BC <- readRDS("./BC/F_BC.rds")
+F_CC <- readRDS("./CC/F_CC.rds")
+F_C  <- readRDS("./C/F_C.rds")
+F_FP <- readRDS("./FP/F_FP.rds")
+F_PG <- readRDS("./PG/F_PG.rds")
+F_WT <- readRDS("./WT/F_WT.rds")
+
 cv_F<-matrix(nrow=(m1*m2), ncol=(m3*m4))
 for(i in 1:(m1*m2)) {
 	for(j in 1:(m3*m4)) {
-		cv_F[i,j]<-CV(c(F_E[i,j], F_W[i,j], F_H[i,j]))
+		cv_F[i,j]<-CV(c(F_BC[i,j], F_CC[i,j], F_C[i,j], F_FP[i,j],
+		              F_PG[i,j], F_WT[i,j]))
 		if(is.na(cv_F[i,j])) {cv_F[i,j]<-0}
 	}
 }
 
-F_avg<-(F_E + F_W + F_H)/3
+F_avg<-(F_BC + F_CC + F_C + F_FP + F_PG + F_WT)/6
 
-rm(F_E)
-rm(F_W)
-rm(F_H)
+rm(F_BC, F_CC, F_C, F_FP, F_PG, F_WT)
 
 #D2
-load("./Eastern/D2_E.RData")
-load("./Hybrid/D2_H.RData")
-load("./Western/D2_W.RData")
+D2_BC <- readRDS("./BC/D2_BC.rds")
+D2_CC <- readRDS("./CC/D2_CC.rds")
+D2_C  <- readRDS("./C/D2_C.rds")
+D2_FP <- readRDS("./FP/D2_FP.rds")
+D2_PG <- readRDS("./PG/D2_PG.rds")
+D2_WT <- readRDS("./WT/D2_WT.rds")
 
 
 cv_D2<-matrix(nrow=(m3*m4), ncol=(m3*m4))
 for(i in 1:(m3*m4)) {
 	for(j in 1:(m3*m4)) {
-		cv_D2[i,j]<-CV(c(D2_E[i,j], D2_W[i,j], D2_H[i,j]))
+		cv_D2[i,j]<-CV(c(D2_BC[i,j], D2_CC[i,j], D2_C[i,j], D2_FP,
+		                 D2_PG, D2_WT))
 		if(is.na(cv_D2[i,j])) {cv_D2[i,j]<-0}
 	}
 }
 
+save(cv_D1, file="cv_D1.RData")
+save(cv_D2, file="cv_D2.RData")
+save(cv_F_, file="cv_F.RData")
+save(cv_G, file="cv_G.RData")
 
 D2_avg<-(D2_E+D2_H+D2_W)/3
 rm(D2_E)
