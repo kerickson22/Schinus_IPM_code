@@ -551,6 +551,11 @@ F_avg<-(F_BC + F_CC + F_C + F_FP + F_PG + F_WT)/6
 
 rm(F_BC, F_CC, F_C, F_FP, F_PG, F_WT)
 
+
+save(cv_D1, file="cv_D1.RData")
+save(cv_F, file="cv_F.RData")
+save(cv_G, file="cv_G.RData")
+rm(cv_D1, cv_F, cv_G)
 #D2
 D2_BC <- readRDS("./BC/D2_BC.rds")
 D2_CC <- readRDS("./CC/D2_CC.rds")
@@ -559,7 +564,8 @@ D2_FP <- readRDS("./FP/D2_FP.rds")
 D2_PG <- readRDS("./PG/D2_PG.rds")
 D2_WT <- readRDS("./WT/D2_WT.rds")
 
-
+#Lines 568: 577 are run on a separate computer because they take
+# a long time to run (X hours)
 cv_D2<-matrix(nrow=(m3*m4), ncol=(m3*m4))
 for(i in 1:(m3*m4)) {
 	for(j in 1:(m3*m4)) {
@@ -567,12 +573,9 @@ for(i in 1:(m3*m4)) {
 		                 D2_PG, D2_WT))
 		if(is.na(cv_D2[i,j])) {cv_D2[i,j]<-0}
 	}
+  cat("i=", i, "\n")
 }
-
-save(cv_D1, file="cv_D1.RData")
 save(cv_D2, file="cv_D2.RData")
-save(cv_F_, file="cv_F.RData")
-save(cv_G, file="cv_G.RData")
 
 D2_avg<-(D2_E+D2_H+D2_W)/3
 rm(D2_E)

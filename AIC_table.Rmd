@@ -1,0 +1,490 @@
+---
+title: "AIC of all possible models"
+author: "Kelley D. Erickson"
+output:
+  html_document:
+    toc: true
+    toc_depth: 5
+---
+
+
+<style type="text/css">
+.table {
+
+    width: 40%;
+
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+
+```
+# 0. Setup
+### Load the data 
+```{r, load data, message=FALSE}
+#Load demographic data
+demog<-read.csv("demography_15_clean.csv", head=T)
+library(AICcmodavg)
+library(fields)
+library(viridis)
+library(scales)
+my.palette <- viridis(9)
+```
+
+This is a csv file where each row is a an individual.
+
+The column names are : 
+
+ * `Obs` : Observation number (each plant should have a different observation number; these were assigned post data entry when we discovered that some of the numbers for individuals were reused between sites
+ 
+ * `Site`: Which site (Big Cypress, Cape Canaveral, Chekika, Forty Pierce, Punta Gorda, Wild Turkey)
+ 
+ * `Plant ID`: The tag number of an individual (each individual in a site has a different number, but numbers were reused across sites)
+ 
+ * `Location`: SeedlingPlot (individual located in a seedling plot) or NA (individual not in seedling plot)
+ 
+ * `Date_i`: The date the census took place for censuses i = 1:7
+ * `Status_i`: One of four categories for censuses i=1:7:
+    * **alive**: individual was alive when censused
+    * **firstdead**: the individual was recorded as dead at this census and was alive at the                      last census 
+    * **missing**: the individual was not located at this census
+    * **prestudy**: the individual had not been tagged yet 
+    * **stilldead**: the individual was already marked dead at a previous census
+  * `Death_Cause_i`: One of three categories for censuses i = 1:7:
+    * **NA**: for individuals that died, there was no reason to suspect their deaths were due               to management actions
+    * **sprayed**: individual death attributed to being sprayed with herbicide (these                       individuals should be excluded)
+    * **fire**: individual death attributed to fire (these individuals should be excluded                  from analysis)
+ * `Rep_stat_i`: One of 4 categories for censuses  i = 1:7:
+    * **NA**: for individuals whose reproductive status is unknown at census i 
+    * **female**: for individuals who have produced fruit at any previous census up to an                  including census i 
+    * **male**: for individuals who have not produced fruit at any previous census (may have               observed male flowers)
+    * **pre-reproductive**: for individuals who have not produced fruit at any previous                   census 
+  * `Diam_i`: Diameter (in mm) of individual at census i 
+  * `Height_i`: Height (in cm) of individual at census i 
+  * `Max_i`: Maximum canopy width in cm of individual at census i 
+  * `Min_i`: Minimum canopy width in cm of individual at census i 
+  * `Multistem`: For each individual takes on one of two values: 
+    * **NA**: individuals that are not multistem
+    * **FLAG**: Individuals that are multistem
+    
+## Stack data 
+```{r stack data}
+#### Restructure the data in a few different ways: 
+
+
+Dates <- c(rep(2009, 1512), rep(2010, 1512), rep(2011, 1512), rep(2012, 1512), rep(2013, 1512), rep(2014, 1512))
+
+
+
+Death_Cause<-c(demog$Death_Cause_2, demog$Death_Cause_3, demog$Death_Cause_4, demog$Death_Cause_5, demog$Death_Cause_6, demog$Death_Cause_7)
+
+Status<-c(demog$Status_1, demog$Status_2, demog$Status_3, demog$Status_4, demog$Status_5, demog$Status_6, demog$Status_7)
+
+Diams<-cbind(demog$Diam_1, demog$Diam_2, demog$Diam_3, demog$Diam_4, demog$Diam_5, demog$Diam_6, demog$Diam_7) 
+
+row.names(Diams)<-demog$Plant_ID
+
+Heights<-cbind(demog$Height_1, demog$Height_2, demog$Height_3, demog$Height_4, demog$Height_5, demog$Height_6, demog$Height_7)
+
+row.names(Heights)<-demog$Plant_ID
+
+Mins<-cbind(demog$Min_1, demog$Min_2, demog$Min_3, demog$Min_4, demog$Min_5, demog$Min_6, demog$Min_7)
+
+row.names(Mins)<-demog$Plant_ID
+
+Maxs<-cbind(demog$Max_1, demog$Max_2, demog$Max_3, demog$Max_4, demog$Max_5, demog$Max_6, demog$Max_7)
+
+row.names(Maxs)<-demog$Plant_ID
+
+Diams_pooled<-rbind( cbind(Diams[,1], Diams[,2]), cbind(Diams[,2], Diams[,3]), cbind(Diams[, 3], Diams[,4]), cbind(Diams[,4], Diams[,5]), cbind(Diams[,5], Diams[,6]), cbind(Diams[, 6], Diams[, 7]))
+
+Diams_pooled<-data.frame(Diams_pooled[,1], Diams_pooled[,2])
+
+names(Diams_pooled)<-c("t", "t_plus_one")
+
+Sites_pooled<-rep(demog$Site, 6)
+
+ID_pooled<-rep(demog$Plant_ID, 6)
+
+Location<-rep(demog$Location, 6)
+
+Genetic_type_pooled<-rep(0, length(Sites_pooled))
+
+#code which sites are which biotype
+for (i in 1:length(Genetic_type_pooled)) { 
+	if (Sites_pooled[i]=="Big Cypress") Genetic_type_pooled[i]<-"hybrid"
+	else if (Sites_pooled[i]=="Cape Canaveral") Genetic_type_pooled[i]<-"hybrid"
+	else if (Sites_pooled[i]=="Chekika") Genetic_type_pooled[i]<-"eastern"
+	else if (Sites_pooled[i]=="Fort Pierce") Genetic_type_pooled[i]<-"eastern"
+	else if (Sites_pooled[i]=="Punta Gorda") Genetic_type_pooled[i]<-"western"
+	else Genetic_type_pooled[i]<-"western"
+	
+}
+
+
+
+Heights_pooled<-rbind( cbind(Heights[,1], Heights[,2]), cbind(Heights[,2], Heights[,3]), cbind(Heights[, 3], Heights[,4]), cbind(Heights[,4], Heights[,5]), cbind(Heights[,5], Heights[,6]), cbind(Heights[, 6], Heights[, 7]))
+
+Heights_pooled<-data.frame(Heights_pooled[,1], Heights_pooled[,2])
+names(Heights_pooled)<-c("t", "t_plus_one")
+
+
+
+#Finish for maxs and mins 
+
+Maxs_pooled<-rbind(cbind(Maxs[,1], Maxs[,2]), cbind(Maxs[,2], Maxs[,3]), 
+	cbind(Maxs[,3], Maxs[,4]), cbind(Maxs[,4], Maxs[,5]), 
+	cbind(Maxs[,5], Maxs[,6]), cbind(Maxs[,6], Maxs[,7]))
+	
+Maxs_pooled<-data.frame(Maxs_pooled[,1], Maxs_pooled[,2])
+names(Maxs_pooled)<-c("t", "t_plus_one")
+
+
+
+Mins_pooled<-rbind( cbind(Mins[,1], Mins[,2]), cbind(Mins[,2], Mins[,3]), 
+	cbind(Mins[,3], Mins[,4]), cbind(Mins[,4], Mins[,5]), 
+	cbind(Mins[, 5], Mins[,6]), cbind(Mins[,6], Mins[,7]))
+	
+Mins_pooled<-data.frame(Mins_pooled[,1], Mins_pooled[,2])
+names(Mins_pooled)<-c("t", "t_plus_one")
+
+
+
+
+###Use status matrix to get survival matrix
+statmat<-as.matrix(demog[, c(6, 14, 22, 30, 38, 46, 54)])
+survmat<-statmat
+survmat<- ifelse(survmat=="prestudy"|survmat=="missing"|survmat=="still_dead", NA, survmat)
+survmat<- ifelse(survmat =="tagged"|survmat=="alive", 1, 0)
+
+survmat_pooled<-rbind( cbind(survmat[,1], survmat[,2]), cbind(survmat[,2], survmat[,3]), cbind(survmat[, 3], survmat[,4]), cbind(survmat[,4], survmat[,5]), cbind(survmat[,5], survmat[,6]), cbind(survmat[, 6], survmat[, 7]))
+names(survmat_pooled)<-c("surv_t", "surv_t_plus_one")
+
+
+survmat_pooled_bysize<-cbind(Diams_pooled[, 1], survmat_pooled[,2])
+names(survmat_pooled_bysize)<-c("size_t", "surv_t_plus_one")
+
+
+
+#Use reproduction status matrix to get reproduction matrix
+repstatmat<-as.matrix(demog[, c(8, 16, 24, 32, 40, 48, 56)])
+repmat<-repstatmat
+repmat<- ifelse(repmat =="female", 1, 0)
+repmat_pooled<-rbind( cbind(repmat[,1], repmat[,2]), cbind(repmat[,2], repmat[,3]), cbind(repmat[, 3], repmat[,4]), cbind(repmat[,4], repmat[,5]), cbind(repmat[,5], repmat[,6]), cbind(repmat[, 6], repmat[, 7]))
+
+
+pooled<-cbind(ID_pooled, Sites_pooled, Location, Death_Cause, Genetic_type_pooled, Mins_pooled, Maxs_pooled, Diams_pooled, Heights_pooled, repmat_pooled, survmat_pooled, Dates)
+names(pooled)<-c("ID", "Site","Location", "Death_Cause", "Genetic_type", "Min_t", "Min_tplus1", "Max_t", "Max_tplus1", "Diameter_t", "Diameter_tplus1", "Height_t", "Height_tplus1", "Rep_t", "Rep_tplus1", "Surv_t", "Surv_tplus1", "Year")
+```
+
+## Investigate relationships among possible state variables 
+```{r, investigate state variables}
+predictors<-cbind(pooled$Min_t, pooled$Diameter_t, pooled$Height_t, pooled$Max_t)
+
+# What is the correlation amongst the predictor variables? 
+correlation<-cor(predictors[, 1:4], use="pairwise.complete.obs")
+colnames(correlation)<-c("Min", "Diameter", "Height", "Max")
+rownames(correlation)<-c("Min", "Diameter", "Height", "Max")
+
+correlation<-round(correlation, 2)
+print(correlation)
+#Over the entire dataset, there is the lowest correlation between diameter and height
+
+```
+
+## Exclude outliers 
+
+```{r, exclude outliers}
+#Remove individual deaths that were sprayed or fire or grinding
+restrict<-subset(pooled, is.na(Death_Cause))
+
+#Remove outliers (very large diameters)
+restrict2<-subset(restrict, Diameter_t<800)
+
+#Remove an individual at Big Cypress that went from diameter 1.4 to diameter 108 back to diameter 2.1 
+restrict2 <- subset(restrict2, restrict2$ID != 5)
+
+#Questioning why we did this? does this lead to model-eviction? 
+#Range of diameter: [0, 800]
+0.9*max(restrict2$Diameter_t) #700
+#Range of height:  [0, 800]
+0.9*max(restrict2$Height_t, na.rm=T) #800
+```
+
+## Divide dataset into size domains (seedlings and larges)
+```{r divide data}
+seedlings<-subset(restrict2, restrict2$Diameter_t<1.6)
+seedlings<-subset(seedlings, seedlings$Height_t<16)
+larges<-subset(restrict2, restrict2$Diameter_t>1.6)
+larges<-subset(larges, larges$Height_t>16)
+
+x1seq_larges<-seq(1.6, 800, length.out=50)
+x2seq_larges<-seq(16, 800, length.out=50)
+
+x1seq_seedlings<-seq(0, 1.6, length.out=50)
+x2seq_seedlings<-seq(0, 16, length.out=50)
+
+grad_status<-rep(NA, length(seedlings$ID))
+for (i in 1:length(seedlings$ID)) {
+  if (is.na(seedlings$Diameter_tplus1[i])) {
+    grad_status[i]<-NA
+  }
+  else if (is.na(seedlings$Height_tplus1[i])) {
+    grad_status[i]<-NA
+  }
+  else if (seedlings$Diameter_tplus1[i]>1.6& seedlings$Height_tplus1[i]>16) { grad_status[i]<-1}
+  else {grad_status[i]<-0}
+}
+
+seedlings<-cbind(seedlings, grad_status)
+
+```
+# Exploratory Statistics 
+There are 1512 individuals 
+
+Big Cypress | Cape Canaveral | Chekika | Fort Pierce | Punta Gorda | Wild Turkey
+------------|----------------|---------|-------------|-------------|------------
+308         | 226            | 460     | 166         | 175         | 177        
+
+Eastern | Hybrid | Western 
+--------|--------|--------
+  626   | 534    | 352
+  
+```{r exploratory statistics}
+summary(seedlings$Site)
+summary(seedlings$Genetic_type)
+summary(as.factor(seedlings$Year))
+        
+summary(larges$Site)
+summary(larges$Genetic_type)
+summary(as.factor(larges$Year))
+
+```
+The number of deaths (0) by biotype:
+```{r deaths by biotype}
+table(seedlings$Surv_tplus1, seedlings$Genetic_type)
+table(larges$Surv_tplus1, larges$Genetic_type)
+```
+The number of deaths(0) by site:
+```{r deaths by site}
+table(seedlings$Surv_tplus1, seedlings$Site)
+table(larges$Surv_tplus1, larges$Site)
+
+```
+```{r deaths by year}
+table(seedlings$Surv_tplus1, seedlings$Year)
+table(larges$Surv_tplus1, larges$Year)
+
+```
+# Define some plotting variables: 
+
+```{r setup plotting}
+x1seq_seedlings<-seq(0, 1.6, length.out=50)
+
+x2seq_seedlings<-seq(0, 16, length.out=50)
+x1seq_larges <- seq(0, 800, length.out = 50 )
+x2seq_larges <- seq (0, 800, length.out = 50)
+
+invlogit<-function(x){exp(x)/(1+exp(x))}
+
+# Function to do an image plot of a matrix in the usual orientation, A(1,1) at top left  
+matrix.image=function(x,y,A,col=topo.colors(200),...) {
+	nx=length(x); ny=length(y); 
+	x1=c(1.5*x[1]-0.5*x[2],1.5*x[nx]-0.5*x[nx-1]); 
+	y1=c(1.5*y[1]-0.5*y[2],1.5*y[ny]-0.5*y[ny-1]); 
+	image.plot(list(x=x,y=y,z=t(A)),xlim=x1,ylim=rev(y1),col=col,bty="u",...);  
+}
+
+```
+Because not all sites were surveyed every year, we restrict the data to only those years where all sites were surveyed. 
+```{r seedling survival models}
+seedlings2 <- subset(seedlings, seedlings$Year > 2009 & seedlings$Year <2014)
+seedlings2$Year <- as.factor(seedlings2$Year)
+
+larges2 <- subset(larges, larges$Year > 2009 & larges$Year < 2014)
+larges2$Year <- as.factor(larges2$Year)
+```
+
+
+### -- Seedling Survival Models 
+The models we are interested in selecting among are as follows: 
+
+* s1_1: logit(S1) = b0 + b1*diameter
+* s1_2: logit(S1) = b0 + b1*diameter + biotype effect
+* s1_3: logit(S1) = b0 + b1*diameter + site effect
+* s1_4: logit(S1) = b0 + b1*diameter + year effect
+* s1_5: logit(S1) = b0 + b1*height 
+* s1_6: logit(S1) = b0 + b1*height + biotype effect
+* s1_7: logit(S1) = b0 + b1*height + site effect
+* s1_8: logit(S1) = b0 + b1*height + year effect
+* s1_9: logit(S1) = b0 + b1*diameter + b2*height 
+* s1_10: logit(S1) = b0 + b1*diameter + b2*height + biotype effect
+* s1_11: logit(S1) = b0 + b1*diameter + b2*height + site effect
+* s1_12: logit(S1) = b0 + b1*diameter + b2*height + year effect
+
+
+
+```{r defining the models: seedling survival}
+ s1_1 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Diameter_t, family = binomial)
+s1_2 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Diameter_t + seedlings2$Genetic_type, family = binomial)
+s1_3 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Diameter_t + seedlings2$Site, family = binomial)
+s1_4 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Diameter_t + seedlings2$Year, family = binomial)
+
+
+s1_5 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Height_t, family = binomial)
+s1_6 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Height_t + seedlings2$Genetic_type, family = binomial)
+s1_7 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Height_t + seedlings2$Site, family = binomial)
+s1_8 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Height_t + seedlings2$Year, family = binomial)
+
+
+s1_9 <-glm(seedlings2$Surv_tplus1 ~ seedlings2$Diameter_t + seedlings2$Height_t, family = binomial)
+s1_10 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Diameter_t + seedlings2$Height_t+ seedlings2$Genetic_type, family = binomial)
+s1_11 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Diameter_t + seedlings2$Height_t+ seedlings2$Site, family = binomial)
+s1_12 <- glm(seedlings2$Surv_tplus1 ~ seedlings2$Diameter_t + seedlings2$Height_t + seedlings2$Year, family = binomial)
+
+
+aictab(list(s1_1, s1_2, s1_3, s1_4, s1_5, s1_6, s1_7, s1_8, s1_9, s1_10, s1_11, s1_12), modnames = c("s1_1: diameter", "s1_2: diameter + biotype", "s1_3: diameter + site", "s1_4: diameter + year", "s1_5: height", "s1_6: height + biotype", "s1_7: height + site", "s1_8: height + year", "s1_9: diameter + height", "s1_10: diameter + height + biotype", "s1_11: diameter + height + site", "s1_12: diameter + height + year"))
+```
+
+
+### -- Adult Survival Models 
+```{r defining the models: adult survival}
+ s2_1 <- glm(larges2$Surv_tplus1 ~ larges2$Diameter_t, family = binomial)
+s2_2 <- glm(larges2$Surv_tplus1 ~ larges2$Diameter_t + larges2$Genetic_type, family = binomial)
+s2_3 <- glm(larges2$Surv_tplus1 ~ larges2$Diameter_t + larges2$Site, family = binomial)
+s2_4 <- glm(larges2$Surv_tplus1 ~ larges2$Diameter_t + larges2$Year, family = binomial)
+
+
+s2_5 <- glm(larges2$Surv_tplus1 ~ larges2$Height_t, family = binomial)
+s2_6 <- glm(larges2$Surv_tplus1 ~ larges2$Height_t + larges2$Genetic_type, family = binomial)
+s2_7 <- glm(larges2$Surv_tplus1 ~ larges2$Height_t + larges2$Site, family = binomial)
+s2_8 <- glm(larges2$Surv_tplus1 ~ larges2$Height_t + larges2$Year, family = binomial)
+
+
+s2_9 <-glm(larges2$Surv_tplus1 ~ larges2$Diameter_t + larges2$Height_t, family = binomial)
+s2_10 <- glm(larges2$Surv_tplus1 ~ larges2$Diameter_t + larges2$Height_t+ larges2$Genetic_type, family = binomial)
+s2_11 <- glm(larges2$Surv_tplus1 ~ larges2$Diameter_t + larges2$Height_t+ larges2$Site, family = binomial)
+s2_12 <- glm(larges2$Surv_tplus1 ~ larges2$Diameter_t + larges2$Height_t + larges2$Year, family = binomial)
+
+
+aictab(list(s2_1, s2_2, s2_3, s2_4, s2_5, s2_6, s2_7, s2_8, s2_9, s2_10, s2_11, s2_12), modnames = c("s2_1: diameter", "s2_2: diameter + biotype", "s2_3: diameter + site", "s2_4: diameter + year", "s2_5: height", "s2_6: height + biotype", "s2_7: height + site", "s2_8: height + year", "s2_9: diameter + height", "s2_10: diameter + height + biotype", "s2_11: diameter + height + site", "s2_12: diameter + height + year"))
+```
+
+### -- Maturation Models 
+
+```{r defining the models maturation}
+m_1 <- glm(seedlings2$grad_status ~ seedlings2$Diameter_t, family = binomial)
+m_2 <- glm(seedlings2$grad_status ~ seedlings2$Diameter_t + seedlings2$Genetic_type, family = binomial)
+m_3 <- glm(seedlings2$grad_status ~ seedlings2$Diameter_t + seedlings2$Site, family = binomial)
+m_4 <- glm(seedlings2$grad_status ~ seedlings2$Diameter_t + seedlings2$Year, family = binomial)
+
+
+m_5 <- glm(seedlings2$grad_status ~ seedlings2$Height_t, family = binomial)
+m_6 <- glm(seedlings2$grad_status ~ seedlings2$Height_t + seedlings2$Genetic_type, family = binomial)
+m_7 <- glm(seedlings2$grad_status ~ seedlings2$Height_t + seedlings2$Site, family = binomial)
+m_8 <- glm(seedlings2$grad_status ~ seedlings2$Height_t + seedlings2$Year, family = binomial)
+
+
+m_9 <-glm(seedlings2$grad_status ~ seedlings2$Diameter_t + seedlings2$Height_t, family = binomial)
+m_10 <- glm(seedlings2$grad_status ~ seedlings2$Diameter_t + seedlings2$Height_t+ seedlings2$Genetic_type, family = binomial)
+m_11 <- glm(seedlings2$grad_status ~ seedlings2$Diameter_t + seedlings2$Height_t+ seedlings2$Site, family = binomial)
+m_12 <- glm(seedlings2$grad_status ~ seedlings2$Diameter_t + seedlings2$Height_t + seedlings2$Year, family = binomial)
+
+
+aictab(list(m_1, m_2, m_3, m_4, m_5, m_6, m_7, m_8, m_9, m_10, m_11, m_12), modnames = c("m_1: diameter", "m_2: diameter + biotype", "m_3: diameter + site", "m_4: diameter + year", "m_5: height", "m_6: height + biotype", "m_7: height + site", "m_8: height + year", "m_9: diameter + height", "m_10: diameter + height + biotype", "m_11: diameter + height + site", "m_12: diameter + height + year"))
+```
+### -- Seedling Growth Models  (can't compare all because predicting different variables)
+
+```{r defining the seedling growth models, eval = FALSE}
+g1_1 <- lm(seedlings2$Diameter_tplus1 ~ seedlings2$Diameter_t)
+g1_2 <- lm(seedlings2$Diameter_tplus1 ~ seedlings2$Diameter_t + seedlings2$Genetic_type)
+g1_3 <- lm(seedlings2$Diameter_tplus1 ~ seedlings2$Diameter_t + seedlings2$Site)
+g1_4 <- lm(seedlings2$Diameter_tplus1 ~ seedlings2$Diameter_t + seedlings2$Year)
+
+
+g1_5 <- lm(seedlings2$Height_tplus1 ~ seedlings2$Height_t)
+g1_6 <- lm(seedlings2$Height_tplus1 ~ seedlings2$Height_t + seedlings2$Genetic_type)
+g1_7 <- lm(seedlings2$Height_tplus1 ~ seedlings2$Height_t + seedlings2$Site)
+g1_8 <- lm(seedlings2$Height_tplus1 ~ seedlings2$Height_t + seedlings2$Year)
+
+
+g1_9 <-manova(cbind(seedlings2$Diameter_tplus1, seedlings2$Height_tplus1) ~ seedlings2$Diameter_t+seedlings2$Height_t)
+g1_10 <- manova(cbind(seedlings2$Diameter_tplus1, seedlings2$Height_tplus1) ~ seedlings2$Diameter_t + seedlings2$Height_t + seedlings2$Genetic_type)
+g1_11 <- manova(cbind(seedlings2$Diameter_tplus1, seedlings2$Height_tplus1) ~ seedlings2$Diameter_t + seedlings2$Height_t + seedlings2$Site)
+g1_12 <- manova(cbind(seedlings2$Diameter_tplus1, seedlings2$Height_tplus1) ~ seedlings2$Diameter_t + seedlings2$Height_t + seedlings2$Year)
+
+
+
+
+aictab(list(g1_1, g1_2, g1_3, g1_4), modnames = 
+         c("g1_1:diameter= f(diameter)",
+           "g1_2: diameter = f(diameter + biotype)",
+           "g1_3: diameter = f(diameter + site)", 
+           "g1_4:diameter=  f(diameter + year)"
+           ))
+
+aictab(list(g1_5, g1_6, g1_7, g1_8), modnames = 
+         c("g1_5: height = f(height)",
+          "g1_6: height = f(height + biotype)",
+          "g1_7: height = f(height + site)",
+          "g1_8: height = f(height+year)"))
+
+#Cannot compute AIC for MANOVA
+aictab(list(g1_9, g1_10, g1_11, g1_12), modnames = 
+         c("g1_9: diameter,height= f(diameter + height)",
+           "g1_10: diameter, height = f(diameter + height + biotype)",
+           "g1_11: diameter,height = f(diameter + height + site)",
+           "g1_12: diameter,height = f(diameter + height + year)"))
+
+```
+
+```{r defining the fertility models}
+pf_1 <- glm(larges2$Rep_tplus1 ~ larges2$Diameter_t, family = "binomial")
+pf_2 <- glm(larges2$Rep_tplus1 ~ larges2$Diameter_t + larges2$Genetic_type, family = "binomial")
+pf_3 <- glm(larges2$Rep_tplus1 ~ larges2$Diameter_t + larges2$Site, family = "binomial")
+pf_4 <- glm(larges2$Rep_tplus1 ~ larges2$Diameter_t + larges2$Year, family = "binomial")
+
+pf_5 <- glm(larges2$Rep_tplus1 ~ larges2$Height_t, family = "binomial")
+pf_6 <- glm(larges2$Rep_tplus1 ~ larges2$Height_t  + larges2$Genetic_type, family = "binomial")
+pf_7 <- glm(larges2$Rep_tplus1 ~ larges2$Height_t + larges2$Site, family="binomial")
+pf_8 <- glm(larges2$Rep_tplus1 ~ larges2$Height_t + larges2$Year, family = "binomial")
+
+pf_9 <- glm(larges2$Rep_tplus1 ~ larges2$Diameter_t + larges2$Height_t, family = "binomial")
+pf_10 <- glm(larges2$Rep_tplus1 ~ larges2$Diameter_t + larges2$Height_t + larges2$Genetic_type, family = "binomial")
+pf_11 <- glm(larges2$Rep_tplus1 ~ larges2$Diameter_t + larges2$Height_t + larges2$Site, family = "binomial")
+pf_12 <- glm(larges2$Rep_tplus1 ~ larges2$Diameter_t + larges2$Height_t + larges2$Year, family= "binomial")
+
+aictab(list(pf_1, pf_2, pf_3, pf_4, pf_5, pf_6, pf_7, pf_8, pf_9, pf_10, pf_11, pf_12), modnames = c("pf_1: diameter", "pf_2: diameter + biotype",
+                            "pf_3: diameter + site",
+                            "pf_4: diameter + year",
+                            "pf_5: height",
+                            "pf_6: height + biotype",
+                            "pf_7: height + site",
+                            "pf_8: height + year",
+                            "pf_9: diameter + height",
+                            "pf_10: diameter + height + biotype",
+                            "pf_11: diameter + height + site",
+                            "pf_12: diameter + height + year"))
+
+
+```
+
+```{r defining the fecundity models}
+
+load("Stems.RData")
+
+diam<-Stems$diam_base*10 #convert from cm to mm
+diam <- diam*diam
+f1 <- lm(Stems$Seed_No ~ 0 + diam)
+f2 <- lm(Stems$Seed_No ~ 0 + diam:Stems$Genetic_Type)
+f3<-lm(Stems$Seed_No ~ 0 + diam:Stems$Site)
+
+
+aictab(list(f1, f2, f3), modnames = 
+         c("f1: diameter",
+           "f2: diammeter by biotype",
+           "f3: diameter by site"))
+```

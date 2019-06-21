@@ -98,53 +98,102 @@ x2seq_larges <- seq (0, 800, length.out = 50)
 
 
 ###FIGURE 1: D1 Survival by Biotype
-load("./Overall/p.vec_overall.RData")
-load("./Eastern/p.vec_E.RData")
-load("./Hybrid/p.vec_H.RData")
-load("./Western/p.vec_W.RData")
+load("./BC/p.vec_BC.RData")
+load("./CC/p.vec_CC.RData")
+load("./C/p.vec_C.RData")
+load("./FP/p.vec_FP.RData")
+load("./PG/p.vec_PG.RData")
 
 #png(file="D1_survival.png", width=20, height=10, units="in", res=300)
-setEPS(horizontal=F, onefile=F, paper="special")
+#setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/D1_survival.eps", width=width.cm/2.54, 
-           height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
- #x11(width = width.cm/2.54, height = height.cm/2.54, 
-  #   pointsize = pointsize)
-par(mar = c(3, 3, 2, 1), # Margins
-    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
-    tcl = -0.3, # Length of axis tickmarks
-    xpd=NA,
-    mai=c(0.1,0.5,0.1,0.1),
-    mfrow=c(1, 2))
-b0<-p.vec_E[20]
-b1<-p.vec_E[21]
-b2<-p.vec_E[22]
+          height=(height.cm*2)/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+ #x11(width = width.cm, height = 2*height.cm, 
+   #pointsize = pointsize)
+par(mfrow=c(2,2)) 
+#par(mar = c(7.1,15.1,5.1,5.1))
+par(mar=c(7, 11, 2, 1.5 ))
+par(oma=c(0,0,1,4)) #2, .5, 2, 4
+#Big Cypress, Punta Gorda and Wild Turkey
+b0 <- p.vec_BC[1]
+b1 <- p.vec_BC[2]
+b2 <- p.vec_BC[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
+
+par(cex.axis = 1, cex.lab = 1.2, cex = 1.2, cex.sub = 2, 
+    cex.main = 1.2, lwd = 1.5, bg = "transparent")
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "", 
+           ylab="", main="", col=my.palette, legend.line = 2.5, legend.lab= "P(Survival)", 
+           legend.cex=1.2, zlim= c(0,1))
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==1 & (seedlings$Site=="Big Cypress" |seedlings$Site == "Punta Gorda" | seedlings$Site == "Wild Turkey")], seedlings$Height_t[seedlings$Surv_tplus1==1& (seedlings$Site=="Big Cypress" |seedlings$Site == "Punta Gorda" | seedlings$Site == "Wild Turkey")],
+       pch=19, cex=1.2)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==0 & (seedlings$Site=="Big Cypress" |seedlings$Site == "Punta Gorda" | seedlings$Site == "Wild Turkey")], seedlings$Height_t[seedlings$Surv_tplus1==0&(seedlings$Site=="Big Cypress" |seedlings$Site == "Punta Gorda" | seedlings$Site == "Wild Turkey")],
+       pch=1, cex=1.2)
+mtext(side=3, "(a) BC, PG, WT", cex = 1.2, line = 1)
+mtext(side=1, "Diameter (mm)", line =3, cex=1.2)
+mtext(side=2, "Height (cm)", line = 3, cex = 1.2)
+#legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
 
 
-z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
+#Cape Canaveral
+b0 <- p.vec_CC[1]
+b1 <- p.vec_CC[2]
+b2 <- p.vec_CC[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
 
-persp(x1seq_seedling, x2seq_seedling, z1, ticktype="detailed",
-      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)",
-      shade=0.1, nticks=4, xlab="\n Diameter (mm)",
-      ylab="\n Height (cm)",  lwd=1, xaxs="i",
-      main="(a) Eastern and Western", cex.main=1)
+par(cex.axis = 1, cex.lab = 1.2, cex = 1.2, cex.sub = 2, 
+    cex.main = 1.2, lwd = 1.5, bg = "transparent")
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "", ylab="", 
+           legend.line = 2.5, legend.lab= "P(Survival)", zlim=c(0,1),
+           main="", col=my.palette, legend.cex=1.2)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==1 & seedlings$Site=="Cape Canaveral"], seedlings$Height_t[seedlings$Surv_tplus1==1& seedlings$Site=="Cape Canaveral"], 
+       pch=19, cex=1.2)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==0 & seedlings$Site=="Cape Canaveral"], seedlings$Height_t[seedlings$Surv_tplus1==0&seedlings$Site=="Cape Canaveral"], 
+       pch=1, cex=1.2)
+mtext(side=3, "(b) CC", cex = 1.2, line = 1)
+mtext(side=1, "Diameter (mm)", line =3, cex=1.2)
+mtext(side=2, "Height (cm)", line = 3, cex = 1.2)
+#legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
 
-###Plotting Hybrid seedling survival
-x1seq_seedling<-seq(0, 1.6, length.out=50)
-x2seq_seedling<-seq(0, 16, length.out=50)
+#Chekika
+b0 <- p.vec_C[1]
+b1 <- p.vec_C[2]
+b2 <- p.vec_C[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
 
-b0<-p.vec_H[20]
-b1<-p.vec_H[21]
-b2<-p.vec_H[22]
+par(cex.axis = 1, cex.lab = 1.2, cex = 1.2, cex.sub = 2, 
+    cex.main = 1.2, lwd = 1.5, bg = "transparent")
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "", ylab="", 
+            main="", col=my.palette, zlim=c(0,1), legend.line = 2.5, 
+           legend.lab= "P(Survival)", legend.cex=1.2)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==1 & seedlings$Site=="Chekika"], seedlings$Height_t[seedlings$Surv_tplus1==1& seedlings$Site=="Chekika"],
+       pch=19, cex = 1.2)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==0 & seedlings$Site=="Chekika"], seedlings$Height_t[seedlings$Surv_tplus1==0&seedlings$Site=="Chekika"],
+       pch=1, cex = 1.2)
+mtext(side=3, "(c) C", cex = 1.2, line = 1)
+mtext(side=1, "Diameter (mm)", line =3, cex=1.2)
+mtext(side=2, "Height (cm)", line = 3, cex = 1.2)
+#legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
 
+#Fort Pierce
+b0 <- p.vec_FP[1]
+b1 <- p.vec_FP[2]
+b2 <- p.vec_FP[3]
+z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
 
-z1<-outer(x1seq_seedling, x2seq_seedling, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
-
-persp(x1seq_seedling, x2seq_seedling, z1, ticktype="detailed",
-      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
-      shade=0.1, nticks=4, xlab="\n Diameter (mm)", 
-      ylab="\n Height (cm)",  lwd=1, xaxs="i", 
-      main="(b) Hybrid", cex.main=1)
-
+par(cex.axis = 1, cex.lab = 1.2, cex = 1.2, cex.sub = 2, 
+    cex.main = 1.2, lwd = 1.5, bg = "transparent")
+image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "", ylab="",
+           main="", col=my.palette, legend.line = 2.5, zlim=c(0,1),
+           legend.lab= "P(Survival)", legend.cex=1.2)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==1 & seedlings$Site=="Fort Pierce"], seedlings$Height_t[seedlings$Surv_tplus1==1& seedlings$Site=="Fort Pierce"], 
+       pch=19, cex=1.2)
+points(seedlings$Diameter_t[seedlings$Surv_tplus1==0 & seedlings$Site=="Fort Pierce"], seedlings$Height_t[seedlings$Surv_tplus1==0&seedlings$Site=="Fort Pierce"],
+       pch=1, cex = 1.2)
+mtext(side=3, "(d) FP", cex = 1.2, line = 1)
+mtext(side=1, "Diameter (mm)", line =3, cex=1.2)
+mtext(side=2, "Height (cm)", line = 3, cex = 1.2)
+#legend(1.63, 15, pch=c(1,19), cex = 0.8, text.width=0.19, c("Died", "Survived"), xpd=T)
 #This creates an EPS figure! That LaTeX can read
 
 dev.off()
