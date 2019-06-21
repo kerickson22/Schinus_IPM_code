@@ -34,6 +34,10 @@ h4=(800-16)/m4
 y4=(h4/2)*((0:(m4-1))+(1:m4))+16; #for height in D2
 
 
+seedlings2<-subset(seedlings, seedlings$Diameter_tplus1<1.6)
+seedlings2<-subset(seedlings2, seedlings2$Height_tplus1<16)
+
+
 
 #setwd("/Users/kelley/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data/MSFigures")
 #setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data/MSFigures")
@@ -97,7 +101,7 @@ x1seq_larges <- seq(0, 800, length.out = 50 )
 x2seq_larges <- seq (0, 800, length.out = 50)
 
 
-###FIGURE 1: D1 Survival by Biotype
+# FIGURE 1: D1 Survival by Biotype #####
 load("./BC/p.vec_BC.RData")
 load("./CC/p.vec_CC.RData")
 load("./C/p.vec_C.RData")
@@ -202,82 +206,203 @@ dev.off()
 
 
 
-### FIGURE 2 D1 GROWTH 
-setEPS(horizontal=F, onefile=F, paper="special")
-postscript("./Figures/D1_growth.eps", width=width.cm/2.54, 
-           height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
-# x11(width = width.cm/2.54, height = height.cm/2.54, 
-#     pointsize = pointsize)
-par(mar = c(3, 3, 2, 1), # Margins
-    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
-    tcl = -0.3, # Length of axis tickmarks
-    xpd=NA,
-    mai=c(0.1,0.5,0.1,0.1),
-    mfrow=c(1, 2))
-#Plot diameter tplus1
-b0<-p.vec_E[23]
-b1<-p.vec_E[24]
-b2<-p.vec_E[25]
+# FIGURE 2 D1 GROWTH  #####
 
-
-z_diam<-outer(x1seq_seedling, x2seq_seedling, function(a,b) (b0+b1*a + b2*b))
-
-#Plot height tplus1
-b0<-p.vec_E[27]
-b1<-p.vec_E[28]
-b2<-p.vec_E[29]
-
-z_height<-outer(x1seq_seedling, x2seq_seedling, function(a,b) (b0+b1*a + b2*b))
+##Big Cypress
+#Grab parameters associated with future diameter
+b0<-p.vec_BC[4]
+b1<-p.vec_BC[5]
+b2<- p.vec_BC[6]
 
 
 
-persp(x1seq_seedling, x2seq_seedling, z_diam, ticktype="detailed",
-      theta=-30,  zlab="\n \n Diameter \n at t plus 1 (mm) ", 
-      shade=0.1, nticks=4, xlab="\n Diameter at t (mm)",
-      ylab="\n Height at t (cm)", 
-      lwd=1)
+#Grab parameters associated with future height
+b3<-p.vec_BC[8]
+b4<-p.vec_BC[9]
+b5<-p.vec_BC[10]
 
 
-persp(x1seq_seedling, x2seq_seedling, z_height, ticktype="detailed",
-      theta=-30,  zlab="\n \n Height \n at t plus 1 (cm) ",
-      shade=0.1, nticks=4, xlab="\n Diameter at t (mm)", 
-      ylab="\n Height at t (cm)", lwd=1)
+z1_BC<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
+z2_BC<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
 
-dev.off()
+##Cape Canaveral
+#Grab parameters associated with future diameter
+b0 <- p.vec_CC[4]
+b1 <- p.vec_CC[5]
+b2 <- p.vec_CC[6]
 
-###Figure 3: D2 Survival
-setEPS(horizontal=F, onefile=F, paper="special")
-postscript("./Figures/D2_survival.eps", width=width.cm/2.54, 
-           height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
-# x11(width = width.cm/2.54, height = height.cm/2.54, 
-#     pointsize = pointsize)
-par(mar = c(3, 3, 2, 1), # Margins
-    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
-    tcl = -0.3, # Length of axis tickmarks
-    xpd=NA,
-    mai=c(0.1,0.5,0.1,0.1),
-    mfrow=c(1, 2))
-b0<-p.vec_E[1]
-b1<-p.vec_E[2]
-b2<-p.vec_E[3]
 
-z1<-outer(x1seq_larges, x2seq_larges, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
 
-persp(x1seq_larges, x2seq_larges, z1, ticktype="detailed",
-      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
-      shade=0.1, nticks=4, xlab="\n Diameter (mm)", ylab="\n Height (cm)",
-      lwd=1, main="(a) Eastern and Western", cex.main=1) #xaxs="i"
-#Plotting Hybrid seedling survival
-b0<-p.vec_H[1]
-b1<-p.vec_H[2]
-b2<-p.vec_H[3]
+#Grab parameters associated with future height
+b3<- p.vec_CC[8]
+b4<- p.vec_CC[9]
+b5<- p.vec_CC[10]
 
-z1<-outer(x1seq_larges, x2seq_larges, function(a,b) ((exp(b0+b1*a +b2*b)/(1+exp(b0+b1*a +b2*b)))))
+z1_CC<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
+z2_CC<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
 
-persp(x1seq_larges, x2seq_larges, z1, ticktype="detailed", 
-      theta=-30, zlim=c(0, 1.25), zlab="\n P(Survival)", 
-      shade=0.1, nticks=4, xlab="\n Diameter (mm)", ylab="\n Height (cm)",  
-      lwd=1, main="(b) Hybrid", cex.main=1) #xaxs="i"
+##Chekika
+#Grab parameters associated with future diameter
+b0<-p.vec_C[4]
+b1<-p.vec_C[5]
+b2<-p.vec_C[6]
+
+
+
+#Grab parameters associated with future height
+b3<-p.vec[8]
+b4<-p.vec[9]
+b5<-p.vec[10]
+
+z1_C<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
+z2_C<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
+
+##Fort Pierce
+#Grab parameters associated with future diameter
+b0<-p.vec_FP[4]
+b1<-p.vec_FP[5]
+b2<-p.vec_FP[6]
+
+
+
+#Grab parameters associated with future height
+b3<-p.vec_FP[8]
+b4<-p.vec_FP[9]
+b5<-p.vec_FP[10]
+
+z1_FP<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
+z2_FP<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
+
+
+##Punta Gorda
+#Grab parameters associated with future diameter
+b0<-p.vec_PG[4]
+b1<-p.vec_PG[5]
+b2<-p.vec_PG[6]
+
+#Grab parameters associated with future height
+b3<-p.vec_PG[8]
+b4<-p.vec_PG[9]
+b5<-p.vec_PG[10]
+
+z1_PG<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
+z2_PG<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
+
+##Wild Turkey
+#Grab parameters associated with future diameter
+b0<-p.vec_WT[4]
+b1<-p.vec_WT[5]
+b2<-p.vec_WT[6]
+
+#Grab parameters associated with future height
+b3<-p.vec_WT[8]
+b4<-p.vec_WT[9]
+b5<-p.vec_WT[10]
+
+z1_WT<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
+z2_WT<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
+
+
+z_BC <- b0 + b1*x1seq_seedlings + b2*x2seq_seedlings
+
+df <- expand.grid(x1seq_seedlings, x2seq_seedlings)
+df$z <- b0 + b1*df$Var1 + b2*df$Var2
+
+ggplot() + geom_tile(data = df, aes(x=Var1, y = Var2, fill= z)) + scale_fill_viridis_c() +
+ geom_point(data=seedlings2, aes(x=Diameter_t, y=Height_t, size = Diameter_tplus1) )
+
+
+
+
+#setEPS(horizontal=F, onefile=F, paper="special")
+#postscript("./Figures/D1_growth.eps", width=width.cm/2.54, 
+           #height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+ x11(width = width.cm/2.54, height = 2*height.cm/2.54, 
+     pointsize = pointsize)##### Image Plots
+par(mfrow=c(1,2))
+my.palette <- viridis(9)
+par(mar=c(5.1,4.1,4.1,6))
+coeff_bigger=.5
+
+layout(matrix(c(1,2, 3, 4), 2, 2, byrow = TRUE), 
+       widths=c(2,2), heights=c(3, 1))
+
+#Big Cypress IMAGE PLOT
+#Future Diameter
+
+image.plot(x1seq_seedlings, x2seq_seedlings, z1_BC, xlab = "Diameter (mm) ", 
+           ylab="Height (cm)", col=my.palette, legend.lab = "Diameter at t+1 (mm)", 
+           main = "Big Cypress")
+points(seedlings2$Diameter_t[seedlings2$Site == "Big Cypress"], 
+       seedlings2$Height_t[seedlings2$Site == "Big Cypress"], 
+       cex=seedlings2$Diameter_tplus1[seedlings2$Site == "Big Cypress"]*coeff_bigger, 
+       pch=1)
+legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(0.5,1, 1.5, 2,2.5, 3, 3.5,4), c("0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4"), xpd=T, horiz = T, title="Diameter at t +1 (mm)")
+
+#Future Height
+image.plot(x1seq_seedlings, x2seq_seedlings, z2_BC, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, main ="Big Cypress",legend.lab = "Height at t+1 (cm)")
+points(seedlings2$Diameter_t[seedlings2$Site == "Big Cypress"], seedlings2$Height_t[seedlings2$Site == "Big Cypress"], cex=seedlings2$Height_tplus1[seedlings2$Site == "Big Cypress"]*coeff_bigger,  pch=1, bg = "white")
+legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)*coeff_bigger,c("3", "8", "13", "23", "28", "33", "38", "44"), xpd=T, horiz = T, title="Height at t +1 (cm)")
+
+
+plot(NULL ,xaxt='n',yaxt='n',bty='n',ylab='',xlab='', xlim=0:1, ylim=0:1)
+legend("topright", 18.5, pch=1,text.width=0.1, pt.cex = c(0.5,1, 1.5, 2,2.5, 3, 3.5,4), c("0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4"), xpd=T, horiz = T, title="Diameter at t +1 (mm)")
+plot(NULL ,xaxt='n',yaxt='n',bty='n',ylab='',xlab='', xlim=0:1, ylim=0:1)
+
+#Cape Canaveral IMAGE PLOT
+#Future Diameter
+image.plot(x1seq_seedlings, x2seq_seedlings, z1_CC, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, legend.lab = "Diameter at t+1 (mm)", main = "Cape Canaveral")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Cape Canaveral"], seedlings_g$Height_t[seedlings_g$Site == "Cape Canaveral"], cex=seedlings_g$Diameter_tplus1[seedlings_g$Site == "Cape Canaveral"]*coeff_bigger,  pch=1)
+legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(0.5,1, 1.5, 2,2.5, 3, 3.5,4), c("0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4"), xpd=T, horiz = T, title="Diameter at t +1 (mm)")
+
+#Future Height
+image.plot(x1seq_seedlings, x2seq_seedlings, z2_CC, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, main ="Cape Canaveral",legend.lab = "Height at t+1 (cm)")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Cape Canaveral"], seedlings_g$Height_t[seedlings_g$Site == "Cape Canaveral"], cex=seedlings_g$Height_tplus1[seedlings_g$Site == "Cape Canaveral"]*coeff_bigger,  pch=1, bg = "white")
+legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)*coeff_bigger,c("3", "8", "13", "23", "28", "33", "38", "44"), xpd=T, horiz = T, title="Height at t +1 (cm)")
+
+#Chekika IMAGE PLOT
+#Future Diameter
+image.plot(x1seq_seedlings, x2seq_seedlings, z1_C, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, legend.lab = "Diameter at t+1 (mm)", main = "Chekika")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Chekika"], seedlings_g$Height_t[seedlings_g$Site == "Chekika"], cex=seedlings_g$Diameter_tplus1[seedlings_g$Site == "Chekika"]*coeff_bigger,  pch=1)
+legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(0.5,1, 1.5, 2,2.5, 3, 3.5,4), c("0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4"), xpd=T, horiz = T, title="Diameter at t +1 (mm)")
+
+#Future Height
+image.plot(x1seq_seedlings, x2seq_seedlings, z2_C, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, main ="Chekika",legend.lab = "Height at t+1 (cm)")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Chekika"], seedlings_g$Height_t[seedlings_g$Site == "Chekika"], cex=seedlings_g$Height_tplus1[seedlings_g$Site == "Chekika"]*coeff_bigger,  pch=1, bg = "white")
+legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)*coeff_bigger,c("3", "8", "13", "23", "28", "33", "38", "44"), xpd=T, horiz = T, title="Height at t +1 (cm)")
+
+#Fort Pierce IMAGE PLOT
+#Future Diameter
+image.plot(x1seq_seedlings, x2seq_seedlings, z1_FP, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, legend.lab = "Diameter at t+1 (mm)", main = "Fort Pierce")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Fort Pierce"], seedlings_g$Height_t[seedlings_g$Site == "Fort Pierce"], cex=seedlings_g$Diameter_tplus1[seedlings_g$Site == "Fort Pierce"]*coeff_bigger,  pch=1)
+legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(0.5,1, 1.5, 2,2.5, 3, 3.5,4), c("0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4"), xpd=T, horiz = T, title="Diameter at t +1 (mm)")
+
+#Future Height
+image.plot(x1seq_seedlings, x2seq_seedlings, z2_FP, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, main ="Fort Pierce",legend.lab = "Height at t+1 (cm)")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Fort Pierce"], seedlings_g$Height_t[seedlings_g$Site == "Fort Pierce"], cex=seedlings_g$Height_tplus1[seedlings_g$Site == "Fort Pierce"]*coeff_bigger,  pch=1, bg = "white")
+legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)*coeff_bigger,c("3", "8", "13", "23", "28", "33", "38", "44"), xpd=T, horiz = T, title="Height at t +1 (cm)")
+
+#Punta Gorda IMAGE PLOT
+#Future Diameter
+image.plot(x1seq_seedlings, x2seq_seedlings, z1_PG, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, legend.lab = "Diameter at t+1 (mm)", main = "Punta Gorda")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Punta Gorda"], seedlings_g$Height_t[seedlings_g$Site == "Punta Gorda"], cex=seedlings_g$Diameter_tplus1[seedlings_g$Site == "Punta Gorda"]*coeff_bigger,  pch=1)
+legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(0.5,1, 1.5, 2,2.5, 3, 3.5,4), c("0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4"), xpd=T, horiz = T, title="Diameter at t +1 (mm)")
+
+#Future Height
+image.plot(x1seq_seedlings, x2seq_seedlings, z2_PG, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, main ="Punta Gorda",legend.lab = "Height at t+1 (cm)")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Punta Gorda"], seedlings_g$Height_t[seedlings_g$Site == "Punta Gorda"], cex=seedlings_g$Height_tplus1[seedlings_g$Site == "Punta Gorda"]*coeff_bigger,  pch=1, bg = "white")
+legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)*coeff_bigger,c("3", "8", "13", "23", "28", "33", "38", "44"), xpd=T, horiz = T, title="Height at t +1 (cm)")
+
+#Wild Turkey IMAGE PLOT
+#Future Diameter
+image.plot(x1seq_seedlings, x2seq_seedlings, z1_WT, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, legend.lab = "Diameter at t+1 (mm)", main = "Wild Turkey")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Wild Turkey"], seedlings_g$Height_t[seedlings_g$Site == "Wild Turkey"], cex=seedlings_g$Diameter_tplus1[seedlings_g$Site == "Wild Turkey"]*coeff_bigger,  pch=1)
+legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(0.5,1, 1.5, 2,2.5, 3, 3.5,4), c("0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4"), xpd=T, horiz = T, title="Diameter at t +1 (mm)")
+
+#Future Height
+image.plot(x1seq_seedlings, x2seq_seedlings, z2_WT, xlab = "Diameter (mm) ", ylab="Height (cm)", col=my.palette, main ="Wild Turkey",legend.lab = "Height at t+1 (cm)")
+points(seedlings_g$Diameter_t[seedlings_g$Site == "Wild Turkey"], seedlings_g$Height_t[seedlings_g$Site == "Wild Turkey"], cex=seedlings_g$Height_tplus1[seedlings_g$Site == "Wild Turkey"]*coeff_bigger,  pch=1, bg = "white")
+legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)*coeff_bigger,c("3", "8", "13", "23", "28", "33", "38", "44"), xpd=T, horiz = T, title="Height at t +1 (cm)")
 
 dev.off()
 
