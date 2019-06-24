@@ -198,7 +198,7 @@ x1seq_seedlings<-seq(0, 1.6, length.out=50)
 x2seq_seedlings<-seq(0, 16, length.out=50)
 
 
-##### SURVIVAL of Seedlings (D1)
+##### SURVIVAL of Seedlings (D1) #####
 
 
 #(b) By Site 
@@ -238,7 +238,7 @@ p.vec_WT[3] <- s1$coeff[3]
 
 
 
-##### Seedling(D1) GROWTH 
+##### Seedling(D1) GROWTH #####
 
 #Size at t+1 is a function of height_t AND diam_t
 #Important: Seedling growth should only include individuals that remained in the 
@@ -323,7 +323,8 @@ p.vec_WT[9]<-g1$coeff[2,2]
 p.vec_WT[10]<-g1$coeff[3,2]
 p.vec_WT[11]<-summary(g1_height)$sigma
 
-##### "Maturation" from the seedling(D1) domain into the larger plant domain (D2)
+##### "Maturation"  ##### 
+#from the seedling(D1) domain into the larger plant domain (D2)
 
 
 
@@ -428,7 +429,8 @@ p.vec_WT[14]<-m$coeff[3]
 
 
 
-##### SURVIVAL of larger plants (in the D2 domain)
+##### D2 SURVIVAL #####
+#of larger plants (in the D2 domain)
 
 #(b) Model D2-survival (by site)
 
@@ -461,7 +463,8 @@ p.vec_WT[19]<-s2$coeff[1] + s2$coeff[8]
 p.vec_WT[20]<-s2$coeff[2]
 p.vec_WT[21]<-s2$coeff[3]
 
-##### GROWTH of larger plants (in the D2 domain)
+##### D2 GROWTH  #####
+# of larger plants (in the D2 domain)
 
 
 #Model variance in growth in diameter: 
@@ -558,7 +561,7 @@ p.vec_FP[29]<-summary(g2_height)$sigma
 p.vec_PG[29]<-summary(g2_height)$sigma
 p.vec_WT[29]<-summary(g2_height)$sigma
 
-##### Reproduction
+##### Reproduction #####
 
 #(b) Model probability of being reproductive     (by site)
 p_f1<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t + larges$Site, family=binomial)
@@ -590,7 +593,8 @@ p.vec_WT[31]<-p_f$coeff[2]
 
 
 
-##### Fecundity (given that an individual is reproductive )
+##### Fecundity #####
+# (given that an individual is reproductive )
 #These values are taken from Erickson et al. 2017 and rescaled (in that paper diameter was 
 # measured in cm instead of mm)
 #(a) Overall 
@@ -610,8 +614,8 @@ p.vec_BC[32]<-f$coeff[1]
 p.vec_CC[32]<-f$coeff[2]
 p.vec_C[32]<-f$coeff[3]
 p.vec_FP[32] <- f$coeff[4]
-p.vec_PG[32] <- f$coeff[5]
-p.vec_WT[32] <- f$coeff[6]
+p.vec_PG[32] <- f$coeff[6]
+p.vec_WT[32] <- f$coeff[7]
 
 
 
@@ -729,7 +733,7 @@ p.vec_WT[36]<-sd_height
 
 
 ##### Some additional (fixed parameters)
-# TAU_1: Pre-dispersal seed survival 
+# TAU_1: Pre-dispersal seed survival ##### 
 #Rethinking this parameter value: Isn't this already encapsulated in tau_2? 
 
 p.vec_BC[37]<-0.002
@@ -745,7 +749,7 @@ p.vec_WT[37]<-0.002
 # p.vec_H[37]<-1
 # p.vec_W[37]<-1
 
-#DELTA: Probability of dispersal 
+#DELTA: Probability of dispersal ##### 
 # p.vec_overall[38]<-0.005
 # p.vec_E[38]<-0.005
 # p.vec_H[38]<-0.005
@@ -760,7 +764,7 @@ p.vec_FP[38]<-0.19
 p.vec_PG[38]<-0.19
 p.vec_WT[38]<-0.19
 
-#TAU_2: Post-dispersal seed survival
+#TAU_2: Post-dispersal seed survival #####
 # Estimated from Geiger et al. 2011 
 
 # Geiger et al. (2011) report 8mo survival rate from seeds sourced from the six sites grown in a 
