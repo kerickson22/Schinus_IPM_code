@@ -305,14 +305,49 @@ z2_WT<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
 
 z_BC <- b0 + b1*x1seq_seedlings + b2*x2seq_seedlings
 
+
+x11(width = width.cm/2.54, height = height.cm/2.54, 
+pointsize = pointsize)
+
+
 df <- expand.grid(x1seq_seedlings, x2seq_seedlings)
-df$z <- b0 + b1*df$Var1 + b2*df$Var2
+df$diam_BC <- b0 + b1*df$Var1 + b2*df$Var2
+df$height_BC <- b3 + b4*df$Var1 + b5*df$Var2
 
-ggplot() + geom_tile(data = df, aes(x=Var1, y = Var2, fill= z)) + scale_fill_viridis_c() +
- geom_point(data=seedlings2, aes(x=Diameter_t, y=Height_t, size = Diameter_tplus1) )
+require(gridExtra)
 
+postscript("./Figures/D1_growth.eps", width=width.cm/2.54, 
+           height=(height.cm)/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+plot1<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_BC)) + 
+  scale_fill_viridis_c(limits = c(0, 1.6)) +
+ geom_point(data=seedlings2, aes(x=Diameter_t, y=Height_t, size = Diameter_tplus1) ) +
+  scale_size_continuous(breaks = c(0.3, 0.6, 0.9, 1.2, 1.5), limits=c(0.3, 1.5), range= c(0,3)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8)) + 
+  labs(fill = "Predicted \n diameter \n at time \n t + 1 (mm)") +
+  labs(size = "Measured \n diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (-12, -5, -12, -11)) +
+  guides(size = guide_legend(title.position = "right")) +
+  guides(fill = guide_colorbar(title.position = "right"))
 
+plot2<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_BC)) + 
+  scale_fill_viridis_c(limits = c(0, 16)) +
+  geom_point(data=seedlings2, aes(x=Diameter_t, y=Height_t, size = Height_tplus1) ) +
+  scale_size_continuous(breaks = c(3, 6, 9, 12, 15), limits=c(3, 15), range = c(0, 3)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8)) + 
+  labs(fill = "Predicted \n height \n at time \n t + 1 (cm)") +
+  labs(size = "Measured \n height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (-12, -5, -12, -11)) +
+  guides(size = guide_legend(title.position = "right")) +
+  guides(fill = guide_colorbar(title.position = "right"))
 
+grid.arrange(plot1, plot2, ncol=2)
+dev.off()
 
 #setEPS(horizontal=F, onefile=F, paper="special")
 #postscript("./Figures/D1_growth.eps", width=width.cm/2.54, 
@@ -407,7 +442,7 @@ legend(0, 18.5, pch=1,text.width=0.1, pt.cex = c(3,8, 13,18, 23, 28, 33, 38, 44)
 dev.off()
 
 
-###FIGURE 4: GROWTH OF D2 INDIVIDUALS
+###FIGURE 4: GROWTH OF D2 INDIVIDUALS #####
 
 ### Plot Growth Mod Eastern Larges
 
@@ -503,7 +538,7 @@ persp(x1seq_larges, x2seq_larges, z_height, ticktype="detailed", theta=-30,
 dev.off()
 
 
-###FIGURE 5: GRADUATION
+###FIGURE 5: GRADUATION #####
 setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/maturation.eps", width=width.cm/2.54, 
            height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
@@ -543,7 +578,7 @@ persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
 
 dev.off()
 
-###FIGURE 6: REPRODUCTION
+###FIGURE 6: REPRODUCTION #####
 setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/reproduction.eps", width=width.cm_onepanel/2.54, 
            height=width.cm_onepanel/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
@@ -575,7 +610,7 @@ legend(5, 0.98, c("Eastern and Hybrid", "Western"),
        lty=c(1, 3), lwd=c(1, 1), seg.len=1.5)
 dev.off()
 
-###FIGURE 7: FECUNDITY
+###FIGURE 7: FECUNDITY #####
 setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/fecundity.eps", width=width.cm_onepanel/2.54, 
            height=width.cm_onepanel/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
@@ -654,7 +689,7 @@ load("total.thing_D2.RData")
 load("total.thing_F.RData")
 load("total.thing_G.RData")
 
-#Figure 8: Population Growth Rates
+#Figure 8: Population Growth Rates #####
 setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/lambdas.eps", width=width.cm_onepanel/2.54, 
            height=width.cm_onepanel/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
@@ -676,7 +711,7 @@ dev.off()
 
 
 
-#Figure 9: Barplot of contribution of kernel components to differences in lambda
+#Figure 9: Barplot of contribution of kernel components to differences in lambda #####
 setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/barplot_contributions.eps", width=width.cm_onepanel/2.54, 
            height=3*height.cm/2.54, pointsize=pointsize)
@@ -714,7 +749,7 @@ mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 dev.off()
 
-#Figure A1: SSD and RV 
+#Figure A1: SSD and RV ######
 
 # #m1=10
 # m2=m1+1
@@ -924,7 +959,7 @@ dev.off()
 
 
 
-#Figure A2: Marginal elasticity by diameter
+#Figure A2: Marginal elasticity by diameter ######
 #setwd("/Users/curculion/Dropbox/matrix/outputs/sites/Eastern")
 # load("total.elas_D1_E.RData")
 # load("total.elas_F_E.RData")
@@ -1046,7 +1081,7 @@ dev.off() #x11(width = width.cm/2.54, height = 1.5*width.cm/(2.54),
 
 
 
-###FIGURE B1: Contribution of matrix elements to differences in lambda by diameter
+###FIGURE B1: Contribution of matrix elements to differences in lambda by diameter #####
 load("./Eastern/total.contrib_E.RData")
 load("./Hybrid/total.contrib_H.RData")
 load("./Western/total.contrib_W.RData")
@@ -1140,7 +1175,8 @@ dev.off()
 
 
 
-#Figure B3: Contributions of matrix elements to variation in lambda by diameter
+#Figure B3: Contributions of matrix elements to variation in lambda by diameter #####
+#With six sites calculating the variability takes too long (more than 50 hours at least)
 load("./Overall/total.thing.RData")
 
 setEPS(horizontal=F, onefile=F, paper="special")
