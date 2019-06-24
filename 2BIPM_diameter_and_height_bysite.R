@@ -976,19 +976,19 @@ save(total.elas_D1_WT, total.elas_D2_WT, total.elas_F_WT, total.elas_G_WT,
 
 # Separate rv and ssd #####
 #Separate:
-load("./BC/v_BC.RData")
-load("./CC/v_CC.RData")
-load("./C/v_C.RData")
-load("./FP/v_FP.RData")
-load("./PG/v_PG.RData")
-load("./WT/v_WT.RData")
+v_BC <- readRDS("./BC/v_BC.rds")
+v_CC <- readRDS("./CC/v_CC.rds")
+v_C  <- readRDS("./C/v_C.rds")
+v_FP <- readRDS("./FP/v_FP.rds")
+v_PG <- readRDS("./PG/v_PG.rds")
+v_WT <- readRDS("./WT/v_WT.rds")
 
-load("./BC/stable.dist_BC.RData")
-load("./CC/stable.dist_CC.RData")
-load("./C/stable.dist_C.RData")
-load("./FP/stable.dist_FP.RData")
-load("./PG/stable.dist_PG.RData")
-load("./WT/stable.dist_WT.RData")
+stable.dist_BC <- readRDS("./BC/stable.dist_BC.rds")
+stable.dist_CC <- readRDS("./CC/stable.dist_CC.rds")
+stable.dist_C  <- readRDS("./C/stable.dist_C.rds")
+stable.dist_FP <- readRDS("./FP/stable.dist_FP.rds")
+stable.dist_PG <- readRDS("./PG/stable.dist_PG.rds")
+stable.dist_WT <- readRDS("./WT/stable.dist_WT.rds")
 
 
 repro.val_smalls_BC=matrix(v_BC[1:(m1*m2)], m1,m2);

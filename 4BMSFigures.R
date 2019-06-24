@@ -18,7 +18,7 @@ par(mar = c(3, 3, 2, 1), # Margins
     xpd=NA,
     mai=c(0.3,0.3,0.1,0.1))
 
-
+cols <- viridis(6)
 m1=10
 m2=m1+1
 m3=100
@@ -207,6 +207,7 @@ dev.off()
 
 
 # FIGURE 2 D1 GROWTH  #####
+df <- expand.grid(x1seq_seedlings, x2seq_seedlings)
 
 ##Big Cypress
 #Grab parameters associated with future diameter
@@ -214,16 +215,13 @@ b0<-p.vec_BC[4]
 b1<-p.vec_BC[5]
 b2<- p.vec_BC[6]
 
-
-
 #Grab parameters associated with future height
 b3<-p.vec_BC[8]
 b4<-p.vec_BC[9]
 b5<-p.vec_BC[10]
 
-
-z1_BC<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
-z2_BC<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
+df$diam_BC <- b0 + b1*df$Var1 + b2*df$Var2
+df$height_BC <- b3 + b4*df$Var1 + b5*df$Var2
 
 ##Cape Canaveral
 #Grab parameters associated with future diameter
@@ -231,48 +229,37 @@ b0 <- p.vec_CC[4]
 b1 <- p.vec_CC[5]
 b2 <- p.vec_CC[6]
 
-
-
 #Grab parameters associated with future height
 b3<- p.vec_CC[8]
 b4<- p.vec_CC[9]
 b5<- p.vec_CC[10]
 
-z1_CC<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
-z2_CC<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
-
+df$diam_CC <- b0 + b1*df$Var1 + b2*df$Var2
+df$height_CC <- b3 + b4*df$Var1 + b5*df$Var2
 ##Chekika
 #Grab parameters associated with future diameter
 b0<-p.vec_C[4]
 b1<-p.vec_C[5]
 b2<-p.vec_C[6]
-
-
-
 #Grab parameters associated with future height
-b3<-p.vec[8]
-b4<-p.vec[9]
-b5<-p.vec[10]
+b3<-p.vec_C[8]
+b4<-p.vec_C[9]
+b5<-p.vec_C[10]
 
-z1_C<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
-z2_C<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
+df$diam_C <- b0 + b1*df$Var1 + b2*df$Var2
+df$height_C <- b3 + b4*df$Var1 + b5*df$Var2
 
 ##Fort Pierce
 #Grab parameters associated with future diameter
 b0<-p.vec_FP[4]
 b1<-p.vec_FP[5]
 b2<-p.vec_FP[6]
-
-
-
 #Grab parameters associated with future height
 b3<-p.vec_FP[8]
 b4<-p.vec_FP[9]
 b5<-p.vec_FP[10]
-
-z1_FP<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
-z2_FP<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
-
+df$diam_FP <- b0 + b1*df$Var1 + b2*df$Var2
+df$height_FP <- b3 + b4*df$Var1 + b5*df$Var2
 
 ##Punta Gorda
 #Grab parameters associated with future diameter
@@ -285,8 +272,8 @@ b3<-p.vec_PG[8]
 b4<-p.vec_PG[9]
 b5<-p.vec_PG[10]
 
-z1_PG<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
-z2_PG<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
+df$diam_PG <- b0 + b1*df$Var1 + b2*df$Var2
+df$height_PG <- b3 + b4*df$Var1 + b5*df$Var2
 
 ##Wild Turkey
 #Grab parameters associated with future diameter
@@ -299,20 +286,15 @@ b3<-p.vec_WT[8]
 b4<-p.vec_WT[9]
 b5<-p.vec_WT[10]
 
-z1_WT<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b ))
-z2_WT<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
-
-
-z_BC <- b0 + b1*x1seq_seedlings + b2*x2seq_seedlings
+df$diam_WT <- b0 + b1*df$Var1 + b2*df$Var2
+df$height_WT <- b3 + b4*df$Var1 + b5*df$Var2
 
 
 x11(width = width.cm/2.54, height = height.cm/2.54, 
 pointsize = pointsize)
 
 
-df <- expand.grid(x1seq_seedlings, x2seq_seedlings)
-df$diam_BC <- b0 + b1*df$Var1 + b2*df$Var2
-df$height_BC <- b3 + b4*df$Var1 + b5*df$Var2
+
 
 require(gridExtra)
 
@@ -333,7 +315,7 @@ plot1<- ggplot() + xlim(0, 1.6) + ylim(0, 16) +
   guides(fill = guide_colorbar(title.position = "right"))
 
 plot2<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
-  geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_BC)) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= height_BC)) + 
   scale_fill_viridis_c(limits = c(0, 16)) +
   geom_point(data=seedlings2, aes(x=Diameter_t, y=Height_t, size = Height_tplus1) ) +
   scale_size_continuous(breaks = c(3, 6, 9, 12, 15), limits=c(3, 15), range = c(0, 3)) + 
@@ -650,6 +632,7 @@ save.image(file="2018_06_27.RData")
 
 
 #rm(list=ls())
+
 load("./Eastern/total.contrib_D1_E.RData")
 load("./Eastern/total.contrib_D2_E.RData")
 load("./Eastern/total.contrib_F_E.RData")
@@ -674,9 +657,13 @@ load("lambda_diff_E.RData")
 load("lambda_diff_H.RData")
 load("lambda_diff_W.RData")
 
-load("./Eastern/E.RData")
-load("./Hybrid/H.RData")
-load("./Western/W.RData")
+load("./BC/BC.RData")
+load("./CC/CC.RData")
+load("./C/C.RData")
+load("./FP/FP.RData")
+load("./PG/PG.RData")
+load("./WT/WT.RData")
+
 
 load("lambda_all.RData")
 load("lambda_E.RData")
@@ -689,6 +676,13 @@ load("total.thing_D2.RData")
 load("total.thing_F.RData")
 load("total.thing_G.RData")
 
+
+lam.stable_BC <- readRDS("./BC/lam.stable_BC.rds")
+lam.stable_CC <- readRDS("./CC/lam.stable_CC.rds")
+lam.stable_C  <- readRDS("./C/lam.stable_C.rds")
+lam.stable_FP <- readRDS("./FP/lam.stable_FP.rds")
+lam.stable_PG <- readRDS("./PG/lam.stable_PG.rds")
+lam.stable_WT <- readRDS("./WT/lam.stable_WT.rds")
 #Figure 8: Population Growth Rates #####
 setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/lambdas.eps", width=width.cm_onepanel/2.54, 
@@ -702,11 +696,13 @@ par(mar = c(3, 3, 2, 1), # Margins
     xpd=F,
     mai=c(0.5,0.5,0.5,0.5),
     mfrow=c(1, 1))
-barplot(c(lambda_all, lambda_E, lambda_H, lambda_W), 
-        col=c("grey", "grey", "grey", "grey"),
+barplot(c(lam.stable_BC, lam.stable_CC, lam.stable_C, lam.stable_FP,
+          lam.stable_PG, lam.stable_WT), 
+        col=cols,
         ylab=expression(paste(lambda)), 
-        names.arg=c("Overall", "Eastern", "Hybrid", "Western"),
-        ylim=c(1, 1.1), xpd=F)
+        names.arg=c("BC", "CC", "C", "FP",
+                    "PG", "WT"),
+        ylim=c(1, 1.5), xpd=F)
 dev.off()
 
 
@@ -725,28 +721,50 @@ par(mar = c(3, 3, 2, 1), # Margins
     xpd=F,
     mai=c(0.2,.5,0.2,0.1),
     oma=c(0.1, 0, 0.1, 0),
-    mfrow=c(3, 1))
+    mfrow=c(3, 2))
 
-barplot(W, col=c("grey", "grey", "grey"), ylim=c(-0.03, 0.06),
-        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), axes=T, cex.names=1.6, cex.axis=1.6)
+barplot(BC, col=cols[1], ylim=c(-0.13, 0.16),
+        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), axes=T, cex.names=0.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["W"],"-", lambda["overall"])))
+              bquote(paste(lambda["BC"],"-", lambda["average"])))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
-barplot(H, col=c("grey", "grey", "grey"), ylim=c(-0.03, 0.06), 
-        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=1.6, cex.axis=1.6)
+barplot(CC, col=cols[2], ylim=c(-0.13, 0.16), 
+        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=0.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["H"],"-", lambda["overall"])))
+              bquote(paste(lambda["CC"],"-", lambda["average"])))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
-barplot(E, col=c("grey", "grey", "grey"), ylim=c(-0.03, 0.06), 
-        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=1.6, cex.axis=1.6)
+barplot(C, col=cols[3], ylim=c(-0.13, 0.16), 
+        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["E"],"-", lambda["overall"])))
+              bquote(paste(lambda["C"],"-", lambda["average"])))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
+
+barplot(FP, col=cols[4], ylim=c(-0.13, 0.16), 
+        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=.6, cex.axis=1)
+Lines <- list(bquote(paste( "Contribution to" )),
+              bquote(paste(lambda["FP"],"-", lambda["average"])))
+mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
+abline(h=0)
+
+barplot(PG, col=cols[5], ylim=c(-0.13, 0.16), 
+        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=.6, cex.axis=1)
+Lines <- list(bquote(paste( "Contribution to" )),
+              bquote(paste(lambda["PG"],"-", lambda["average"])))
+mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
+abline(h=0)
+
+barplot(WT, col=cols[6], ylim=c(-0.13, 0.16), 
+        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=.6, cex.axis=1)
+Lines <- list(bquote(paste( "Contribution to" )),
+              bquote(paste(lambda["WT"],"-", lambda["average"])))
+mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
+abline(h=0)
+
 dev.off()
 
 #Figure A1: SSD and RV ######
@@ -907,52 +925,77 @@ par(mar = c(3, 3, 2, 1), # Margins
     mai=c(0.4,0.3,0.2,0.1),
     mfrow=c(2, 2))
 
-load("./Overall/y_diam.RData")
-load("./Overall/y_height.RData")
-load("./Eastern/ss_diam_E.RData")
-load("./Hybrid/ss_diam_H.RData")
-load("./Western/ss_diam_W.RData")
-load("./Eastern/ss_height_E.RData")
-load("./Hybrid/ss_height_H.RData")
-load("./Western/ss_height_W.RData")
-load("./Eastern/rv_diam_E.RData")
-load("./Eastern/rv_height_E.RData")
-load("./Hybrid/rv_diam_H.RData")
-load("./Hybrid/rv_height_H.RData")
-load("./Western/rv_diam_W.RData")
-load("./Western/rv_height_W.RData")
+load("./BC/y_diam.RData")
+load("./BC/y_height.RData")
+load("./BC/ss_diam_BC.RData")
+load("./CC/ss_diam_CC.RData")
+load("./C/ss_diam_C.RData")
+load("./FP/ss_diam_FP.RData")
+load("./PG/ss_diam_PG.RData")
+load("./WT/ss_diam_WT.RData")
 
-plot(y_diam, ss_diam_E,xlab="Diameter (mm)",ylab="frequency",
-     type="l", cex=1, cex.axis=1, cex.lab=1, lty=5, lwd=1, ylim=c(0, 0.2)); 
-lines(y_diam, ss_diam_W, lwd=1, lty=3)
-lines(y_diam, ss_diam_H, lwd=1, lty=1)
+load("./BC/ss_height_BC.RData")
+load("./CC/ss_height_CC.RData")
+load("./C/ss_height_C.RData")
+load("./FP/ss_height_FP.RData")
+load("./PG/ss_height_PG.RData")
+load("./WT/ss_height_WT.RData")
+
+load("./BC/rv_diam_BC.RData")
+load("./BC/rv_height_BC.RData")
+load("./CC/rv_diam_CC.RData")
+load("./CC/rv_height_CC.RData")
+load("./C/rv_diam_C.RData")
+load("./C/rv_height_C.RData")
+load("./FP/rv_diam_FP.RData")
+load("./FP/rv_height_FP.RData")
+load("./PG/rv_diam_PG.RData")
+load("./PG/rv_height_PG.RData")
+load("./WT/rv_diam_WT.RData")
+load("./WT/rv_height_WT.RData")
+
+plot(y_diam, ss_diam_BC,xlab="Diameter (mm)",ylab="frequency",
+     type="l", cex=1, cex.axis=1, cex.lab=1, lty=5, lwd=1, ylim=c(0, 0.24), col=cols[1]); 
+lines(y_diam, ss_diam_CC, lwd=1, lty=3, col=cols[2])
+lines(y_diam, ss_diam_C, lwd=1, lty=1, col=cols[3])
+lines(y_diam, ss_diam_FP, lwd=1, lty=4, col=cols[4])
+lines(y_diam, ss_diam_PG, lwd=1, lty=6, col=cols[5])
+lines(y_diam, ss_diam_WT, lwd=1, lty=7, col=cols[6])
 
 title(main="(a) Stable diameter distribution", cex.main=1);
 
 
-plot(y_height,ss_height_E,xlab="Height (cm)",ylab="frequency",
-     type="l", cex=1, cex.axis=1, cex.lab=1, lty=5, lwd=1, ylim=c(0, 0.2)); 
-lines(y_height, ss_height_W, lwd=1, lty=3)
-lines(y_height, ss_height_H, lwd=1, lty=1)
+plot(y_height,ss_height_BC,xlab="Height (cm)",ylab="frequency",
+     type="l", cex=1, cex.axis=1, cex.lab=1, lty=5, lwd=1, ylim=c(0, 0.24), col=cols[1]); 
+lines(y_height, ss_height_CC, lwd=1, lty=3, col=cols[2])
+lines(y_height, ss_height_C, lwd=1, lty=1, col= cols[3])
+lines(y_height, ss_height_FP, lwd=1, lty=4, col=cols[4])
+lines(y_height, ss_height_PG, lwd=1, lty=6, col=cols[5])
+lines(y_height, ss_height_WT, lwd=1, lty=7, col=cols[6])
 title(main="(b) Stable height distribution", cex.main=1); 
+legend(350, 0.15, lty=c(5, 1, 3, 4, 6, 7), lwd=1, col=cols,
+       c("BC", "CC", "C", "FP", "PG", "WT"), cex=1,  seg.len=3)
 
 
-plot(y_diam, rv_diam_H, xlab="Diameter(mm)", ylab="frequency",
-     type="l", cex=1, cex.axis=1, cex.lab=1, lty=1, lwd=1, ylim=c(0, 0.02))
-lines(y_diam, rv_diam_E, lwd=1, lty=5)
-lines(y_diam, rv_diam_W, lwd=1, lty=3)
-lines(y_diam, rv_diam_H, lwd=1, lty=1)
+plot(y_diam, rv_diam_BC, xlab="Diameter(mm)", ylab="frequency",
+     type="l", cex=1, cex.axis=1, cex.lab=1, lty=5, lwd=1, ylim=c(0, 0.022), col=cols[1])
+lines(y_diam, rv_diam_CC, lwd=1, lty=3, col=cols[2])
+lines(y_diam, rv_diam_C, lwd=1, lty=1, col=cols[3])
+lines(y_diam, rv_diam_FP, lwd=1, lty=4, col=cols[4])
+lines(y_diam, rv_diam_PG, lwd=1, lty=6, col=cols[5])
+lines(y_diam, rv_diam_WT, lwd=1, lty=7, col=cols[6] )
 title(main="(c) Reproductive value: by diameter", cex.main=1);
 
  
-plot(y_height, rv_height_H, xlab="Height (cm)", ylab="frequency",
-     type="l", cex=1, cex.axis=1, cex.lab=1, lty=1, lwd=1, ylim=c(0, 0.02))
-lines(y_height, rv_height_E, lwd=1, lty=5)
-lines(y_height, rv_height_W, lwd=1, lty=3)
+plot(y_height, rv_height_BC, xlab="Height (cm)", ylab="frequency",
+     type="l", cex=1, cex.axis=1, cex.lab=1, lty=5, lwd=1, ylim=c(0, 0.022), col=cols[1])
+lines(y_height, rv_height_CC, lwd=1, lty=1, col=cols[2])
+lines(y_height, rv_height_C, lwd=1, lty=3, col=cols[3])
+lines(y_height, rv_height_FP, lwd=1, lty=4, col=cols[4])
+lines(y_height, rv_height_PG, lwd=1, lty=6, col=cols[5])
+lines(y_height, rv_height_WT, lwd=1, lty=7, col=cols[6])
 title(main="(d) Reproductive value: by height", cex.main=1); 
 
-legend(350, 0.005, lty=c(3, 1, 5), lwd=1,
-       c("Western", "Hybrid", "Eastern"), cex=1,  seg.len=3)
 
 dev.off()
 
@@ -966,23 +1009,12 @@ dev.off()
 # load("total.elas_G_E.RData")
 # load("total.elas_D2_E.RData")
 
-load("./Eastern/total.elas.RData")
-
-# #setwd("/Users/curculion/Dropbox/matrix/outputs/sites/Hybrid")
-# load("total.elas_D1_H.RData")
-# load("total.elas_F_H.RData")
-# load("total.elas_G_H.RData")
-# load("total.elas_D2_H.RData")
-
-load("./Hybrid/total.elas.RData")
-
-# #setwd("/Users/curculion/Dropbox/matrix/outputs/sites/Western")
-# load("total.elas_D1_W.RData")
-# load("total.elas_F_W.RData")
-# load("total.elas_G_W.RData")
-# load("total.elas_D2_W.RData")
-
-load("./Western/total.elas.RData")
+load("./BC/total.elas.RData")
+load("./CC/total.elas.RData")
+load("./C/total.elas.RData")
+load("./FP/total.elas.RData")
+load("./PG/total.elas.RData")
+load("./WT/total.elas.RData")
 
 #setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data/MSFigures")
 
@@ -1004,74 +1036,102 @@ x2_seedlings <- seq(0, 16, length.out=11)
 x2_adults <- seq(16, 800, length.out=101)
 
 
-plot(x1_seedlings, rowSums(total.elas_D1_E), ylim=c(0, 0.03), xlim=c(0, 1.6), xlab="", 
-     ylab="", main="",  type='l', lwd=1, lty=5, cex.axis=1.5)
-text(0.2, 0.049, "Seedling", cex=1.5)
-lines(x1_seedlings, rowSums(total.elas_D1_H), type='l', lwd=1, lty=1)
-lines(x1_seedlings, rowSums(total.elas_D1_W), type='l', lwd=1, lty=3)
+plot(x1_seedlings, rowSums(total.elas_D1_BC), ylim=c(0, 0.03), xlim=c(0, 1.6), xlab="", 
+     ylab="", main="",  type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
+text(0.2, 0.029, "Seedling", cex=1.5)
+lines(x1_seedlings, rowSums(total.elas_D1_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x1_seedlings, rowSums(total.elas_D1_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x1_seedlings, rowSums(total.elas_D1_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x1_seedlings, rowSums(total.elas_D1_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x1_seedlings, rowSums(total.elas_D1_WT), type='l', lwd=1, lty=7, col=cols[6])
 mtext(side=3, "(a) Marginal elasticity over diameter", line=1, cex=1.2, adj=0)
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
 
-plot(x1_adults, rowSums(total.elas_F_E), ylim=c(0, 0.03), xlim=c(1.6, 800), xlab="", 
-     ylab= "", main="", type='l', lwd=1, lty=5, cex.axis=1.5)
-text(65, 0.049, "Fertility", cex=1.5)
-lines(x1_adults, rowSums(total.elas_F_H), type='l', lwd=1, lty=1)
-lines(x1_adults, rowSums(total.elas_F_W), type='l', lwd=1, lty=3)
+plot(x1_adults, rowSums(total.elas_F_BC), ylim=c(0, 0.03), xlim=c(1.6, 800), xlab="", 
+     ylab= "", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
+text(65, 0.029, "Fertility", cex=1.5)
+lines(x1_adults, rowSums(total.elas_F_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x1_adults, rowSums(total.elas_F_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x1_adults, rowSums(total.elas_F_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x1_adults, rowSums(total.elas_F_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x1_adults, rowSums(total.elas_F_WT), type='l', lwd=1, lty=7, col=cols[6])
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
 
-plot(x1_seedlings, rowSums(total.elas_G_E), ylim= c(0, 0.03), xlim=c(0, 1.6), xlab="",
-     ylab="", main="", type='l', lwd=1, lty=5, cex.axis=1.5)
-text(0.2, 0.049, "Maturation", cex=1.5)
-lines(x1_seedlings, rowSums(total.elas_G_H), type='l', lty=1)
-lines(x1_seedlings, rowSums(total.elas_G_W), type='l', lty=3)
+plot(x1_seedlings, rowSums(total.elas_G_BC), ylim= c(0, 0.03), xlim=c(0, 1.6), xlab="",
+     ylab="", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
+text(0.2, 0.039, "Maturation", cex=1.5)
+lines(x1_seedlings, rowSums(total.elas_G_CC), type='l', lty=1, col=cols[2])
+lines(x1_seedlings, rowSums(total.elas_G_C), type='l', lty=3, col=cols[3])
+lines(x1_seedlings, rowSums(total.elas_G_FP), type='l', lty=4, col=cols[4])
+lines(x1_seedlings, rowSums(total.elas_G_PG), type='l', lty=6, col=cols[5])
+lines(x1_seedlings, rowSums(total.elas_G_WT), type='l', lty=7, col=cols[6])
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
 
-plot(x1_adults, rowSums(total.elas_D2_E), ylim= c(0, 0.03), xlim=c(1.6, 800), xlab=" ",
-     ylab="", main="",  type='l',  lwd=1, lty=5, cex.axis=1.5)
-text(65, 0.049, "Adult", cex=1.5)
-lines(x1_adults, rowSums(total.elas_D2_H), type='l', lwd=1, lty=1)
-lines(x1_adults, rowSums(total.elas_D2_W), type='l', lwd=1, lty=3)
+plot(x1_adults, rowSums(total.elas_D2_BC), ylim= c(0, 0.03), xlim=c(1.6, 800), xlab=" ",
+     ylab="", main="",  type='l',  lwd=1, lty=5, cex.axis=1.5, col=cols[1])
+text(65, 0.029, "Adult", cex=1.5)
+lines(x1_adults, rowSums(total.elas_D2_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x1_adults, rowSums(total.elas_D2_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x1_adults, rowSums(total.elas_D2_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x1_adults, rowSums(total.elas_D2_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x1_adults, rowSums(total.elas_D2_WT), type='l', lwd=1, lty=7, col=cols[6])
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
-plot(x2_seedlings, colSums(total.elas_D1_E), ylim=c(0, 0.03), xlim=c(0, 16), xlab=" ", 
-     ylab="", main="",  type='l', lwd=1, lty=5, cex.axis=1.5)
-text(2, 0.049, "Seedling", cex=1.5)
-lines(x2_seedlings, colSums(total.elas_D1_H), type='l', lwd=1, lty=1)
-lines(x2_seedlings, colSums(total.elas_D1_W), type='l', lwd=1, lty=3)
+
+
+
+plot(x2_seedlings, colSums(total.elas_D1_BC), ylim=c(0, 0.03), xlim=c(0, 16), xlab=" ", 
+     ylab="", main="",  type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
+text(2, 0.029, "Seedling", cex=1.5)
+lines(x2_seedlings, colSums(total.elas_D1_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x2_seedlings, colSums(total.elas_D1_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x2_seedlings, colSums(total.elas_D1_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x2_seedlings, colSums(total.elas_D1_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x2_seedlings, colSums(total.elas_D1_WT), type='l', lwd=1, lty=7, col=cols[6])
 mtext(side=3, "(b) Marginal elasticity over height", line=1, cex=1.2, adj=0)
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 
-plot(x2_adults, colSums(total.elas_F_E), ylim=c(0, 0.03), xlim=c(16,800),  xlab=" ",
-     ylab= "", main="", type='l', lwd=1, lty=5, cex.axis=1.5)
-text(65, 0.049, "Fertility", cex=1.5)
-lines(x2_adults, colSums(total.elas_F_H), type='l', lwd=1, lty=1)
-lines(x2_adults, colSums(total.elas_F_W), type='l', lwd=1, lty=3)
+plot(x2_adults, colSums(total.elas_F_BC), ylim=c(0, 0.03), xlim=c(16,800),  xlab=" ",
+     ylab= "", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
+text(65, 0.029, "Fertility", cex=1.5)
+lines(x2_adults, colSums(total.elas_F_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x2_adults, colSums(total.elas_F_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x2_adults, colSums(total.elas_F_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x2_adults, colSums(total.elas_F_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x2_adults, colSums(total.elas_F_WT), type='l', lwd=1, lty=7, col=cols[6])
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 
 
-plot(x2_seedlings, colSums(total.elas_G_E), ylim= c(0, 0.03), xlim=c(0, 16), xlab="",
-     ylab="", main="", type='l', lwd=1, lty=5, cex.axis=1.5)
-lines(x2_seedlings, colSums(total.elas_G_H), type='l', lwd=1, lty=1)
-lines(x2_seedlings, colSums(total.elas_G_W), type='l', lwd=1, lty=3)
-text(2, 0.049, "Maturation", cex=1.5)
+plot(x2_seedlings, colSums(total.elas_G_BC), ylim= c(0, 0.03), xlim=c(0, 16), xlab="",
+     ylab="", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
+lines(x2_seedlings, colSums(total.elas_G_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x2_seedlings, colSums(total.elas_G_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x2_seedlings, colSums(total.elas_G_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x2_seedlings, colSums(total.elas_G_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x2_seedlings, colSums(total.elas_G_WT), type='l', lwd=1, lty=7, col=cols[6])
+text(2, 0.029, "Maturation", cex=1.5)
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 
-plot(x2_adults, colSums(total.elas_D2_E), ylim= c(0, 0.03), xlim=c(16, 800),  xlab=" ", 
-     ylab="", main="",  type='l',  lwd=1, lty=5, cex.axis=1.5)
-lines(x2_adults, colSums(total.elas_D2_H), type='l', lwd=1, lty=1)
-lines(x2_adults, colSums(total.elas_D2_W), type='l', lwd=1, lty=3)
-text(65, 0.049, "Adult", cex=1.5)
-legend(250, 0.03, lty=c(3, 1, 5), lwd=1, c("Western", "Hybrid", "Eastern"),
+plot(x2_adults, colSums(total.elas_D2_BC), ylim= c(0, 0.03), xlim=c(16, 800),  xlab=" ", 
+     ylab="", main="",  type='l',  lwd=1, lty=5, cex.axis=1.5, col=cols[1])
+lines(x2_adults, colSums(total.elas_D2_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x2_adults, colSums(total.elas_D2_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x2_adults, colSums(total.elas_D2_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x2_adults, colSums(total.elas_D2_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x2_adults, colSums(total.elas_D2_WT), type='l', lwd=1, lty=7, col=cols[6])
+text(75, 0.029, "Adult", cex=1.5)
+legend(250, 0.03, lty=c(3, 1, 5, 4, 6, 7), col=cols, lwd=1,
+       c("BC", "CC", "C", "FP", "PG", "WT"),
        seg.len=2)
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
@@ -1082,9 +1142,12 @@ dev.off() #x11(width = width.cm/2.54, height = 1.5*width.cm/(2.54),
 
 
 ###FIGURE B1: Contribution of matrix elements to differences in lambda by diameter #####
-load("./Eastern/total.contrib_E.RData")
-load("./Hybrid/total.contrib_H.RData")
-load("./Western/total.contrib_W.RData")
+load("./BC/total.contrib_BC.RData")
+load("./CC/total.contrib_CC.RData")
+load("./C/total.contrib_C.RData")
+load("./FP/total.contrib_FP.RData")
+load("./PG/total.contrib_PG.RData")
+load("./WT/total.contrib_WT.RData")
 
 setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/marginal_contributions.eps", width=width.cm/2.54, 
@@ -1100,75 +1163,99 @@ par(mar = c(3, 3, 2, 1), # Margins
     mfrow=c(4, 2))
 
 
-plot(x1_seedlings, rowSums(total.contrib_D1_E), ylim=c(-0.003, 0.01),
+plot(x1_seedlings, rowSums(total.contrib_D1_BC), ylim=c(-0.003, 0.01),
      xlim=c(0, 1.6), xlab="", ylab="", main="",  type='l', lwd=1, 
-     lty=5, cex.axis=1.5)
+     lty=5, cex.axis=1.5, col=cols[1])
 text(0.2, 0.01, "Seedling", cex=1.5)
-lines(x1_seedlings, rowSums(total.contrib_D1_H), type='l', lwd=1, lty=1)
-lines(x1_seedlings, rowSums(total.contrib_D1_W), type='l', lwd=1, lty=3)
+lines(x1_seedlings, rowSums(total.contrib_D1_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x1_seedlings, rowSums(total.contrib_D1_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x1_seedlings, rowSums(total.contrib_D1_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x1_seedlings, rowSums(total.contrib_D1_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x1_seedlings, rowSums(total.contrib_D1_WT), type='l', lwd=1, lty=7, col=cols[6])
 mtext(side=3, "(a) Contributions by diameter", line=1, cex=1.2, adj=0)
 mtext(side=2, "Contribution", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
 
-plot(x1_adults, rowSums(total.contrib_F_E), ylim=c(-0.003, 0.01), xlim=c(1.6, 800), xlab="", 
-     ylab= "", main="", type='l', lwd=1, lty=5, cex.axis=1.5)
+plot(x1_adults, rowSums(total.contrib_F_BC), ylim=c(-0.003, 0.01), xlim=c(1.6, 800), xlab="", 
+     ylab= "", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
 text(65, 0.01, "Fertility", cex=1.5)
-lines(x1_adults, rowSums(total.contrib_F_H), type='l', lwd=1, lty=1)
-lines(x1_adults, rowSums(total.contrib_F_W), type='l', lwd=1, lty=3)
+lines(x1_adults, rowSums(total.contrib_F_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x1_adults, rowSums(total.contrib_F_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x1_adults, rowSums(total.contrib_F_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x1_adults, rowSums(total.contrib_F_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x1_adults, rowSums(total.contrib_F_WT), type='l', lwd=1, lty=7, col=cols[6])
 mtext(side=2, "Contribution", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
-plot(x1_seedlings, rowSums(total.contrib_G_E), ylim=c(-0.003, 0.01), xlim=c(0, 1.6), xlab="",
-     ylab="", main="", type='l', lwd=1, lty=5, cex.axis=1.5)
+plot(x1_seedlings, rowSums(total.contrib_G_BC), ylim=c(-0.003, 0.01), xlim=c(0, 1.6), xlab="",
+     ylab="", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
 text(0.2, 0.01, "Maturation", cex=1.5)
-lines(x1_seedlings, rowSums(total.contrib_G_H), type='l', lty=1)
-lines(x1_seedlings, rowSums(total.contrib_G_W), type='l', lty=3)
+lines(x1_seedlings, rowSums(total.contrib_G_CC), type='l', lty=1, col=cols[2])
+lines(x1_seedlings, rowSums(total.contrib_G_C), type='l', lty=3, col=cols[3])
+lines(x1_seedlings, rowSums(total.contrib_G_FP), type='l', lty=4, col=cols[4])
+lines(x1_seedlings, rowSums(total.contrib_G_PG), type='l', lty=6, col=cols[5])
+lines(x1_seedlings, rowSums(total.contrib_G_WT), type='l', lty=7, col=cols[6])
 mtext(side=2, "Contribution", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
 
-plot(x1_adults, rowSums(total.contrib_D2_E), ylim=c(-0.003, 0.01), xlim=c(1.6, 800), xlab=" ",
-     ylab="", main="",  type='l',  lwd=1, lty=5, cex.axis=1.5)
+plot(x1_adults, rowSums(total.contrib_D2_BC), ylim=c(-0.003, 0.01), xlim=c(1.6, 800), xlab=" ",
+     ylab="", main="",  type='l',  lwd=1, lty=5, cex.axis=1.5, col=cols[1])
 text(65, 0.01, "Adult", cex=1.5)
-lines(x1_adults, rowSums(total.contrib_D2_H), type='l', lwd=1, lty=1)
-lines(x1_adults, rowSums(total.contrib_D2_W), type='l', lwd=1, lty=3)
+lines(x1_adults, rowSums(total.contrib_D2_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x1_adults, rowSums(total.contrib_D2_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x1_adults, rowSums(total.contrib_D2_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x1_adults, rowSums(total.contrib_D2_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x1_adults, rowSums(total.contrib_D2_WT), type='l', lwd=1, lty=7, col=cols[6])
 mtext(side=2, "Contribution", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
-plot(x2_seedlings, colSums(total.contrib_D1_E), ylim=c(-0.003, 0.01), xlim=c(0, 16), xlab=" ", 
-     ylab="", main="",  type='l', lwd=1, lty=5, cex.axis=1.5)
+plot(x2_seedlings, colSums(total.contrib_D1_BC), ylim=c(-0.003, 0.01), xlim=c(0, 16), xlab=" ", 
+     ylab="", main="",  type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
 text(2, 0.01, "Seedling", cex=1.5)
-lines(x2_seedlings, colSums(total.contrib_D1_H), type='l', lwd=1, lty=1)
-lines(x2_seedlings, colSums(total.contrib_D1_W), type='l', lwd=1, lty=3)
+lines(x2_seedlings, colSums(total.contrib_D1_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x2_seedlings, colSums(total.contrib_D1_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x2_seedlings, colSums(total.contrib_D1_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x2_seedlings, colSums(total.contrib_D1_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x2_seedlings, colSums(total.contrib_D1_WT), type='l', lwd=1, lty=7, col=cols[6])
 mtext(side=3, "(b) Contributions by height", line=1, cex=1.2, adj=0)
 mtext(side=2, "Contribution", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 
-plot(x2_adults, colSums(total.contrib_F_E), ylim=c(-0.003, 0.01), xlim=c(16,800),  xlab=" ",
-     ylab= "", main="", type='l', lwd=1, lty=5, cex.axis=1.5)
+plot(x2_adults, colSums(total.contrib_F_BC), ylim=c(-0.003, 0.01), xlim=c(16,800),  xlab=" ",
+     ylab= "", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
 text(65, 0.01, "Fertility", cex=1.5)
-lines(x2_adults, colSums(total.contrib_F_H), type='l', lwd=1, lty=1)
-lines(x2_adults, colSums(total.contrib_F_W), type='l', lwd=1, lty=3)
+lines(x2_adults, colSums(total.contrib_F_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x2_adults, colSums(total.contrib_F_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x2_adults, colSums(total.contrib_F_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x2_adults, colSums(total.contrib_F_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x2_adults, colSums(total.contrib_F_WT), type='l', lwd=1, lty=7, col=cols[6])
 mtext(side=2, "Contribution", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 
 
-plot(x2_seedlings, colSums(total.contrib_G_E), ylim=c(-0.003, 0.01), xlim=c(0, 16), xlab="",
-     ylab="", main="", type='l', lwd=1, lty=5, cex.axis=1.5)
-lines(x2_seedlings, colSums(total.contrib_G_H), type='l', lwd=1, lty=1)
-lines(x2_seedlings, colSums(total.contrib_G_W), type='l', lwd=1, lty=3)
+plot(x2_seedlings, colSums(total.contrib_G_BC), ylim=c(-0.003, 0.01), xlim=c(0, 16), xlab="",
+     ylab="", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
+lines(x2_seedlings, colSums(total.contrib_G_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x2_seedlings, colSums(total.contrib_G_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x2_seedlings, colSums(total.contrib_G_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x2_seedlings, colSums(total.contrib_G_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x2_seedlings, colSums(total.contrib_G_WT), type='l', lwd=1, lty=7, col=cols[6])
 text(2, 0.01, "Maturation", cex=1.5)
 mtext(side=2, "Contribution", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 
-plot(x2_adults, colSums(total.contrib_D2_E), ylim=c(-0.003, 0.01), xlim=c(16, 800),  xlab=" ", 
-     ylab="", main="",  type='l',  lwd=1, lty=5, cex.axis=1.5)
-lines(x2_adults, colSums(total.contrib_D2_H), type='l', lwd=1, lty=1)
-lines(x2_adults, colSums(total.contrib_D2_W), type='l', lwd=1, lty=3)
+plot(x2_adults, colSums(total.contrib_D2_BC), ylim=c(-0.003, 0.01), xlim=c(16, 800),  xlab=" ", 
+     ylab="", main="",  type='l',  lwd=1, lty=5, cex.axis=1.5, col=cols[1])
+lines(x2_adults, colSums(total.contrib_D2_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x2_adults, colSums(total.contrib_D2_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x2_adults, colSums(total.contrib_D2_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x2_adults, colSums(total.contrib_D2_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x2_adults, colSums(total.contrib_D2_WT), type='l', lwd=1, lty=7, col=cols[6])
 text(65, 0.01, "Adult", cex=1.5)
-legend(250, 0.01, lty=c(3, 1, 5), lwd=1, c("Western", "Hybrid", "Eastern"),
-       seg.len=2)
+legend(250, 0.01, lty=c(3, 1, 5, 4, 6, 7), lwd=1, c("BC", "CC", "C", "FP", "PG", "WT"),
+       seg.len=2, col=cols)
 mtext(side=2, "Contribution", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 dev.off()
