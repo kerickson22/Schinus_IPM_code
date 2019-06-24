@@ -10,6 +10,30 @@ library(msm)
 #increase memory limit on Windows machines  (This will make everything run faster)
 memory.limit(memory.limit() *2^30)
 
+m1=10
+m2=m1+1
+m3=100
+m4=m3+1
+tol=1.e-8; 
+
+# Compute meshpoints  
+
+###Fix these to match domains 
+h1=1.6/m1; 
+y1=(h1/2)*((0:(m1-1))+(1:m1)); #for diameter in D1
+h2=16/m2
+y2=(h2/2)*((0:(m2-1))+(1:m2)); #for height in D1
+h3=(700-1.6)/m3;
+y3=(h3/2)*((0:(m3-1))+(1:m3))+1.6; #for diameter in D2
+h4=(800-16)/m4
+y4=(h4/2)*((0:(m4-1))+(1:m4))+16; #for height in D2
+
+matrix.image=function(x,y,A,col=topo.colors(200),...) {
+  nx=length(x); ny=length(y); 
+  x1=c(1.5*x[1]-0.5*x[2],1.5*x[nx]-0.5*x[nx-1]); 
+  y1=c(1.5*y[1]-0.5*y[2],1.5*y[ny]-0.5*y[ny-1]); 
+  image(list(x=x,y=y,z=t(A)),xlim=x1,ylim=rev(y1),col=col,bty="u",...);  
+}
 
 boot.lam <- function(dataset, dataset_allometry, sample.index) {
 
@@ -480,5 +504,37 @@ p.vec_C[39]<-0.5072
 p.vec_FP[39]<-0.5072
 p.vec_PG[39]<-0.5072
 p.vec_WT[39]<-0.5072
+
+
+#============================================================================# 
+#  Define the kernels and iteration matrix:
+#Domain 1: Seedling Domain
+#	for diam=diameter in range [0, 1.6]
+#	for height in range [0, 16]
+#Domain 2: Larger Domain
+#	 for diam=diameter in range [1.6,700]
+#and for height=height in range [16, 800]
+#============================================================================# 
+
+
+
+
+#Survival-Growth of Seedlings (in D1)
+pyx1=function(diamp,heightp,diam, height, params) { (1-((exp(params[12]+params[13]*diam + params[14]*height)/(1+exp(params[12]+params[13]*diam + params[14]*height))
+)))*(exp(params[1]+params[2]*diam+params[3]*height)/(1+exp(params[1]+params[2]*diam+params[3]*height)))*dtnorm(diamp,mean=params[4] + params[5]*diam + params[6]*height,sd=params[7], lower=0, upper=1.6)*dtnorm(heightp,mean=params[8]+params[9]*diam + params[10]*height,sd=params[11], lower=0, upper=16)}
+
+
+#Survival-Growth of Larger Plants (in D2)
+#Note that D2 survival is multiplied by 0.997 to avoid 100% survival 
+
+pyx2=function(diamp,heightp,diam, height, params) { 0.997*(exp(params[19]+params[20]*diam+params[21]*height)/(1+exp(params[19]+params[20]*diam+params[21]*height)))*dtnorm(diamp,mean=params[22] + params[23]*diam + params[24]*height,sd=params[25], lower=1.6, upper=700)*dtnorm(heightp,mean=params[26]+params[27]*diam + params[28]*height,sd=params[29], lower=16, upper=800)}
+
+
+#Fecundity=P(fruiting)*# of Fruits Produced*P(survival of seeds)*Distribution of Seedling Diameters*Distribution of Seedling Heights
+fyx=function(diamp,heightp,diam,height, params) {(exp(params[30]+params[31]*height)/(1+exp(params[30]+params[31]*height)))*(params[32]*diam*diam)*params[38]*params[37]*params[39]*dtnorm(diamp,mean=params[33],sd=params[34], lower=0, upper=1.6)*dtnorm(heightp,mean=params[35],sd=params[36], lower=0, upper=34)}
+
+#Graduation = P(graduation)*Distribution of Graduates Diams*Distribution of Graduates Heights
+gyx=function(diamp,heightp,diam,height, params) {((exp(params[1]+params[2]*diam+params[3]*height)/(1+exp(params[1]+params[2]*diam+params[3]*height))))*(exp(params[12]+params[13]*diam + params[14]*height)/(1+exp(params[12]+params[13]*diam + params[14]*height))
+)*dtnorm(diamp,mean=params[15],sd=params[16], lower=1.6, upper=700)*dtnorm(heightp,mean=params[17],sd=params[18], lower=16, upper=800)}
 
 }
