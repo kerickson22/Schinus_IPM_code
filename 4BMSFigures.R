@@ -107,6 +107,7 @@ load("./CC/p.vec_CC.RData")
 load("./C/p.vec_C.RData")
 load("./FP/p.vec_FP.RData")
 load("./PG/p.vec_PG.RData")
+load("./WT/p.vec_WT.RData")
 
 #png(file="D1_survival.png", width=20, height=10, units="in", res=300)
 #setEPS(horizontal=F, onefile=F, paper="special")
@@ -297,40 +298,217 @@ pointsize = pointsize)
 
 
 require(gridExtra)
+library(grid)
 
-postscript("./Figures/D1_growth.eps", width=width.cm/2.54, 
-           height=(height.cm)/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
-plot1<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+
+#Big Cypress
+plot1_BC<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
   geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_BC)) + 
   scale_fill_viridis_c(limits = c(0, 1.6)) +
- geom_point(data=seedlings2, aes(x=Diameter_t, y=Height_t, size = Diameter_tplus1) ) +
+  ggtitle("(a) Big Cypress") + 
+ geom_point(data=subset(seedlings2, seedlings2$Site == "Big Cypress"), aes(x=Diameter_t, y=Height_t, size = Diameter_tplus1))+
   scale_size_continuous(breaks = c(0.3, 0.6, 0.9, 1.2, 1.5), limits=c(0.3, 1.5), range= c(0,3)) + 
   xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
-  theme(text = element_text(size=8)) + 
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
   labs(fill = "Predicted \n diameter \n at time \n t + 1 (mm)") +
   labs(size = "Measured \n diameter \n at time \n t + 1 (mm)") +
   theme(legend.title.align=0.5) +
-  theme(legend.box.margin = margin (-12, -5, -12, -11)) +
-  guides(size = guide_legend(title.position = "right")) +
-  guides(fill = guide_colorbar(title.position = "right"))
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order =1)) +
+  guides(fill = guide_colorbar(title.position = "right", order =2))
 
-plot2<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+plot2_BC<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
   geom_tile(data = df, aes(x=Var1, y = Var2, fill= height_BC)) + 
   scale_fill_viridis_c(limits = c(0, 16)) +
-  geom_point(data=seedlings2, aes(x=Diameter_t, y=Height_t, size = Height_tplus1) ) +
+  ggtitle("(a) Big Cypress") + 
+  geom_point(data=subset(seedlings2,seedlings2$Site == "Big Cypress"), aes(x=Diameter_t, y=Height_t, size = Height_tplus1) ) +
   scale_size_continuous(breaks = c(3, 6, 9, 12, 15), limits=c(3, 15), range = c(0, 3)) + 
   xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
-  theme(text = element_text(size=8)) + 
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
   labs(fill = "Predicted \n height \n at time \n t + 1 (cm)") +
   labs(size = "Measured \n height \n at time \n t + 1 (cm)") +
   theme(legend.title.align=0.5) +
-  theme(legend.box.margin = margin (-12, -5, -12, -11)) +
-  guides(size = guide_legend(title.position = "right")) +
-  guides(fill = guide_colorbar(title.position = "right"))
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order = 1)) +
+  guides(fill = guide_colorbar(title.position = "right", order = 2))
 
-grid.arrange(plot1, plot2, ncol=2)
+#Cape Canaveral
+plot1_CC<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_CC)) + 
+  scale_fill_viridis_c(limits = c(0, 1.6)) +
+  ggtitle("(b) Cape Canaveral") + 
+  geom_point(data=subset(seedlings2, seedlings2$Site == "Cape Canaveral"), aes(x=Diameter_t, y=Height_t, size = Diameter_tplus1))+
+  scale_size_continuous(breaks = c(0.3, 0.6, 0.9, 1.2, 1.5), limits=c(0.3, 1.5), range= c(0,3)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n diameter \n at time \n t + 1 (mm)") +
+  labs(size = "Measured \n diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order =1)) +
+  guides(fill = guide_colorbar(title.position = "right", order =2))
+
+plot2_CC<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= height_CC)) + 
+  scale_fill_viridis_c(limits = c(0, 16)) +
+  ggtitle("(b) Cape Canaveral") + 
+  geom_point(data=subset(seedlings2,seedlings2$Site == "Cape Canaveral"), 
+             aes(x=Diameter_t, y=Height_t, size = Height_tplus1) ) +
+  scale_size_continuous(breaks = c(3, 6, 9, 12, 15), limits=c(3, 15), range = c(0, 3)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n height \n at time \n t + 1 (cm)") +
+  labs(size = "Measured \n height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order = 1)) +
+  guides(fill = guide_colorbar(title.position = "right", order = 2))
+
+#Chekika
+plot1_C<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_C)) + 
+  scale_fill_viridis_c(limits = c(0, 1.6)) +
+  ggtitle("(c) Chekika") + 
+  geom_point(data=subset(seedlings2, seedlings2$Site == "Chekika"), aes(x=Diameter_t, y=Height_t, size = Diameter_tplus1))+
+  scale_size_continuous(breaks = c(0.3, 0.6, 0.9, 1.2, 1.5), limits=c(0.3, 1.5), range= c(0,3)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n diameter \n at time \n t + 1 (mm)") +
+  labs(size = "Measured \n diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order =1)) +
+  guides(fill = guide_colorbar(title.position = "right", order =2))
+
+
+plot2_C<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= height_C)) + 
+  scale_fill_viridis_c(limits = c(0, 16)) +
+  ggtitle("(c) Chekika") + 
+  geom_point(data=subset(seedlings2,seedlings2$Site == "Chekika"), 
+             aes(x=Diameter_t, y=Height_t, size = Height_tplus1) ) +
+  scale_size_continuous(breaks = c(3, 6, 9, 12, 15), limits=c(3, 15), range = c(0, 3)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n height \n at time \n t + 1 (cm)") +
+  labs(size = "Measured \n height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order = 1)) +
+  guides(fill = guide_colorbar(title.position = "right", order = 2))
+
+#Fort Pierce
+plot1_FP<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_FP)) + 
+  scale_fill_viridis_c(limits = c(0, 1.6)) +
+  ggtitle("(d) Fort Pierce") + 
+  geom_point(data=subset(seedlings2, seedlings2$Site == "Fort Pierce"),
+             aes(x=Diameter_t, y=Height_t, size = Diameter_tplus1))+
+  scale_size_continuous(breaks = c(0.3, 0.6, 0.9, 1.2, 1.5), 
+                        limits=c(0.3, 1.5), range= c(0,3)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n diameter \n at time \n t + 1 (mm)") +
+  labs(size = "Measured \n diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order =1)) +
+  guides(fill = guide_colorbar(title.position = "right", order =2))
+
+plot2_FP<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= height_FP)) + 
+  scale_fill_viridis_c(limits = c(0, 16)) +
+  ggtitle("(d) Fort Pierce") + 
+  geom_point(data=subset(seedlings2,seedlings2$Site == "Fort Pierce"), 
+             aes(x=Diameter_t, y=Height_t, size = Height_tplus1) ) +
+  scale_size_continuous(breaks = c(3, 6, 9, 12, 15), limits=c(3, 15), range = c(0, 3)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n height \n at time \n t + 1 (cm)") +
+  labs(size = "Measured \n height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order = 1)) +
+  guides(fill = guide_colorbar(title.position = "right", order = 2))
+
+#Punta Gorda
+plot1_PG<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_PG)) + 
+  scale_fill_viridis_c(limits = c(0, 1.6)) +
+  ggtitle("(e) Punta Gorda") + 
+  geom_point(data=subset(seedlings2, seedlings2$Site == "Punta Gorda"),
+             aes(x=Diameter_t, y=Height_t, size = Diameter_tplus1))+
+  scale_size_continuous(breaks = c(0.3, 0.6, 0.9, 1.2, 1.5), 
+                        limits=c(0.3, 1.5), range= c(0,3)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n diameter \n at time \n t + 1 (mm)") +
+  labs(size = "Measured \n diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order =1)) +
+  guides(fill = guide_colorbar(title.position = "right", order =2))
+
+plot2_PG<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= height_PG)) + 
+  scale_fill_viridis_c(limits = c(0, 16)) +
+  ggtitle("(e) Punta Gorda") + 
+  geom_point(data=subset(seedlings2,seedlings2$Site == "Punta Gorda"), 
+             aes(x=Diameter_t, y=Height_t, size = Height_tplus1) ) +
+  scale_size_continuous(breaks = c(3, 6, 9, 12, 15), limits=c(3, 15), range = c(0, 3)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n height \n at time \n t + 1 (cm)") +
+  labs(size = "Measured \n height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order = 1)) +
+  guides(fill = guide_colorbar(title.position = "right", order = 2))
+
+#Wild Turkey
+plot1_WT<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_WT)) + 
+  scale_fill_viridis_c(limits = c(0, 1.6)) +
+  ggtitle("(f) Wild Turkey") + 
+  geom_point(data=subset(seedlings2, seedlings2$Site == "Wild Turkey"), 
+             aes(x=Diameter_t, y=Height_t, size = Diameter_tplus1))+
+  scale_size_continuous(breaks = c(0.3, 0.6, 0.9, 1.2, 1.5), 
+                        limits=c(0.3, 1.5), range= c(0,3)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n diameter \n at time \n t + 1 (mm)") +
+  labs(size = "Measured \n diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order =1)) +
+  guides(fill = guide_colorbar(title.position = "right", order =2))
+
+plot2_WT<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= height_WT)) + 
+  scale_fill_viridis_c(limits = c(0, 16)) +
+  ggtitle("(f) Wild Turkey") + 
+  geom_point(data=subset(seedlings2,seedlings2$Site == "Wild Turkey"), 
+             aes(x=Diameter_t, y=Height_t, size = Height_tplus1) ) +
+  scale_size_continuous(breaks = c(3, 6, 9, 12, 15), 
+                        limits=c(3, 15), range = c(0, 3)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n height \n at time \n t + 1 (cm)") +
+  labs(size = "Measured \n height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order = 1)) +
+  guides(fill = guide_colorbar(title.position = "right", order = 2))
+
+postscript("./Figures/D1_growth_diameter.eps", width=width.cm/2.54, 
+           height=(3*height.cm)/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+grid.arrange(plot1_BC, plot1_CC, plot1_C, plot1_FP, plot1_PG, plot1_WT,ncol=2)
 dev.off()
 
+postscript("./Figures/D1_growth_height.eps", width=width.cm/2.54, 
+           height=(3*height.cm)/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+grid.arrange(plot2_BC, plot2_CC, plot2_C, plot2_FP, plot2_PG, plot2_WT,ncol=2)
+dev.off()
 #setEPS(horizontal=F, onefile=F, paper="special")
 #postscript("./Figures/D1_growth.eps", width=width.cm/2.54, 
            #height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
@@ -561,11 +739,44 @@ persp(x1seq_seedlings, x2seq_seedlings, z1, ticktype="detailed",
 dev.off()
 
 ###FIGURE 6: REPRODUCTION #####
+
+
+
+#Big Cypress
+b0<-p.vec_BC[30]
+b1<-p.vec_BC[31]
+pf_BC <- invlogit(b0 + b1*x2seq_larges)
+
+#Cape Canaveral
+b0<-p.vec_CC[30]
+b1<-p.vec_CC[31]
+pf_CC <- invlogit(b0 + b1*x2seq_larges)
+
+#Chekika
+b0<-p.vec_C[30]
+b1<-p.vec_C[31]
+pf_C <- invlogit(b0 + b1*x2seq_larges)
+
+#Fort Pierce
+b0<-p.vec_FP[30]
+b1<-p.vec_FP[31]
+pf_FP <- invlogit(b0 + b1*x2seq_larges)
+
+#Punta Gorda
+b0<-p.vec_PG[30]
+b1<-p.vec_PG[31]
+pf_PG <- invlogit(b0 + b1*x2seq_larges)
+
+#Wild Turkey
+b0<-p.vec_WT[30]
+b1<-p.vec_WT[31]
+pf_WT <- invlogit(b0 + b1*x2seq_larges)
+
 setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/reproduction.eps", width=width.cm_onepanel/2.54, 
            height=width.cm_onepanel/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
- # x11(width = width.cm_onepanel/2.54, height = width.cm_onepanel/2.54, 
- #     pointsize = pointsize)
+# x11(width = width.cm_onepanel/2.54, height = width.cm_onepanel/2.54, 
+#     pointsize = pointsize)
 
 par(mar = c(3, 3, 2, 1), # Margins
     mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
@@ -573,23 +784,17 @@ par(mar = c(3, 3, 2, 1), # Margins
     xpd=F,
     mai=c(0.5,0.5,0.5,0.5),
     mfrow=c(1, 1))
-b0<-p.vec_E[12]
-b1<-p.vec_E[13]
-y_E<-((exp(b0+b1*x2seq_larges)/(1+exp(b0+b1*x2seq_larges))))
 
-b0<-p.vec_H[12]
-b1<-p.vec_H[13]
-y_H<-((exp(b0+b1*x2seq_larges)/(1+exp(b0+b1*x2seq_larges))))
-
-b0<-p.vec_W[12]
-b1<-p.vec_W[13]
-y_W<-((exp(b0+b1*x2seq_larges)/(1+exp(b0+b1*x2seq_larges))))
-
-plot(x2seq_larges, y_E, xlab="Height at time t (cm)", 
-     ylab="\n \n Probability of Reproducing", lwd=1, type='l', lty=1)
-lines(x2seq_larges, y_W,  lwd=1, type='l', lty=3)
-legend(5, 0.98, c("Eastern and Hybrid", "Western"), 
-       lty=c(1, 3), lwd=c(1, 1), seg.len=1.5)
+# TODO: Add datapoints to this plot
+plot(x2seq_larges, pf_BC, xlab="Height at time t (cm)", 
+     ylab="\n \n Probability of Reproducing", lwd=1, type='l', lty=1, col=cols[1])
+lines(x2seq_larges, pf_CC,  lwd=1, type='l', lty=2, col=cols[2])
+lines(x2seq_larges, pf_C, lwd=1, type='l', lty=3, col=cols[3])
+lines(x2seq_larges, pf_FP, lwd=1, type='l', lty=4, col=cols[4])
+lines(x2seq_larges, pf_PG, lwd=1, type='l', lty=5, col=cols[5])
+lines(x2seq_larges, pf_WT, lwd=1, type='l', lty=6, col=cols[6])
+legend(5, 0.98, c("BC", "CC", "C", "FP", "PG", "WT"), 
+       lty=c(1, 2, 3, 4, 5, 6), lwd=c(1, 1), seg.len=1.5, col=cols)
 dev.off()
 
 ###FIGURE 7: FECUNDITY #####
@@ -606,24 +811,28 @@ par(mar = c(3, 3, 2, 1), # Margins
     mai=c(0.5,0.5,0.5,0.5),
     mfrow=c(1, 1))
 
-y_overall<- 4.89*x1seq_larges*x1seq_larges
-y_E<- 4.00*x1seq_larges*x1seq_larges
-y_H<- 4.25*x1seq_larges*x1seq_larges
-y_W<-5.52*x1seq_larges*x1seq_larges
+y_BC <- p.vec_BC[32]*x1seq_larges*x1seq_larges
+y_CC <- p.vec_CC[32]*x1seq_larges*x1seq_larges
+y_C  <- p.vec_C[32]*x1seq_larges*x1seq_larges
+y_FP <- p.vec_FP[32]*x1seq_larges*x1seq_larges
+y_PG <- p.vec_PG[32]*x1seq_larges*x1seq_larges
+y_WT <- p.vec_WT[32]*x1seq_larges*x1seq_larges
 
 
-plot(x1seq_larges, y_E, xlab="Diameter at time t (mm)", 
-     ylab="\n \n Number of Offspring",  lwd=1, type='l', lty=5)
-lines(x1seq_larges, y_H, lwd=1, type='l', lty=1)
-lines(x1seq_larges, y_W,  lwd=1, type='l', lty=3)
+
+plot(x1seq_larges, y_BC, xlab="Diameter at time t (mm)", 
+     ylab="\n \n Number of Offspring",  lwd=1, type='l', lty=1, col=cols[1])
+lines(x1seq_larges, y_CC, lwd=1, type='l', lty=2, col=cols[2])
+lines(x1seq_larges, y_C,  lwd=1, type='l', lty=3, col=cols[3])
+lines(x1seq_larges, y_FP, lwd=1, type='l', lty=4, col=cols[4])
+lines(x1seq_larges, y_PG, lwd=1, type='l', lty=5, col=cols[5])
+lines(x1seq_larges, y_WT, lwd=1, type='l', lty=6, col=cols[6])
 #lines(x1seq_larges, y_overall, lwd=3, type='l', lty=2, col="red")
-legend(5, 2500000, c("Eastern", "Hybrid", "Western"),   lty=c(5, 1, 3, 2), seg.len=3)
+legend(5, 2500000, c("BC", "CC", "C","FP", "PG","WT" ),   lty=1:6, seg.len=3, col=cols)
 dev.off()
 
 
 
-
-save.image(file="2018_06_27.RData")
 
 
 

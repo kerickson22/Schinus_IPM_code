@@ -478,7 +478,7 @@ save(total.contrib_D1_WT, total.contrib_D2_WT, total.contrib_F_WT, total.contrib
  
 # Variability in lambda #####
  #With six sites to compare, this part of the
- # code takes a long time to run (over 48 hours at least)
+ #code takes a long time to run (over 48 hours at least)
 # Calculate matrices of coefficients of variation #####
 
 	
