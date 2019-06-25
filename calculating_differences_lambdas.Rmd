@@ -1,10 +1,34 @@
+---
+title: "Testing for differences between lambdas"
+author: "KDE"
+date: "June 25, 2019"
+output: 
+  html_document:
+   toc: true
+   toc_depth: 6
+   self_contained: yes
+
+
+    
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+Load data, set the number of reshufflings to run and initialize a vector to store the values of $\lambda$. 
+```{r loading data}
 n.samp <- 100 #for now, to test
 demog<-read.csv("demography_15_clean.csv", head=T)
-lam.boot_old <- lam.boot
-save(lam.boot_old, file="lam.boot_old.RData")
 lam.boot <- array(NA, dim=c(n.samp, 6))
+```
 
+##### Calculate $\lambda$ for each of the six sites using reshuffled data 
+5 runs took 51.15 minutes.
+100 runs took 60215.47seconds. 
 
+```{r calculate lambda, eval = F}
 start_time <- proc.time()
 for (boots in 1:n.samp) {
 temp <- demog
@@ -46,7 +70,8 @@ names(Heights_pooled)<-c("t", "t_plus_one")
 ###Use status matrix to get survival matrix
 statmat<-as.matrix(temp[, c(6, 14, 22, 30, 38, 46, 54)])
 survmat<-statmat
-survmat<- ifelse(survmat=="prestudy"|survmat=="missing"|survmat=="still_dead", NA, survmat)
+survmat<- ifelse(survmat=="prestudy"|survmat=="missing"|
+                   survmat=="still_dead", NA, survmat)
 survmat<- ifelse(survmat =="tagged"|survmat=="alive", 1, 0)
 
 survmat_pooled<-rbind( cbind(survmat[,1], survmat[,2]), cbind(survmat[,2], survmat[,3]), cbind(survmat[, 3], survmat[,4]), cbind(survmat[,4], survmat[,5]), cbind(survmat[,5], survmat[,6]), cbind(survmat[, 6], survmat[, 7]))
@@ -59,7 +84,8 @@ names(survmat_pooled_bysize)<-c("size_t", "surv_t_plus_one")
 repstatmat<-as.matrix(temp[, c(8, 16, 24, 32, 40, 48, 56)])
 repmat<-repstatmat
 repmat<- ifelse(repmat =="female", 1, 0)
-repmat_pooled<-rbind( cbind(repmat[,1], repmat[,2]), cbind(repmat[,2], repmat[,3]), cbind(repmat[, 3], repmat[,4]), cbind(repmat[,4], repmat[,5]), cbind(repmat[,5], repmat[,6]), cbind(repmat[, 6], repmat[, 7]))
+repmat_pooled<-rbind( cbind(repmat[,1], repmat[,2]), cbind(repmat[,2], repmat[,3]), cbind(repmat[, 3], repmat[,4]), cbind(repmat[,4], repmat[,5]), cbind(repmat[,5], repmat[,6]), cbind(repmat[, 6], 
+repmat[, 7]))
 
 pooled<-cbind(ID_pooled, Sites_pooled, Location, Death_Cause, Diams_pooled, Heights_pooled, repmat_pooled, survmat_pooled)
 names(pooled)<-c("ID", "Site","Location", "Death_Cause", "Diameter_t", "Diameter_tplus1", "Height_t", "Height_tplus1", "Rep_t", "Rep_tplus1", "Surv_t", "Surv_tplus1")
@@ -106,6 +132,7 @@ p.vec_WT[2] <- s1$coeff[2]
 p.vec_WT[3] <- s1$coeff[3]
 
 # ** Seedling Growth #####
+# (Create seedlings2 to only use individuals that REMAIN as seedlings: 
 seedlings2<-subset(seedlings, seedlings$Diameter_tplus1<1.6)
 seedlings2<-subset(seedlings2, seedlings2$Height_tplus1<16)
 
@@ -118,7 +145,7 @@ g1_diam<-lm(seedlings2$Diameter_tplus1 ~ seedlings2$Diameter_t+seedlings2$Height
 g1_height<-lm(seedlings2$Height_tplus1 ~ seedlings2$Diameter_t + seedlings2$Height_t + seedlings2$Site)
 
 
-#(b) By Site: 
+#By Site: 
 g1<-manova(cbind(seedlings2$Diameter_tplus1, seedlings2$Height_tplus1) ~ seedlings2$Diameter_t+seedlings2$Height_t+seedlings2$Site)
 
 
@@ -401,6 +428,7 @@ p.vec_WT[31]<-p_f$coeff[2]
 
 
 #(b) Model fecundity (by biotype)
+#These values come from rerunning the allometry analysis using site instead of biotype. They are fixed because the data comes from a different data set. 
 p.vec_BC[32] <-6.244343
 p.vec_CC[32] <-1.655202
 p.vec_C[32]  <-4.372614
@@ -409,14 +437,20 @@ p.vec_PG[32] <- 3.102713
 p.vec_WT[32] <- 5.801386
 
 #Determine new recruits size
-recruit4_diam<-temp$Diam_4[temp$Status_4=="tagged"&temp$Location=="SeedlingPlot"]
-recruit5_diam<-temp$Diam_5[temp$Status_5=="tagged"&temp$Location=="SeedlingPlot"]
-recruit6_diam<-temp$Diam_6[temp$Status_6=="tagged"&temp$Location=="SeedlingPlot"]
+recruit4_diam<-temp$Diam_4[temp$Status_4=="tagged"&
+                             temp$Location=="SeedlingPlot"]
+recruit5_diam<-temp$Diam_5[temp$Status_5=="tagged"&
+                             temp$Location=="SeedlingPlot"]
+recruit6_diam<-temp$Diam_6[temp$Status_6=="tagged"&
+                             temp$Location=="SeedlingPlot"]
 recruits_diam<-c(recruit4_diam, recruit5_diam, recruit6_diam)
 
-recruit4_height<-temp$Height_4[temp$Status_4=="tagged"&temp$Location=="SeedlingPlot"]
-recruit5_height<-temp$Height_5[temp$Status_5=="tagged"&temp$Location=="SeedlingPlot"]
-recruit6_height<-temp$Height_6[temp$Status_6=="tagged"&temp$Location=="SeedlingPlot"]
+recruit4_height<-temp$Height_4[temp$Status_4=="tagged"&
+                                 temp$Location=="SeedlingPlot"]
+recruit5_height<-temp$Height_5[temp$Status_5=="tagged"&
+                                 temp$Location=="SeedlingPlot"]
+recruit6_height<-temp$Height_6[temp$Status_6=="tagged"&
+                                 temp$Location=="SeedlingPlot"]
 recruits_height<-c(recruit4_height, recruit5_height, recruit6_height)
 
 
@@ -433,14 +467,6 @@ var_diam<-var(recruits_diam[recruits_diam<1.6], na.rm=T)
 mu_height<-mean(recruits_height[recruits_height<16], na.rm=T) 
 sd_height<-sd(recruits_height[recruits_height<16],na.rm=T)
 var_height<-var(recruits_height[recruits_height<16],na.rm=T) 
-
-
-# recruits<-cbind(recruits_diam, recruits_height)
-# recruits<-as.data.frame(recruits)
-# names(recruits)<-c("diam", "height")
-# recruits_1<-subset(recruits, recruits$diam<1.6)
-# recruits_2<-subset(recruits_1, recruits_1$height<16)
-
 
 #Parameters associated with distribution of recruits diameter
 p.vec_BC[33]<-mu_diam
@@ -484,7 +510,6 @@ p.vec_WT[36]<-sd_height
 
 ##### Some additional (fixed parameters)
 # TAU_1: Pre-dispersal seed survival 
-#Rethinking this parameter value: Isn't this already encapsulated in tau_2? 
 
 p.vec_BC[37]<-0.002
 p.vec_CC[37]<-0.002
@@ -494,7 +519,7 @@ p.vec_PG[37]<-0.002
 p.vec_WT[37]<-0.002
 
 
-#Revised based on calculations for appendix 
+#Delta  
 
 p.vec_BC[38]<-0.19
 p.vec_CC[38]<-0.19
@@ -505,7 +530,7 @@ p.vec_WT[38]<-0.19
 
 #TAU_2: Post-dispersal seed survival
 
-#p.vec_overall[39]<- 0.5072 #Selected the highest survival probability (could have selected lowest)
+#p.vec_overall[39]<- 0.5072 #Selected the highest survival probability (could have selected lowest) from the Geiger et al. study
 p.vec_BC[39]<-0.5072
 p.vec_CC[39]<-0.5072
 p.vec_C[39]<-0.5072
@@ -530,14 +555,18 @@ tol=1.e-8;
 #============================================================================# 
 
 ## Survival-Growth of Seedlings (in D1)
-pyx1=function(diamp,heightp,diam, height, params) { (1-((exp(params[12]+params[13]*diam + params[14]*height)/(1+exp(params[12]+params[13]*diam + params[14]*height))
-)))*(exp(params[1]+params[2]*diam+params[3]*height)/(1+exp(params[1]+params[2]*diam+params[3]*height)))*dtnorm(diamp,mean=params[4] + params[5]*diam + params[6]*height,sd=params[7], lower=0, upper=1.6)*dtnorm(heightp,mean=params[8]+params[9]*diam + params[10]*height,sd=params[11], lower=0, upper=16)}
+pyx1=function(diamp,heightp,diam, height, params) { (1-((exp(params[12]+params[13]*diam + params[14]*height)/(1+exp(params[12]+params[13]*diam + params[14]*height)))))*
+    (exp(params[1]+params[2]*diam+params[3]*height)/
+       (1+exp(params[1]+params[2]*diam+params[3]*height)))*
+    dtnorm(diamp,mean=params[4] + params[5]*diam + params[6]*height,sd=params[7], lower=0, upper=1.6)*dtnorm(heightp,mean=params[8]+params[9]*diam + params[10]*height,sd=params[11], lower=0, upper=16)}
 
 
 # Survival-Growth of Larger Plants (in D2)
 #Note that D2 survival is multiplied by 0.997 to avoid 100% survival 
 
-pyx2=function(diamp,heightp,diam, height, params) { 0.997*(exp(params[19]+params[20]*diam+params[21]*height)/(1+exp(params[19]+params[20]*diam+params[21]*height)))*dtnorm(diamp,mean=params[22] + params[23]*diam + params[24]*height,sd=params[25], lower=1.6, upper=700)*dtnorm(heightp,mean=params[26]+params[27]*diam + params[28]*height,sd=params[29], lower=16, upper=800)}
+pyx2=function(diamp,heightp,diam, height, params) { 0.997*(exp(params[19]+params[20]*diam+params[21]*height)/
+                                                             (1+exp(params[19]+params[20]*diam+params[21]*height)))*
+    dtnorm(diamp,mean=params[22] + params[23]*diam + params[24]*height,sd=params[25], lower=1.6, upper=700)*dtnorm(heightp,mean=params[26]+params[27]*diam + params[28]*height,sd=params[29], lower=16, upper=800)}
 
 
 # Fecundity=P(fruiting)*# of Fruits Produced*P(survival of seeds)*Distribution of Seedling Diameters*Distribution of Seedling Heights
@@ -694,7 +723,7 @@ find_lambda = function(A) {
     nt1=A2%*%nt;
     qmax=sum(abs((nt1-lam*nt)@x));  
     lam=sum(nt1@x); 
-    nt@x=(nt1@x)/lam; #we're cheating here - don't tell Doug Bates.  
+    nt@x=(nt1@x)/lam;   
 
   } 
   nt=matrix(nt@x,m1*m2+m3*m4,1); 
@@ -728,8 +757,15 @@ cat("Bootstrap:", boots,"Site:", j,"\n");
 }
 }
 end_time <- proc.time() - start_time
-
 save(lam.boot, file = "lam.boot.RData")
+```
+
+##### Calculate the pairwise differences between $\lambda$s 
+
+Store them in a dataframe called 'differences': 
+
+```{r initialize dataframe}
+load("lam.boot.RData")
 colnames(lam.boot) <- c("BC", "CC", "C", "FP", "PG", "WT")
 differences <- data.frame(BC_CC = rep(NA, nrow(lam.boot)),
                           BC_C  = rep(NA, nrow(lam.boot)),
@@ -767,6 +803,13 @@ differences$FP_WT <- abs(lam.boot[,4]-lam.boot[,6])
 
 differences$PG_WT <- abs(lam.boot[,5]-lam.boot[,6])
 
+```
+
+##### Calculate the observed pairwise differences in $\lambda$ between sites 
+
+These differences are calculated using the values of $\lambda$ from running the analysis before the sites were shuffled: 
+
+```{r calculate observed differences}
 lam.stable_BC <- readRDS("./BC/lam.stable_BC.rds")
 lam.stable_CC <- readRDS("./CC/lam.stable_CC.rds")
 lam.stable_C  <- readRDS("./C/lam.stable_C.rds")
@@ -789,103 +832,127 @@ C_WT_obs  <- abs(lam.stable_C  - lam.stable_WT)
 FP_PG_obs <- abs(lam.stable_FP - lam.stable_PG)
 FP_WT_obs <- abs(lam.stable_FP - lam.stable_WT)
 PG_WT_obs <- abs(lam.stable_PG - lam.stable_WT)
+```
 
-hist(differences[,1], main = "BC - CC", xlab="Difference")
+##### Plotting the distributions of differences
+
+Can show these differences as either histograms or a cumulative distribution function. 
+The function 'ecdf' is used to calculate the empirical cdf corresponding to each of the distributions of differences in $\lambda$. 
+We then ask what percentage of the reshuffled differences are more extreme than our observed difference. 
+
+The actual values will change as more samples of $\lambda$s calculated from the reshuffled data are added. 
+
+
+```{r distributions of differences }
+hist(differences[,1], main = "|BC - CC|", xlab="Difference")
 abline(v=BC_CC_obs,col="red")
 
-plot(ecdf(differences[,1]), main = "BC - CC", xlab="Magnitude of Difference", xlim = c(0, 0.2))
-abline(v=BC_CC_obs, col="red") 
+#Big Cypress - Cape Canaveral 
+plot(ecdf(differences[,1]), main = "|BC - CC|", xlab="Magnitude of Difference", xlim = c(0, 0.2))
+abline(v=BC_CC_obs, col="red")
+#90% of the resampled differences are more extreme than the observed difference
 f<-ecdf(differences[,1])
 1-f(BC_CC_obs)
-#90% of the resampled differences are more extreme than the observed difference
 
-hist(differences[,2], main = "BC - C", xlab="Difference", xlim=c(0, 0.2))
+#Big Cypress - Chekika 
+
+hist(differences[,2], main = "|BC - C|", xlab="Difference", xlim=c(0, 0.2))
 abline(v=BC_C_obs, col="red")
-plot(ecdf(differences[,2]), main = "BC - C", xlab="Magnitude of Difference", xlim = c(0, 0.2))
+plot(ecdf(differences[,2]), main = "|BC - C|", xlab="Magnitude of Difference", xlim = c(0, 0.2))
 abline(v=BC_C_obs, col="red") 
+#0% of the resampled differences are more extreme than the observed difference 
 f<-ecdf(differences[,2])
 1-f(BC_C_obs)
-#0% of the resampled differences are more extreme than the observed difference 
 
-hist(differences[,3], main = "BC - FP", xlab="Difference")
+#Big Cypress - Fort Pierce 
+hist(differences[,3], main = "|BC - FP|", xlab="Difference")
 abline(v=BC_FP_obs, col="red")
+#70% of the resampled differences are more extreme than the observed difference
 f<-ecdf(differences[,3])
 1-f(BC_FP_obs)
-#70% of the resampled differences are more extreme than the observed difference
 
-
-hist(differences[,4], main= "BC - PG", xlab="Difference")
+#Big Cypress - Fort Pierce 
+hist(differences[,4], main= "|BC - PG|", xlab="Difference")
 abline(v=BC_PG_obs, col="red")
+#60% of the resampled differences are more extreme than the observed difference 
 f <- ecdf(differences[,4])
 1-f(BC_PG_obs)
-#60% of the resampled differences are more extreme than the observed difference 
 
-hist(differences[,5], main="BC - WT", xlab="Difference")
+#Big Cypress - Wild Turkey 
+hist(differences[,5], main="|BC - WT|", xlab="Difference")
 abline(v=BC_WT_obs, col="red")
+#95% of the resampled differences are more extreme than the observed difference 
 f<-ecdf(differences[,5])
 1-f(BC_WT_obs)
-#95% of the resampled differences are more extreme than the observed difference 
 
-hist(differences[,6], main="CC - C", xlab="Difference", xlim=c(-0.16,0.16))
+#Cape Canaveral - Chekika 
+hist(differences[,6], main="|CC - C|", xlab="Difference", xlim=c(-0.16,0.16))
 abline(v=CC_C_obs, col="red")
+#<1% of the resampled differences are more extreme than the observed difference
 f<-ecdf(differences[,6])
 1-f(CC_C_obs)
-#<1% of the resampled differences are more extreme than the observed difference
 
-hist(differences[,7], main ="CC - FP", xlab="Difference")
+#Cape Canaveral - Fort Pierce 
+hist(differences[,7], main ="|CC - FP|", xlab="Difference")
 abline(v=CC_FP_obs, col="red")
+#16% of the resampled differences are more extreme than the observed difference 
 f<-ecdf(differences[,7])
 1-f(CC_FP_obs)
-#16% of the resampled differences are more extreme than the observed difference 
 
-
-hist(differences[,8], main = "CC - PG", xlab="Difference")
+#Cape Canaveral - Punta Gorda 
+hist(differences[,8], main = "|CC - PG|", xlab="Difference")
 abline(v=CC_PG_obs, col="red")
+#88% of the resampled differences are more extreme than the observed difference 
 f<-ecdf(differences[,8])
 1-f(CC_PG_obs)
-#88% of the resampled differences are more extreme than the observed difference 
 
-
-hist(differences[,9], main = "CC - WT", xlab="Difference")
+#Cape Canaveral - Wild Turkey
+hist(differences[,9], main = "|CC - WT|", xlab="Difference")
 abline(v=CC_WT_obs, col="red")
+#82% of the resampled differences are more extreme than the observed difference
 f<-ecdf(differences[,9])
 1-f(CC_WT_obs)
-#82% of the resampled differences are more extreme than the observed difference
 
-
-hist(differences[,10], main="C - FP", xlab="Difference")
+#Chekika - Fort Pierce 
+hist(differences[,10], main="|C - FP|", xlab="Difference")
 abline(v=C_FP_obs, col="red")
+#1% of the resampled differences are more extreme than the observed difference 
 f<-ecdf(differences[,10])
 1-f(C_FP_obs)
-#1% of the resampled differences are more extreme than the observed difference 
 
-hist(differences[,11], main = "C - PG", xlab="Difference")
+#Chekika - Punta Gorda 
+hist(differences[,11], main = "|C - PG|", xlab="Difference")
 abline(v=C_PG_obs, col="red")
+#<1% of the resampled differences are more extreme than the observed difference
 f<-ecdf(differences[,11])
 1-f(C_PG_obs)
-#<1% of the resampled differences are more extreme than the observed difference
 
-hist(differences[,12], main = "C - WT", xlab="Difference")
+#Chekika - Wild Turkey
+hist(differences[,12], main = "|C - WT|", xlab="Difference")
 abline(v=C_WT_obs, col="red")
+#4% of the resampled differences are more extreme than the observed difference 
 f<-ecdf(differences[,12])
 1-f(C_WT_obs)
-#4% of the resampled differences are more extreme than the observed difference 
 
-
-hist(differences[,13], main = "FP - PG", xlab="Difference")
+#Fort Pierce - Punta Gorda 
+hist(differences[,13], main = "|FP - PG|", xlab="Difference")
 abline(v=FP_PG_obs, col="red")
+#15% of the resampled differences are more extreme than the observed difference 
 f <- ecdf(differences[,13])
 1-f(FP_PG_obs)
-#15% of the resampled differences are more extreme than the observed difference 
 
-hist(differences[,14], main = "FP - WT", xlab="Difference")
+#Fort Pierce - Wild Turkey
+hist(differences[,14], main = "|FP - WT|", xlab="Difference")
 abline(v=FP_WT_obs, col="red")
+#63% of the resampled differences are more extreme than the observed difference
 f <- ecdf(differences[,14])
 1-f(FP_WT_obs)
-#63% of the resampled differences are more extreme than the observed difference
 
-hist(differences[,15], main = "PG - WT", xlab="Difference")
+#Punta Gorda - Wild Turkey 
+hist(differences[,15], main = "|PG - WT|", xlab="Difference")
 abline(v=PG_WT_obs, col="red")
+#68% of the resampled differences are more extreme than the observed difference
 f <- ecdf(differences[,15])
 1-f(PG_WT_obs)
-#68% of the resampled differences are more extreme than the observed difference
+
+```

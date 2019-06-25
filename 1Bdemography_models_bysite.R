@@ -175,6 +175,8 @@ restrict<-subset(pooled, is.na(Death_Cause))
 
 #Remove outliers (very large diameters)
 restrict2<-subset(restrict, Diameter_t<800)
+#Remove an individual at Big Cypress that went from diameter 1.4 to diameter 108 back to diameter 2.1 
+restrict2 <- subset(restrict2, restrict2$ID != 5)
 
 #Range of diameter: [0, 800]
 0.9*max(restrict2$Diameter_t) #700
@@ -203,11 +205,21 @@ x2seq_seedlings<-seq(0, 16, length.out=50)
 
 #(b) By Site 
 
-s1<-glm(seedlings$Surv_tplus1~ seedlings$Diameter_t + seedlings$Height_t+seedlings$Site, family=binomial)
+s1_a<-glm(seedlings$Surv_tplus1~ seedlings$Diameter_t + seedlings$Height_t+seedlings$Site, family=binomial)
+summary(s1_a)
+
+#Create a new dataframe where PG, WT and BC are lumped together
+location_s1<-rep(0, length(seedlings$Site))
+for (i in 1:length(seedlings$Site)) {
+  if (seedlings$Site[i]=="Big Cypress" |seedlings$Site[i] == "Punta Gorda"|
+      seedlings$Site[i]=="Wild Turkey") {location_s1[i]<-"BC-PG-WT"}
+  else{location_s1[i]<-as.character(seedlings$Site[i])}
+}
+seedlings<-cbind(seedlings, location_s1)
+
+s1 <- glm(seedlings$Surv_tplus1~ seedlings$Diameter_t + 
+            seedlings$Height_t+seedlings$location_s1, family=binomial)
 summary(s1)
-
-
-
 
 
 p.vec_BC[1]<-s1$coeff[1]
@@ -226,11 +238,11 @@ p.vec_FP[1] <- s1$coeff[1] + s1$coeff[6]
 p.vec_FP[2] <- s1$coeff[2]
 p.vec_FP[3] <- s1$coeff[3]
 
-p.vec_PG[1] <- s1$coeff[1] + s1$coeff[7]
+p.vec_PG[1] <- s1$coeff[1] 
 p.vec_PG[2] <- s1$coeff[2]
 p.vec_PG[3] <- s1$coeff[3]
 
-p.vec_WT[1] <- s1$coeff[1] + s1$coeff[8]
+p.vec_WT[1] <- s1$coeff[1] 
 p.vec_WT[2] <- s1$coeff[2]
 p.vec_WT[3] <- s1$coeff[3]
 
@@ -397,32 +409,43 @@ p.vec_WT[18]<-sd_grad_height
 
 
 #(b) Model graduation by site
-m <-glm(seedlings$grad_status~ seedlings$Diameter_t + seedlings$Height_t + seedlings$Site, family=binomial)
+m_a <-glm(seedlings$grad_status~ seedlings$Diameter_t + seedlings$Height_t + seedlings$Site, family=binomial)
+summary(m_a)
+
+#Create a new dataframe where BC, CC, FP and PG are lumped together
+location_m<-rep(0, length(seedlings$Site))
+for (i in 1:length(seedlings$Site)) {
+  if (seedlings$Site[i]=="Big Cypress" |seedlings$Site[i] == "Cape Canaveral"|
+      seedlings$Site[i]=="Fort Pierce" |
+      seedlings$Site[i]=="Punta Gorda") {location_m[i]<-"BC-CC-FP-PG"}
+  else{location_m[i]<-as.character(seedlings$Site[i])}
+}
+seedlings<-cbind(seedlings, location_m)
+
+m <-glm(seedlings$grad_status~ seedlings$Diameter_t + seedlings$Height_t + seedlings$location_m, family=binomial)
 summary(m)
-
-
 
 p.vec_BC[12]<-m$coeff[1]
 p.vec_BC[13]<-m$coeff[2]
 p.vec_BC[14]<-m$coeff[3]
 
-p.vec_CC[12]<-m$coeff[1] + m$coeff[4]
+p.vec_CC[12]<-m$coeff[1]
 p.vec_CC[13]<-m$coeff[2]
 p.vec_CC[14]<-m$coeff[3]
 
-p.vec_C[12]<-m$coeff[1] + m$coeff[5]
+p.vec_C[12]<-m$coeff[1] + m$coeff[4]
 p.vec_C[13]<-m$coeff[2]
 p.vec_C[14]<-m$coeff[3]
 
-p.vec_FP[12]<-m$coeff[1] + m$coeff[6]
+p.vec_FP[12]<-m$coeff[1] 
 p.vec_FP[13]<-m$coeff[2]
 p.vec_FP[14]<-m$coeff[3]
 
-p.vec_PG[12]<-m$coeff[1] + m$coeff[7]
+p.vec_PG[12]<-m$coeff[1] 
 p.vec_PG[13]<-m$coeff[2]
 p.vec_PG[14]<-m$coeff[3]
 
-p.vec_WT[12]<-m$coeff[1] + m$coeff[8]
+p.vec_WT[12]<-m$coeff[1] + m$coeff[5]
 p.vec_WT[13]<-m$coeff[2]
 p.vec_WT[14]<-m$coeff[3]
 
@@ -434,32 +457,42 @@ p.vec_WT[14]<-m$coeff[3]
 
 #(b) Model D2-survival (by site)
 
-s2<-glm(larges$Surv_tplus1~larges$Diameter_t + larges$Height_t +larges$Site, family=binomial)
+s2_a<-glm(larges$Surv_tplus1~larges$Diameter_t + larges$Height_t +larges$Site, family=binomial)
+summary(s2_a)
+
+#Create a new dataframe where BC, CC, and PG are lumped together
+location_s2<-rep(0, length(larges$Site))
+for (i in 1:length(larges$Site)) {
+  if (larges$Site[i]=="Big Cypress" |larges$Site[i] == "Cape Canaveral"|
+      larges$Site[i]=="Punta Gorda") {location_s2[i]<-"BC-CC-PG"}
+  else{location_s2[i]<-as.character(larges$Site[i])}
+}
+
+larges<-cbind(larges, location_s2)
+s2<-glm(larges$Surv_tplus1~larges$Diameter_t + larges$Height_t +larges$location_s2, family=binomial)
 summary(s2)
-
-
 
 p.vec_BC[19]<-s2$coeff[1]
 p.vec_BC[20]<-s2$coeff[2]
 p.vec_BC[21]<-s2$coeff[3]
 
-p.vec_CC[19]<-s2$coeff[1] + s2$coeff[4]
+p.vec_CC[19]<-s2$coeff[1] 
 p.vec_CC[20]<-s2$coeff[2]
 p.vec_CC[21]<-s2$coeff[3]
 
-p.vec_C[19]<-s2$coeff[1] + s2$coeff[5]
+p.vec_C[19]<-s2$coeff[1] + s2$coeff[4]
 p.vec_C[20]<-s2$coeff[2]
 p.vec_C[21]<-s2$coeff[3]
 
-p.vec_FP[19]<-s2$coeff[1] + s2$coeff[6]
+p.vec_FP[19]<-s2$coeff[1] + s2$coeff[5]
 p.vec_FP[20]<-s2$coeff[2]
 p.vec_FP[21]<-s2$coeff[3]
 
-p.vec_PG[19]<-s2$coeff[1] + s2$coeff[7]
+p.vec_PG[19]<-s2$coeff[1] 
 p.vec_PG[20]<-s2$coeff[2]
 p.vec_PG[21]<-s2$coeff[3]
 
-p.vec_WT[19]<-s2$coeff[1] + s2$coeff[8]
+p.vec_WT[19]<-s2$coeff[1] + s2$coeff[6]
 p.vec_WT[20]<-s2$coeff[2]
 p.vec_WT[21]<-s2$coeff[3]
 
@@ -564,28 +597,40 @@ p.vec_WT[29]<-summary(g2_height)$sigma
 ##### Reproduction #####
 
 #(b) Model probability of being reproductive     (by site)
-p_f1<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t + larges$Site, family=binomial)
-summary(p_f)
+p_f_a<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t + larges$Site, family=binomial)
+summary(p_f_a)
 #Diameter term is not significant, so remove it: 
-p_f<-glm(larges$Rep_tplus1 ~ larges$Height_t +larges$Site, family=binomial)
+p_f_b<-glm(larges$Rep_tplus1 ~ larges$Height_t +larges$Site, family=binomial)
+summary(p_f_b)
+
+#Create a new dataframe where BC, CC, and FP are lumped together
+location_pf<-rep(0, length(larges$Site))
+for (i in 1:length(larges$Site)) {
+  if (larges$Site[i]=="Big Cypress" |larges$Site[i] == "Cape Canaveral"|
+      larges$Site[i]=="Fort Pierce") {location_pf[i]<-"BC-CC-FP"}
+  else{location_pf[i]<-as.character(larges$Site[i])}
+}
+larges<-cbind(larges, location_pf)
+
+p_f<-glm(larges$Rep_tplus1 ~ larges$Height_t +larges$location_pf, family=binomial)
 summary(p_f)
 
 p.vec_BC[30]<-p_f$coeff[1]
 p.vec_BC[31]<-p_f$coeff[2]
 
-p.vec_CC[30]<-p_f$coeff[1] + p_f$coeff[3]
+p.vec_CC[30]<-p_f$coeff[1] 
 p.vec_CC[31]<-p_f$coeff[2]
 
-p.vec_C[30]<-p_f$coeff[1] + p_f$coeff[4]
+p.vec_C[30]<-p_f$coeff[1] + p_f$coeff[3]
 p.vec_C[31]<-p_f$coeff[2]
 
-p.vec_FP[30]<-p_f$coeff[1] + p_f$coeff[5]
+p.vec_FP[30]<-p_f$coeff[1] 
 p.vec_FP[31]<-p_f$coeff[2]
 
-p.vec_PG[30]<-p_f$coeff[1] + p_f$coeff[6]
+p.vec_PG[30]<-p_f$coeff[1] + p_f$coeff[4]
 p.vec_PG[31]<-p_f$coeff[2]
 
-p.vec_WT[30]<-p_f$coeff[1] + p_f$coeff[7]
+p.vec_WT[30]<-p_f$coeff[1] + p_f$coeff[5]
 p.vec_WT[31]<-p_f$coeff[2]
 
 

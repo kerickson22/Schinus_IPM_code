@@ -76,6 +76,7 @@ load('./WT/p.vec_WT.RData')
 
 
 
+
 ## Survival-Growth of Seedlings (in D1)
 pyx1=function(diamp,heightp,diam, height, params) { (1-((exp(params[12]+params[13]*diam + params[14]*height)/(1+exp(params[12]+params[13]*diam + params[14]*height))
 )))*(exp(params[1]+params[2]*diam+params[3]*height)/(1+exp(params[1]+params[2]*diam+params[3]*height)))*dtnorm(diamp,mean=params[4] + params[5]*diam + params[6]*height,sd=params[7], lower=0, upper=1.6)*dtnorm(heightp,mean=params[8]+params[9]*diam + params[10]*height,sd=params[11], lower=0, upper=16)}
@@ -263,7 +264,6 @@ h4=(800-16)/m4
  saveRDS(thing$F, file = "./WT/F_WT.rds")
  saveRDS(thing$Kvals_F, file ="./WT/Kvals_F_WT.rds" )
  
-
 
 # Construct M (Maturation): #####
  
