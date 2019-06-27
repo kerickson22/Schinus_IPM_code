@@ -48,6 +48,7 @@ p.vec_FP <- rep(0, 39)
 p.vec_WT <- rep(0, 39)
 p.vec_PG <- rep(0, 39)
 p.vec_CC <- rep(0, 39)
+p.vec_overall <- rep(0, 39)
 
 
 
@@ -201,7 +202,13 @@ x2seq_seedlings<-seq(0, 16, length.out=50)
 
 
 ##### SURVIVAL of Seedlings (D1) #####
+#(a) Overall 
+s1_overall <- glm(seedlings$Surv_tplus1 ~ seedlings$Diameter_t + seedlings$Height_t, family=binomial)
+summary(s1_overall)
 
+p.vec_overall[1]<-s1_overall$coeff[1]
+p.vec_overall[2]<-s1_overall$coeff[2]
+p.vec_overall[3]<-s1_overall$coeff[3]
 
 #(b) By Site 
 
@@ -263,11 +270,29 @@ seedlings2<-subset(seedlings2, seedlings2$Height_tplus1<16)
 #First, model variance in growth for future diameter
 g1_diam<-lm(seedlings2$Diameter_tplus1 ~ seedlings2$Diameter_t+seedlings2$Height_t + seedlings2$Site)
 summary(g1_diam)
+g1_diam_overall <- lm(seedlings2$Diameter_tplus1 ~ seedlings2$Diameter_t + seedlings2$Height_t)
+summary(g1_diam_overall)
 
 #Then, model variance in growth for future height
 g1_height<-lm(seedlings2$Height_tplus1 ~ seedlings2$Diameter_t + seedlings2$Height_t + seedlings2$Site)
 summary(g1_height)
+g1_height_overall <- lm(seedlings2$Height_tplus1 ~ seedlings2$Diameter_t + seedlings2$Height_t)
+summary(g1_height_overall)
+#(a) Overall
 
+g1_overall <-manova(cbind(seedlings2$Diameter_tplus1, seedlings2$Height_tplus1) ~ seedlings2$Diameter_t+seedlings2$Height_t)
+summary(g1_overall)
+#Params associated with future diameter
+p.vec_overall[4]<-g1_overall$coeff[1,1]
+p.vec_overall[5]<-g1_overall$coeff[2,1]
+p.vec_overall[6]<-g1_overall$coeff[3,1]
+p.vec_overall[7]<-summary(g1_diam_overall)$sigma
+
+#Params associated with future height
+p.vec_overall[8]<-g1_overall$coeff[1,2]
+p.vec_overall[9]<-g1_overall$coeff[2,2]
+p.vec_overall[10]<-g1_overall$coeff[3,2]
+p.vec_overall[11]<-summary(g1_height_overall)$sigma
 #(b) By Site: 
 g1<-manova(cbind(seedlings2$Diameter_tplus1, seedlings2$Height_tplus1) ~ seedlings2$Diameter_t+seedlings2$Height_t+seedlings2$Site)
 summary(g1)
@@ -355,10 +380,6 @@ for (i in 1:length(seedlings$ID)) {
 
 seedlings<-cbind(seedlings, grad_status)
 
-#Probability of leaving the seedling domain: 
-
-
-
 
 #Model distribution of sizes of graduates 
 
@@ -407,7 +428,14 @@ p.vec_WT[16]<-sd_grad_diam
 p.vec_WT[17]<-mu_grad_height
 p.vec_WT[18]<-sd_grad_height
 
+p.vec_overall[15] <- mu_grad_diam
+p.vec_overall[16] <- sd_grad_diam
+p.vec_overall[17] <- mu_grad_height
+p.vec_overall[18] <- sd_grad_height
 
+#(a) Maturation overall
+m_overall <- glm(seedlings$grad_status ~ seedlings$Diameter_t + seedlings$Height_t, family = binomial)
+summary(m_overall)
 #(b) Model graduation by site
 m_a <-glm(seedlings$grad_status~ seedlings$Diameter_t + seedlings$Height_t + seedlings$Site, family=binomial)
 summary(m_a)
@@ -445,16 +473,26 @@ p.vec_PG[12]<-m$coeff[1]
 p.vec_PG[13]<-m$coeff[2]
 p.vec_PG[14]<-m$coeff[3]
 
+
 p.vec_WT[12]<-m$coeff[1] + m$coeff[5]
 p.vec_WT[13]<-m$coeff[2]
 p.vec_WT[14]<-m$coeff[3]
 
 
+p.vec_overall[12] <- m_overall$coeff[1]
+p.vec_overall[13] <- m_overall$coeff[2]
+p.vec_overall[14] <- m_overall$coeff[3] 
+
 
 
 ##### D2 SURVIVAL #####
 #of larger plants (in the D2 domain)
-
+#(a) Overall
+s2_overall<-glm(larges$Surv_tplus1~larges$Diameter_t + larges$Height_t, family=binomial)
+summary(s2_overall)
+p.vec_overall[19]<-s2_overall$coeff[1]
+p.vec_overall[20]<-s2_overall$coeff[2]
+p.vec_overall[21]<-s2_overall$coeff[3]
 #(b) Model D2-survival (by site)
 
 s2_a<-glm(larges$Surv_tplus1~larges$Diameter_t + larges$Height_t +larges$Site, family=binomial)
@@ -505,13 +543,21 @@ p.vec_WT[21]<-s2$coeff[3]
 g2_diam<-lm(larges$Diameter_tplus1 ~ larges$Diameter_t + larges$Height_t + larges$Site)
 summary(g2_diam)
 
+g2_diam_overall <- lm(larges$Diameter_tplus1 ~ larges$Diameter_t + larges$Height_t)
+summary(g2_diam_overall)
+
 
 #Model variance in growth in height: 
 
 g2_height<-lm(larges$Height_tplus1 ~ larges$Diameter_t + larges$Height_t + larges$Site)
 summary(g2_height)
 
+g2_height_overall<-lm(larges$Height_tplus1 ~ larges$Diameter_t + larges$Height_t)
+summary(g2_height_overall)
 
+#(a) Overall D2 Growth
+g2_overall<-manova(cbind(larges$Diameter_tplus1, larges$Height_tplus1) ~ larges$Diameter_t+larges$Height_t)
+summary(g2_overall)
 
 #(d) Modeling growth in D2 by site
 
@@ -544,7 +590,9 @@ p.vec_WT[22]<-g2$coeff[1,1] + g2$coeff[8,1]
 p.vec_WT[23]<-g2$coeff[2,1]
 p.vec_WT[24]<-g2$coeff[3,1]
 
-
+p.vec_overall[22] <- g2_overall$coeff[1,1]
+p.vec_overall[23] <- g2_overall$coeff[2,1]
+p.vec_overall[24] <- g2_overall$coeff[3,1]
 
 
 #Model variance in growth of D2 individuals in diameter
@@ -556,6 +604,7 @@ p.vec_C[25]<-summary(g2_diam)$sigma
 p.vec_FP[25]<-summary(g2_diam)$sigma
 p.vec_PG[25]<-summary(g2_diam)$sigma
 p.vec_WT[25]<-summary(g2_diam)$sigma
+p.vec_overall[25] <- summary(g2_diam_overall)$sigma
 
 #Store parameters associated with modeling growth of D2 individuals in height
 p.vec_BC[26]<-g2$coeff[1,2]
@@ -582,7 +631,9 @@ p.vec_WT[26]<-g2$coeff[1,2] + g2$coeff[8,2]
 p.vec_WT[27]<-g2$coeff[2,2]
 p.vec_WT[28]<-g2$coeff[3,2]
 
-
+p.vec_overall[26] <- g2_overall$coeff[1,2]
+p.vec_overall[27] <- g2_overall$coeff[2,2]
+p.vec_overall[28] <- g2_overall$coeff[3,2]
 
 
 
@@ -593,8 +644,15 @@ p.vec_C[29]<-summary(g2_height)$sigma
 p.vec_FP[29]<-summary(g2_height)$sigma
 p.vec_PG[29]<-summary(g2_height)$sigma
 p.vec_WT[29]<-summary(g2_height)$sigma
+p.vec_overall[29] <- summary(g2_height_overall)$sigma
 
 ##### Reproduction #####
+#(a) Overall
+p_f_overall_a <- glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t, family=binomial)
+summary(p_f_overall_a)
+#Diameter is not significant so remove it
+p_f_overall <- glm(larges$Rep_tplus1 ~ larges$Height_t, family=binomial)
+summary(p_f_overall)
 
 #(b) Model probability of being reproductive     (by site)
 p_f_a<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t + larges$Site, family=binomial)
@@ -633,6 +691,8 @@ p.vec_PG[31]<-p_f$coeff[2]
 p.vec_WT[30]<-p_f$coeff[1] + p_f$coeff[5]
 p.vec_WT[31]<-p_f$coeff[2]
 
+p.vec_overall[30] <-p_f_overall$coeff[1]
+p.vec_overall[31] <- p_f_overall$coeff[2]
 
 
 
@@ -649,9 +709,10 @@ load("Stems.RData")
 x<-Stems$diam_base*10 #convert from cm to mm
 x <- x*x
 f<-lm(Stems$Seed_No ~ 0 + x:Stems$Site)
-
 summary(f)
 
+f_overall <- lm(Stems$Seed_No ~ 0 + x)
+summary(f_overall)
 
 
 #(b) Model fecundity (by biotype)
@@ -661,6 +722,7 @@ p.vec_C[32]<-f$coeff[3]
 p.vec_FP[32] <- f$coeff[4]
 p.vec_PG[32] <- f$coeff[6]
 p.vec_WT[32] <- f$coeff[7]
+p.vec_overall[32] <- f_overall$coeff[1]
 
 
 
@@ -736,6 +798,8 @@ recruits_2<-subset(recruits_1, recruits_1$height<16)
 
 
 #Parameters associated with distribution of recruits diameter
+p.vec_overall[33] <- mu_diam
+p.vec_overall[34] <- sd_diam
 
 p.vec_BC[33]<-mu_diam
 p.vec_BC[34]<-sd_diam
@@ -757,6 +821,8 @@ p.vec_WT[34]<-sd_diam
 
 #Parameters associated with distribution of recruits heights
 
+p.vec_overall[35] <- mu_height
+p.vec_overall[36] <- sd_height
 
 p.vec_BC[35]<-mu_height
 p.vec_BC[36]<-sd_height
@@ -781,6 +847,7 @@ p.vec_WT[36]<-sd_height
 # TAU_1: Pre-dispersal seed survival ##### 
 #Rethinking this parameter value: Isn't this already encapsulated in tau_2? 
 
+p.vec_overall[37] <- 0.002
 p.vec_BC[37]<-0.002
 p.vec_CC[37]<-0.002
 p.vec_C[37]<-0.002
@@ -801,7 +868,7 @@ p.vec_WT[37]<-0.002
 # p.vec_W[38]<-0.005
 
 #Revised based on calculations for appendix 
-
+p.vec_overall[38] <- 0.19
 p.vec_BC[38]<-0.19
 p.vec_CC[38]<-0.19
 p.vec_C[38]<-0.19
@@ -848,6 +915,7 @@ tau_2_hybrid<-0.5072
 tau_2_E_W<-0.388
 
 #p.vec_overall[39]<- 0.5072 #Selected the highest survival probability (could have selected lowest)
+p.vec_overall[39] <- 0.5072
 p.vec_BC[39]<-0.5072
 p.vec_CC[39]<-0.5072
 p.vec_C[39]<-0.5072
@@ -863,6 +931,7 @@ save(p.vec_C, file="./C/p.vec_C.RData")
 save(p.vec_FP, file="./FP/p.vec_FP.RData")
 save(p.vec_PG, file="./PG/p.vec_PG.RData")
 save(p.vec_WT, file="./WT/p.vec_WT.RData")
+save(p.vec_overall, file="./Overall/p.vec_overall.RData")
 
 
 
