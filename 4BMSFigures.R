@@ -914,7 +914,12 @@ barplot(c(lam.stable_BC, lam.stable_CC, lam.stable_C, lam.stable_FP,
         ylim=c(1, 1.5), xpd=F)
 dev.off()
 
-
+load("./BC/BC_pool.RData")
+load("./CC/CC_pool.RData")
+load("./C/C_pool.RData")
+load("./FP/FP_pool.RData")
+load("./PG/PG_pool.RData")
+load("./WT/WT_pool.RData")
 
 #Figure 9: Barplot of contribution of kernel components to differences in lambda #####
 setEPS(horizontal=F, onefile=F, paper="special")
@@ -932,45 +937,45 @@ par(mar = c(3, 3, 2, 1), # Margins
     oma=c(0.1, 0, 0.1, 0),
     mfrow=c(3, 2))
 
-barplot(BC, col=cols[1], ylim=c(-0.13, 0.16),
+barplot(BC_pool, col=cols[1], ylim=c(-0.0001, 0.0001),
         names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), axes=T, cex.names=0.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["BC"],"-", lambda["average"])))
+              bquote(paste(lambda["BC"],"-", lambda["overall"])))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
-barplot(CC, col=cols[2], ylim=c(-0.13, 0.16), 
+barplot(CC_pool, col=cols[2], ylim=c(-0.13, 0.16), 
         names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=0.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["CC"],"-", lambda["average"])))
+              bquote(paste(lambda["CC"],"-", lambda["overall"])))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
-barplot(C, col=cols[3], ylim=c(-0.13, 0.16), 
+barplot(C_pool, col=cols[3], ylim=c(-0.13, 0.16), 
         names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["C"],"-", lambda["average"])))
+              bquote(paste(lambda["C"],"-", lambda["overall"])))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
-barplot(FP, col=cols[4], ylim=c(-0.13, 0.16), 
+barplot(FP_pool, col=cols[4], ylim=c(-0.13, 0.16), 
         names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["FP"],"-", lambda["average"])))
+              bquote(paste(lambda["FP"],"-", lambda["overall"])))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
-barplot(PG, col=cols[5], ylim=c(-0.13, 0.16), 
+barplot(PG_pool, col=cols[5], ylim=c(-0.13, 0.16), 
         names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["PG"],"-", lambda["average"])))
+              bquote(paste(lambda["PG"],"-", lambda["overall"])))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
-barplot(WT, col=cols[6], ylim=c(-0.13, 0.16), 
+barplot(WT_pool, col=cols[6], ylim=c(-0.13, 0.16), 
         names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["WT"],"-", lambda["average"])))
+              bquote(paste(lambda["WT"],"-", lambda["overall"])))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 

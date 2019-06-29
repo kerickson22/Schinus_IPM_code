@@ -10,7 +10,7 @@ demog<-read.csv("demography_15_clean.csv", head=T)
 # The column names are : 
 # Obs : Observation number (each plant should have a different observation number; these were assigned post data 
 #      entry when we discovered that some of the numbers for individuals were reused between sites
-# Site: Which site (Big Cypress, Cape Canaveral, Chekika, Forty Pierce, Punta Gorda, Wild Turkey)
+# Site: Which site (Big Cypress, Cape Canaveral, Chekika, Fort Pierce, Punta Gorda, Wild Turkey)
 # Plant ID: The tag number of an individual (each individual in a site has a different number, but numbers were
 #      reused across sites)
 # Location: SeedlingPlot (individual located in a seedling plot) or NA (individual not in seedling plot)

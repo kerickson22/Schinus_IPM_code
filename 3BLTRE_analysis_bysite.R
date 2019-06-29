@@ -24,16 +24,16 @@ h4=(800-16)/m4
 
 #Calculate A_avg and associated quantities#####
  load("./BC/A_BC.RData")
- load("./CC/A_CC.RData")
+ load("./PG/A_PG.RData")
  load("./C/A_C.RData")
  load("./FP/A_FP.RData")
  load("./PG/A_PG.RData")
  load("./WT/A_WT.RData")
  
- A_avg <- (A_BC + A_CC + A_C + A_FP + A_PG + A_WT)/6
+ A_avg <- (A_BC + A_PG + A_C + A_FP + A_PG + A_WT)/6
  
  save(A_avg, file="A_avg.RData")
- rm(A_CC, A_C, A_FP, A_PG, A_WT)
+ rm(A_PG, A_C, A_FP, A_PG, A_WT)
  
 #Now calculate the sensitivity of the average matrix: 
 
@@ -94,52 +94,73 @@ h4=(800-16)/m4
 # Calculate difference matrices ##### 
 # Big Cypress 
 load("./BC/A_BC.RData")
-D_BC<-A_BC-A_avg #Difference matrix
+load("./Overall/A_overall.RData")
+sens_overall <- readRDS("./Overall/sens_overall.rds")
+D_BC_avg <-A_BC-A_avg #Difference matrix
+D_BC_pool <- A_BC -A_overall 
 rm(A_BC)
-C_BC<-D_BC*sens_avg #Matrix of contributions
-rm(D_BC)
-save(C_BC, file="./BC/C_BC.RData")
+C_BC_avg<-D_BC_avg*sens_avg #Matrix of contributions
+C_BC_pool <- D_BC_pool*sens_overall
+rm(D_BC_avg, D_BC_pool)
+save(C_BC_avg, file="./BC/C_BC_avg.RData")
+save(C_BC_pool, file="./BC/C_BC_pool.RData")
+rm(C_BC_avg, C_BC_pool)
 
+# Cape Canaveral 
+load("./PG/A_PG.RData")
+D_PG_avg <-A_PG-A_avg #Difference matrix
+D_PG_pool <- A_PG -A_overall 
+rm(A_PG)
+C_PG_avg<-D_PG_avg*sens_avg #Matrix of contributions
+C_PG_pool <- D_PG_pool*sens_overall
+rm(D_PG_avg, D_PG_pool)
+save(C_PG_avg, file="./PG/C_PG_avg.RData")
+save(C_PG_pool, file="./PG/C_PG_pool.RData")
 
-#Cape Canaveral
-load("./CC/A_CC.RData")
-D_CC<-A_CC-A_avg #Difference matrix
-rm(A_CC)
-C_CC<-D_CC*sens_avg #Matrix of contributions
-rm(D_CC)
-save(C_CC, file="./CC/C_CC.RData")
-
-#Chekika
+#Chekika 
 load("./C/A_C.RData")
-D_C<-A_C-A_avg #Difference matrix
+D_C_avg <-A_C-A_avg #Difference matrix
+D_C_pool <- A_C -A_overall 
 rm(A_C)
-C_C<-D_C*sens_avg #Matrix of contributions
-rm(D_C)
-save(C_C, file="./C/C_C.RData")
+C_C_avg<-D_C_avg*sens_avg #Matrix of contributions
+C_C_pool <- D_C_pool*sens_overall
+rm(D_C_avg, D_C_pool)
+save(C_C_avg, file="./C/C_C_avg.RData")
+save(C_C_pool, file="./C/C_C_pool.RData")
 
 #Fort Pierce
 load("./FP/A_FP.RData")
-D_FP<-A_FP-A_avg #Difference matrix
+D_FP_avg <-A_FP-A_avg #Difference matrix
+D_FP_pool <- A_FP -A_overall 
 rm(A_FP)
-C_FP<-D_FP*sens_avg #Matrix of contributions
-rm(D_FP)
-save(C_FP, file="./FP/C_FP.RData")
+C_FP_avg<-D_FP_avg*sens_avg #Matrix of contributions
+C_FP_pool <- D_FP_pool*sens_overall
+rm(D_FP_avg, D_FP_pool)
+save(C_FP_avg, file="./FP/C_FP_avg.RData")
+save(C_FP_pool, file="./FP/C_FP_pool.RData")
 
 #Punta Gorda
 load("./PG/A_PG.RData")
-D_PG<-A_PG-A_avg #Difference matrix
+D_PG_avg <-A_PG-A_avg #Difference matrix
+D_PG_pool <- A_PG -A_overall 
 rm(A_PG)
-C_PG<-D_PG*sens_avg #Matrix of contributions
-rm(D_PG)
-save(C_PG, file="./PG/C_PG.RData")
+C_PG_avg<-D_PG_avg*sens_avg #Matrix of contributions
+C_PG_pool <- D_PG_pool*sens_overall
+rm(D_PG_avg, D_PG_pool)
+save(C_PG_avg, file="./PG/C_PG_avg.RData")
+save(C_PG_pool, file="./PG/C_PG_pool.RData")
 
 #Wild Turkey
+#Punta Gorda
 load("./WT/A_WT.RData")
-D_WT<-A_WT-A_avg #Difference matrix
+D_WT_avg <-A_WT-A_avg #Difference matrix
+D_WT_pool <- A_WT -A_overall 
 rm(A_WT)
-C_WT<-D_WT*sens_avg #Matrix of contributions
-rm(D_WT)
-save(C_WT, file="./WT/C_WT.RData")
+C_WT_avg<-D_WT_avg*sens_avg #Matrix of contributions
+C_WT_pool <- D_WT_pool*sens_overall
+rm(D_WT_avg, D_WT_pool)
+save(C_WT_avg, file="./WT/C_WT_avg.RData")
+save(C_WT_pool, file="./WT/C_WT_pool.RData")
 
 # Decompose contribution matrices into components #####
 decompose = function (mat) {
@@ -151,51 +172,99 @@ decompose = function (mat) {
   return(list(mat_D1 = mat_D1, mat_G = mat_G, mat_F = mat_F, mat_D2 = mat_D2))
 }
 
-load("./BC/C_BC.RData")
-load("./CC/C_CC.RData")
-load("./C/C_C.RData")
-load("./FP/C_FP.RData")
-load("./PG/C_PG.RData")
-load("./WT/C_WT.RData")
+load("./BC/C_BC_pool.RData")
+load("./PG/C_PG_pool.RData")
+load("./C/C_C_pool.RData")
+load("./FP/C_FP_pool.RData")
+load("./PG/C_PG_pool.RData")
+load("./WT/C_WT_pool.RData")
+
+load("./BC/C_BC_avg.RData")
+load("./PG/C_PG_avg.RData")
+load("./C/C_C_avg.RData")
+load("./FP/C_FP_avg.RData")
+load("./PG/C_PG_avg.RData")
+load("./WT/C_WT_avg.RData")
 
 #Big Cypress
-thing <- decompose(C_BC)
-saveRDS(thing$mat_D1, file="./BC/C_D1_BC.rds")
-saveRDS(thing$mat_G, file="./BC/C_G_BC.rds")
-saveRDS(thing$mat_F, file="./BC/C_F_BC.rds")
-saveRDS(thing$mat_D2, file="./BC/C_D2_BC.rds")
-#Cape Canaveral
-thing <- decompose(C_CC)
-saveRDS(thing$mat_D1, file="./CC/C_D1_CC.rds")
-saveRDS(thing$mat_G, file="./CC/C_G_CC.rds")
-saveRDS(thing$mat_F, file="./CC/C_F_CC.rds")
-saveRDS(thing$mat_D2, file="./CC/C_D2_CC.rds")
-#Chekika
-thing <- decompose(C_C)
-saveRDS(thing$mat_D1, file="./C/C_D1_C.rds")
-saveRDS(thing$mat_G, file="./C/C_G_C.rds")
-saveRDS(thing$mat_F, file="./C/C_F_C.rds")
-saveRDS(thing$mat_D2, file="./C/C_D2_C.rds")
-#Fort Pierce
-thing <- decompose(C_FP)
-saveRDS(thing$mat_D1, file="./FP/C_D1_FP.rds")
-saveRDS(thing$mat_G, file="./FP/C_G_FP.rds")
-saveRDS(thing$mat_F, file="./FP/C_F_FP.rds")
-saveRDS(thing$mat_D2, file="./FP/C_D2_FP.rds")
-#Punta Gorda
-thing <- decompose(C_PG)
-saveRDS(thing$mat_D1, file="./PG/C_D1_PG.rds")
-saveRDS(thing$mat_G, file="./PG/C_G_PG.rds")
-saveRDS(thing$mat_F, file="./PG/C_F_PG.rds")
-saveRDS(thing$mat_D2, file="./PG/C_D2_PG.rds")
-#Wild Turkey
-thing <- decompose(C_WT)
-saveRDS(thing$mat_D1, file="./WT/C_D1_WT.rds")
-saveRDS(thing$mat_G, file="./WT/C_G_WT.rds")
-saveRDS(thing$mat_F, file="./WT/C_F_WT.rds")
-saveRDS(thing$mat_D2, file="./WT/C_D2_WT.rds")
+thing <- decompose(C_BC_pool)
+saveRDS(thing$mat_D1, file="./BC/C_D1_BC_pool.rds")
+saveRDS(thing$mat_G, file="./BC/C_G_BC_pool.rds")
+saveRDS(thing$mat_F, file="./BC/C_F_BC_pool.rds")
+saveRDS(thing$mat_D2, file="./BC/C_D2_BC_pool.rds")
 
-rm(C_BC, C_C, C_CC, C_FP, C_PG, C_WT)
+thing <- decompose(C_BC_avg)
+saveRDS(thing$mat_D1, file="./BC/C_D1_BC_avg.rds")
+saveRDS(thing$mat_G, file="./BC/C_G_BC_avg.rds")
+saveRDS(thing$mat_F, file="./BC/C_F_BC_avg.rds")
+saveRDS(thing$mat_D2, file="./BC/C_D2_BC_avg.rds")
+
+#Cape Canaveral
+thing <- decompose(C_CC_pool)
+saveRDS(thing$mat_D1, file="./CC/C_D1_CC_pool.rds")
+saveRDS(thing$mat_G, file="./CC/C_G_CC_pool.rds")
+saveRDS(thing$mat_F, file="./CC/C_F_CC_pool.rds")
+saveRDS(thing$mat_D2, file="./CC/C_D2_CC_pool.rds")
+
+thing <- decompose(C_CC_avg)
+saveRDS(thing$mat_D1, file="./CC/C_D1_CC_avg.rds")
+saveRDS(thing$mat_G, file="./CC/C_G_CC_avg.rds")
+saveRDS(thing$mat_F, file="./CC/C_F_CC_avg.rds")
+saveRDS(thing$mat_D2, file="./CC/C_D2_CC_avg.rds")
+
+#Chekika
+thing <- decompose(C_C_pool)
+saveRDS(thing$mat_D1, file="./C/C_D1_C_pool.rds")
+saveRDS(thing$mat_G, file="./C/C_G_C_pool.rds")
+saveRDS(thing$mat_F, file="./C/C_F_C_pool.rds")
+saveRDS(thing$mat_D2, file="./C/C_D2_C_pool.rds")
+
+thing <- decompose(C_C_avg)
+saveRDS(thing$mat_D1, file="./C/C_D1_C_avg.rds")
+saveRDS(thing$mat_G, file="./C/C_G_C_avg.rds")
+saveRDS(thing$mat_F, file="./C/C_F_C_avg.rds")
+saveRDS(thing$mat_D2, file="./C/C_D2_C_avg.rds")
+
+#Fort Pierce
+thing <- decompose(C_FP_pool)
+saveRDS(thing$mat_D1, file="./FP/C_D1_FP_pool.rds")
+saveRDS(thing$mat_G, file="./FP/C_G_FP_pool.rds")
+saveRDS(thing$mat_F, file="./FP/C_F_FP_pool.rds")
+saveRDS(thing$mat_D2, file="./FP/C_D2_FP_pool.rds")
+
+thing <- decompose(C_FP_avg)
+saveRDS(thing$mat_D1, file="./FP/C_D1_FP_avg.rds")
+saveRDS(thing$mat_G, file="./FP/C_G_FP_avg.rds")
+saveRDS(thing$mat_F, file="./FP/C_F_FP_avg.rds")
+saveRDS(thing$mat_D2, file="./FP/C_D2_FP_avg.rds")
+
+#Punta Gorda
+thing <- decompose(C_PG_pool)
+saveRDS(thing$mat_D1, file="./PG/C_D1_PG_pool.rds")
+saveRDS(thing$mat_G, file="./PG/C_G_PG_pool.rds")
+saveRDS(thing$mat_F, file="./PG/C_F_PG_pool.rds")
+saveRDS(thing$mat_D2, file="./PG/C_D2_PG_pool.rds")
+
+thing <- decompose(C_PG_avg)
+saveRDS(thing$mat_D1, file="./PG/C_D1_PG_avg.rds")
+saveRDS(thing$mat_G, file="./PG/C_G_PG_avg.rds")
+saveRDS(thing$mat_F, file="./PG/C_F_PG_avg.rds")
+saveRDS(thing$mat_D2, file="./PG/C_D2_PG_avg.rds")
+
+#Wild Turkey
+thing <- decompose(C_WT_pool)
+saveRDS(thing$mat_D1, file="./WT/C_D1_WT_pool.rds")
+saveRDS(thing$mat_G, file="./WT/C_G_WT_pool.rds")
+saveRDS(thing$mat_F, file="./WT/C_F_WT_pool.rds")
+saveRDS(thing$mat_D2, file="./WT/C_D2_WT_pool.rds")
+
+thing <- decompose(C_WT_avg)
+saveRDS(thing$mat_D1, file="./WT/C_D1_WT_avg.rds")
+saveRDS(thing$mat_G, file="./WT/C_G_WT_avg.rds")
+saveRDS(thing$mat_F, file="./WT/C_F_WT_avg.rds")
+saveRDS(thing$mat_D2, file="./WT/C_D2_WT_avg.rds")
+
+
 
 # Unpack decomposed matrix into pieces #####
 toKvals_D1 = function(C_D1) {
@@ -216,29 +285,54 @@ toKvals_D1 = function(C_D1) {
 }
 
 #Big Cypress
-C_D1_BC <-readRDS("./BC/C_D1_BC.rds")
-Kvals_contrib_D1_BC <- toKvals_D1(C_D1_BC)
-save(Kvals_contrib_D1_BC, file="./BC/Kvals_contrib_D1_BC.RData")
+C_D1_BC_pool <-readRDS("./BC/C_D1_BC_pool.rds")
+C_D1_BC_avg  <-readRDS("./BC/C_D1_BC_avg.rds")
+Kvals_contrib_D1_BC_pool <- toKvals_D1(C_D1_BC_pool)
+Kvals_contrib_D1_BC_avg <- toKvals_D1(C_D1_BC_avg)
+save(Kvals_contrib_D1_BC_pool, file="./BC/Kvals_contrib_D1_BC_pool.RData")
+save(Kvals_contrib_D1_BC_avg, file="./BC/Kvals_contrib_D1_BC_avg.RData")
+
 #Cape Canaveral
-C_D1_CC <-readRDS("./CC/C_D1_CC.rds")
-Kvals_contrib_D1_CC <- toKvals_D1(C_D1_CC)
-save(Kvals_contrib_D1_CC, file="./CC/Kvals_contrib_D1_CC.RData")
+C_D1_CC_pool <-readRDS("./CC/C_D1_CC_pool.rds")
+C_D1_CC_avg  <-readRDS("./CC/C_D1_CC_avg.rds")
+Kvals_contrib_D1_CC_pool <- toKvals_D1(C_D1_CC_pool)
+Kvals_contrib_D1_CC_avg <- toKvals_D1(C_D1_CC_avg)
+save(Kvals_contrib_D1_CC_pool, file="./CC/Kvals_contrib_D1_CC_pool.RData")
+save(Kvals_contrib_D1_CC_avg, file="./CC/Kvals_contrib_D1_CC_avg.RData")
+
 #Chekika
-C_D1_C <- readRDS("./C/C_D1_C.rds")
-Kvals_contrib_D1_C <- toKvals_D1(C_D1_C)
-save(Kvals_contrib_D1_C, file="./C/Kvals_contrib_D1_C.RData")
+C_D1_C_pool <-readRDS("./C/C_D1_C_pool.rds")
+C_D1_C_avg  <-readRDS("./C/C_D1_C_avg.rds")
+Kvals_contrib_D1_C_pool <- toKvals_D1(C_D1_C_pool)
+Kvals_contrib_D1_C_avg <- toKvals_D1(C_D1_C_avg)
+save(Kvals_contrib_D1_C_pool, file="./C/Kvals_contrib_D1_C_pool.RData")
+save(Kvals_contrib_D1_C_avg, file="./C/Kvals_contrib_D1_C_avg.RData")
+
 #Fort Pierce
-C_D1_FP <- readRDS("./FP/C_D1_FP.rds")
-Kvals_contrib_D1_FP <- toKvals_D1(C_D1_FP)
-save(Kvals_contrib_D1_FP, file="./FP/Kvals_contrib_D1_FP.RData")
+C_D1_FP_pool <-readRDS("./FP/C_D1_FP_pool.rds")
+C_D1_FP_avg  <-readRDS("./FP/C_D1_FP_avg.rds")
+Kvals_contrib_D1_FP_pool <- toKvals_D1(C_D1_FP_pool)
+Kvals_contrib_D1_FP_avg <- toKvals_D1(C_D1_FP_avg)
+save(Kvals_contrib_D1_FP_pool, file="./FP/Kvals_contrib_D1_FP_pool.RData")
+save(Kvals_contrib_D1_FP_avg, file="./FP/Kvals_contrib_D1_FP_avg.RData")
+
 #Punta Gorda
-C_D1_PG <- readRDS("./PG/C_D1_PG.rds")
-Kvals_contrib_D1_PG <- toKvals_D1(C_D1_PG)
-save(Kvals_contrib_D1_PG, file="./PG/Kvals_contrib_D1_PG.RData")
+C_D1_PG_pool <-readRDS("./PG/C_D1_PG_pool.rds")
+C_D1_PG_avg  <-readRDS("./PG/C_D1_PG_avg.rds")
+Kvals_contrib_D1_PG_pool <- toKvals_D1(C_D1_PG_pool)
+Kvals_contrib_D1_PG_avg <- toKvals_D1(C_D1_PG_avg)
+save(Kvals_contrib_D1_PG_pool, file="./PG/Kvals_contrib_D1_PG_pool.RData")
+save(Kvals_contrib_D1_PG_avg, file="./PG/Kvals_contrib_D1_PG_avg.RData")
+
 #Wild Turkey
-C_D1_WT <- readRDS("./WT/C_D1_WT.rds")
-Kvals_contrib_D1_WT <- toKvals_D1(C_D1_WT)
-save(Kvals_contrib_D1_WT, file="./WT/Kvals_contrib_D1_WT.RData")
+C_D1_WT_pool <-readRDS("./WT/C_D1_WT_pool.rds")
+C_D1_WT_avg  <-readRDS("./WT/C_D1_WT_avg.rds")
+Kvals_contrib_D1_WT_pool <- toKvals_D1(C_D1_WT_pool)
+Kvals_contrib_D1_WT_avg <- toKvals_D1(C_D1_WT_avg)
+save(Kvals_contrib_D1_WT_pool, file="./WT/Kvals_contrib_D1_WT_pool.RData")
+save(Kvals_contrib_D1_WT_avg, file="./WT/Kvals_contrib_D1_WT_avg.RData")
+
+
 
 
 
@@ -265,29 +359,53 @@ toKvals_D2 = function(contrib_D2) {
 
 
 #Big Cypress
-C_D2_BC <-readRDS("./BC/C_D2_BC.rds")
-Kvals_contrib_D2_BC <- toKvals_D2(C_D2_BC)
-save(Kvals_contrib_D2_BC, file="./BC/Kvals_contrib_D2_BC.RData")
+C_D2_BC_pool <-readRDS("./BC/C_D2_BC_pool.rds")
+C_D2_BC_avg <- readRDS("./BC/C_D2_BC_avg.rds")
+Kvals_contrib_D2_BC_pool <- toKvals_D2(C_D2_BC_pool)
+Kvals_contrib_D2_BC_avg <- toKvals_D2(C_D2_BC_avg)
+save(Kvals_contrib_D2_BC_pool, file="./BC/Kvals_contrib_D2_BC_pool.RData")
+save(Kvals_contrib_D2_BC_avg, file="./BC/Kvals_contrib_D2_BC_avg.RData")
+
 #Cape Canaveral
-C_D2_CC <-readRDS("./CC/C_D2_CC.rds")
-Kvals_contrib_D2_CC <- toKvals_D2(C_D2_CC)
-save(Kvals_contrib_D2_CC, file="./CC/Kvals_contrib_D2_CC.RData")
+C_D2_CC_pool <-readRDS("./CC/C_D2_CC_pool.rds")
+C_D2_CC_avg <- readRDS("./CC/C_D2_CC_avg.rds")
+Kvals_contrib_D2_CC_pool <- toKvals_D2(C_D2_CC_pool)
+Kvals_contrib_D2_CC_avg <- toKvals_D2(C_D2_CC_avg)
+save(Kvals_contrib_D2_CC_pool, file="./CC/Kvals_contrib_D2_CC_pool.RData")
+save(Kvals_contrib_D2_CC_avg, file="./CC/Kvals_contrib_D2_CC_avg.RData")
+
 #Chekika
-C_D2_C <- readRDS("./C/C_D2_C.rds")
-Kvals_contrib_D2_C <- toKvals_D2(C_D2_C)
-save(Kvals_contrib_D2_C, file="./C/Kvals_contrib_D2_C.RData")
+C_D2_C_pool <-readRDS("./C/C_D2_C_pool.rds")
+C_D2_C_avg <- readRDS("./C/C_D2_C_avg.rds")
+Kvals_contrib_D2_C_pool <- toKvals_D2(C_D2_C_pool)
+Kvals_contrib_D2_C_avg <- toKvals_D2(C_D2_C_avg)
+save(Kvals_contrib_D2_C_pool, file="./C/Kvals_contrib_D2_C_pool.RData")
+save(Kvals_contrib_D2_C_avg, file="./C/Kvals_contrib_D2_C_avg.RData")
+
 #Fort Pierce
-C_D2_FP <- readRDS("./FP/C_D2_FP.rds")
-Kvals_contrib_D2_FP <- toKvals_D2(C_D2_FP)
-save(Kvals_contrib_D2_FP, file="./FP/Kvals_contrib_D2_FP.RData")
+C_D2_FP_pool <-readRDS("./FP/C_D2_FP_pool.rds")
+C_D2_FP_avg <- readRDS("./FP/C_D2_FP_avg.rds")
+Kvals_contrib_D2_FP_pool <- toKvals_D2(C_D2_FP_pool)
+Kvals_contrib_D2_FP_avg <- toKvals_D2(C_D2_FP_avg)
+save(Kvals_contrib_D2_FP_pool, file="./FP/Kvals_contrib_D2_FP_pool.RData")
+save(Kvals_contrib_D2_FP_avg, file="./FP/Kvals_contrib_D2_FP_avg.RData")
+
 #Punta Gorda
-C_D2_PG <- readRDS("./PG/C_D2_PG.rds")
-Kvals_contrib_D2_PG <- toKvals_D2(C_D2_PG)
-save(Kvals_contrib_D2_PG, file="./PG/Kvals_contrib_D2_PG.RData")
+C_D2_PG_pool <-readRDS("./PG/C_D2_PG_pool.rds")
+C_D2_PG_avg <- readRDS("./PG/C_D2_PG_avg.rds")
+Kvals_contrib_D2_PG_pool <- toKvals_D2(C_D2_PG_pool)
+Kvals_contrib_D2_PG_avg <- toKvals_D2(C_D2_PG_avg)
+save(Kvals_contrib_D2_PG_pool, file="./PG/Kvals_contrib_D2_PG_pool.RData")
+save(Kvals_contrib_D2_PG_avg, file="./PG/Kvals_contrib_D2_PG_avg.RData")
+
 #Wild Turkey
-C_D2_WT <- readRDS("./WT/C_D2_WT.rds")
-Kvals_contrib_D2_WT <- toKvals_D2(C_D2_WT)
-save(Kvals_contrib_D2_WT, file="./WT/Kvals_contrib_D2_WT.RData")
+C_D2_WT_pool <-readRDS("./WT/C_D2_WT_pool.rds")
+C_D2_WT_avg <- readRDS("./WT/C_D2_WT_avg.rds")
+Kvals_contrib_D2_WT_pool <- toKvals_D2(C_D2_WT_pool)
+Kvals_contrib_D2_WT_avg <- toKvals_D2(C_D2_WT_avg)
+save(Kvals_contrib_D2_WT_pool, file="./C/Kvals_contrib_D2_WT_pool.RData")
+save(Kvals_contrib_D2_WT_avg, file="./C/Kvals_contrib_D2_WT_avg.RData")
+
 
 toKvals_F = function(elas_F) {
   plop1=function(i, j) {(j-1)*m1 + i}
@@ -309,29 +427,60 @@ toKvals_F = function(elas_F) {
 }
 
 #Big Cypress
-C_F_BC <-readRDS("./BC/C_F_BC.rds")
-Kvals_contrib_F_BC <- toKvals_F(C_F_BC)
-save(Kvals_contrib_F_BC, file="./BC/Kvals_contrib_F_BC.RData")
+C_F_BC_pool <-readRDS("./BC/C_F_BC_pool.rds")
+C_F_BC_avg  <-readRDS("./BC/C_F_BC_avg.rds")
+Kvals_contrib_F_BC_pool <- toKvals_F(C_F_BC_pool)
+Kvals_contrib_F_BC_avg  <- toKvals_F(C_F_BC_avg)
+save(Kvals_contrib_F_BC_pool, file="./BC/Kvals_contrib_F_BC_pool.RData")
+save(Kvals_contrib_F_BC_avg, file="./BC/Kvals_contrib_F_BC_avg.RData")
+
 #Cape Canaveral
-C_F_CC <-readRDS("./CC/C_F_CC.rds")
-Kvals_contrib_F_CC <- toKvals_F(C_F_CC)
-save(Kvals_contrib_F_CC, file="./CC/Kvals_contrib_F_CC.RData")
+C_F_CC_pool <-readRDS("./CC/C_F_CC_pool.rds")
+C_F_CC_avg  <-readRDS("./CC/C_F_CC_avg.rds")
+Kvals_contrib_F_CC_pool <- toKvals_F(C_F_CC_pool)
+Kvals_contrib_F_CC_avg  <- toKvals_F(C_F_CC_avg)
+save(Kvals_contrib_F_CC_pool, file="./CC/Kvals_contrib_F_CC_pool.RData")
+save(Kvals_contrib_F_CC_avg, file="./CC/Kvals_contrib_F_CC_avg.RData")
+
 #Chekika
-C_F_C <- readRDS("./C/C_F_C.rds")
-Kvals_contrib_F_C <- toKvals_F(C_F_C)
-save(Kvals_contrib_F_C, file="./C/Kvals_contrib_F_C.RData")
+C_F_C_pool <-readRDS("./C/C_F_C_pool.rds")
+C_F_C_avg  <-readRDS("./C/C_F_C_avg.rds")
+Kvals_contrib_F_C_pool <- toKvals_F(C_F_C_pool)
+Kvals_contrib_F_C_avg  <- toKvals_F(C_F_C_avg)
+save(Kvals_contrib_F_C_pool, file="./C/Kvals_contrib_F_C_pool.RData")
+save(Kvals_contrib_F_C_avg, file="./C/Kvals_contrib_F_C_avg.RData")
+
 #Fort Pierce
-C_F_FP <- readRDS("./FP/C_F_FP.rds")
-Kvals_contrib_F_FP <- toKvals_F(C_F_FP)
-save(Kvals_contrib_F_FP, file="./FP/Kvals_contrib_F_FP.RData")
+C_F_FP_pool <-readRDS("./FP/C_F_FP_pool.rds")
+C_F_FP_avg  <-readRDS("./FP/C_F_FP_avg.rds")
+Kvals_contrib_F_FP_pool <- toKvals_F(C_F_FP_pool)
+Kvals_contrib_F_FP_avg  <- toKvals_F(C_F_FP_avg)
+save(Kvals_contrib_F_FP_pool, file="./FP/Kvals_contrib_F_FP_pool.RData")
+save(Kvals_contrib_F_FP_avg, file="./FP/Kvals_contrib_F_FP_avg.RData")
+
 #Punta Gorda
-C_F_PG <- readRDS("./PG/C_F_PG.rds")
-Kvals_contrib_F_PG <- toKvals_F(C_F_PG)
-save(Kvals_contrib_F_PG, file="./PG/Kvals_contrib_F_PG.RData")
+C_F_PG_pool <-readRDS("./PG/C_F_PG_pool.rds")
+C_F_PG_avg  <-readRDS("./PG/C_F_PG_avg.rds")
+Kvals_contrib_F_PG_pool <- toKvals_F(C_F_PG_pool)
+Kvals_contrib_F_PG_avg  <- toKvals_F(C_F_PG_avg)
+save(Kvals_contrib_F_PG_pool, file="./PG/Kvals_contrib_F_PG_pool.RData")
+save(Kvals_contrib_F_PG_avg, file="./PG/Kvals_contrib_F_PG_avg.RData")
+
 #Wild Turkey
-C_F_WT <- readRDS("./WT/C_F_WT.rds")
-Kvals_contrib_F_WT <- toKvals_F(C_F_WT)
-save(Kvals_contrib_F_WT, file="./WT/Kvals_contrib_F_WT.RData")
+C_F_WT_pool <-readRDS("./WT/C_F_WT_pool.rds")
+C_F_WT_avg  <-readRDS("./WT/C_F_WT_avg.rds")
+Kvals_contrib_F_WT_pool <- toKvals_F(C_F_WT_pool)
+Kvals_contrib_F_WT_avg  <- toKvals_F(C_F_WT_avg)
+save(Kvals_contrib_F_WT_pool, file="./WT/Kvals_contrib_F_WT_pool.RData")
+save(Kvals_contrib_F_WT_avg, file="./WT/Kvals_contrib_F_WT_avg.RData")
+
+
+
+
+
+
+
+
 
 
 toKvals_G = function(elas_G) {
@@ -354,127 +503,256 @@ toKvals_G = function(elas_G) {
 }
 
 #Big Cypress
-C_G_BC <-readRDS("./BC/C_G_BC.rds")
-Kvals_contrib_G_BC <- toKvals_G(C_G_BC)
-save(Kvals_contrib_G_BC, file="./BC/Kvals_contrib_G_BC.RData")
+C_G_BC_pool <-readRDS("./BC/C_G_BC_pool.rds")
+C_G_BC_avg  <-readRDS("./BC/C_G_BC_avg.rds")
+Kvals_contrib_G_BC_pool <- toKvals_G(C_G_BC_pool)
+Kvals_contrib_G_BC_avg  <- toKvals_G(C_G_BC_avg)
+save(Kvals_contrib_G_BC_pool, file="./BC/Kvals_contrib_G_BC_pool.RData")
+save(Kvals_contrib_G_BC_avg, file="./BC/Kvals_contrib_G_BC_avg.RData")
+
 #Cape Canaveral
-C_G_CC <-readRDS("./CC/C_G_CC.rds")
-Kvals_contrib_G_CC <- toKvals_G(C_G_CC)
-save(Kvals_contrib_G_CC, file="./CC/Kvals_contrib_G_CC.RData")
+C_G_CC_pool <-readRDS("./CC/C_G_CC_pool.rds")
+C_G_CC_avg  <-readRDS("./CC/C_G_CC_avg.rds")
+Kvals_contrib_G_CC_pool <- toKvals_G(C_G_CC_pool)
+Kvals_contrib_G_CC_avg  <- toKvals_G(C_G_CC_avg)
+save(Kvals_contrib_G_CC_pool, file="./CC/Kvals_contrib_G_CC_pool.RData")
+save(Kvals_contrib_G_CC_avg, file="./CC/Kvals_contrib_G_CC_avg.RData")
+
 #Chekika
-C_G_C <- readRDS("./C/C_G_C.rds")
-Kvals_contrib_G_C <- toKvals_G(C_G_C)
-save(Kvals_contrib_G_C, file="./C/Kvals_contrib_G_C.RData")
+C_G_C_pool <-readRDS("./C/C_G_C_pool.rds")
+C_G_C_avg  <-readRDS("./C/C_G_C_avg.rds")
+Kvals_contrib_G_C_pool <- toKvals_G(C_G_C_pool)
+Kvals_contrib_G_C_avg  <- toKvals_G(C_G_C_avg)
+save(Kvals_contrib_G_C_pool, file="./C/Kvals_contrib_G_C_pool.RData")
+save(Kvals_contrib_G_C_avg, file="./C/Kvals_contrib_G_C_avg.RData")
+
 #Fort Pierce
-C_G_FP <- readRDS("./FP/C_G_FP.rds")
-Kvals_contrib_G_FP <- toKvals_G(C_G_FP)
-save(Kvals_contrib_G_FP, file="./FP/Kvals_contrib_G_FP.RData")
+C_G_FP_pool <-readRDS("./FP/C_G_FP_pool.rds")
+C_G_FP_avg  <-readRDS("./FP/C_G_FP_avg.rds")
+Kvals_contrib_G_FP_pool <- toKvals_G(C_G_FP_pool)
+Kvals_contrib_G_FP_avg  <- toKvals_G(C_G_FP_avg)
+save(Kvals_contrib_G_FP_pool, file="./FP/Kvals_contrib_G_FP_pool.RData")
+save(Kvals_contrib_G_FP_avg, file="./FP/Kvals_contrib_G_FP_avg.RData")
+
 #Punta Gorda
-C_G_PG <- readRDS("./PG/C_G_PG.rds")
-Kvals_contrib_G_PG <- toKvals_G(C_G_PG)
-save(Kvals_contrib_G_PG, file="./PG/Kvals_contrib_G_PG.RData")
+C_G_PG_pool <-readRDS("./PG/C_G_PG_pool.rds")
+C_G_PG_avg  <-readRDS("./PG/C_G_PG_avg.rds")
+Kvals_contrib_G_PG_pool <- toKvals_G(C_G_PG_pool)
+Kvals_contrib_G_PG_avg  <- toKvals_G(C_G_PG_avg)
+save(Kvals_contrib_G_PG_pool, file="./PG/Kvals_contrib_G_PG_pool.RData")
+save(Kvals_contrib_G_PG_avg, file="./PG/Kvals_contrib_G_PG_avg.RData")
+
 #Wild Turkey
-C_G_WT <- readRDS("./WT/C_G_WT.rds")
-Kvals_contrib_G_WT <- toKvals_G(C_G_WT)
-save(Kvals_contrib_G_WT, file="./WT/Kvals_contrib_G_WT.RData")
+C_G_WT_pool <-readRDS("./WT/C_G_WT_pool.rds")
+C_G_WT_avg  <-readRDS("./WT/C_G_WT_avg.rds")
+Kvals_contrib_G_WT_pool <- toKvals_G(C_G_WT_pool)
+Kvals_contrib_G_WT_avg  <- toKvals_G(C_G_WT_avg)
+save(Kvals_contrib_G_WT_pool, file="./WT/Kvals_contrib_G_WT_pool.RData")
+save(Kvals_contrib_G_WT_avg, file="./WT/Kvals_contrib_G_WT_avg.RData")
+
+
+
+
+
+
+
+
+
+
 
 
 # Convert to totals: #####
 #Big Cypress
-total.contrib_D1_BC<-apply(Kvals_contrib_D1_BC, c(3,4), sum);
-total.contrib_D2_BC<-apply(Kvals_contrib_D2_BC, c(3,4), sum);
-total.contrib_F_BC<-apply(Kvals_contrib_F_BC, c(3,4), sum);
-total.contrib_G_BC<-apply(Kvals_contrib_G_BC, c(3,4), sum);
-save(total.contrib_D1_BC, total.contrib_D2_BC, total.contrib_F_BC, total.contrib_G_BC, 
-     file="./BC/total.contrib_BC.RData")
+
+total.contrib_D1_BC_pool<-apply(Kvals_contrib_D1_BC_pool, c(3,4), sum);
+total.contrib_D2_BC_pool<-apply(Kvals_contrib_D2_BC_pool, c(3,4), sum);
+total.contrib_F_BC_pool<-apply(Kvals_contrib_F_BC_pool, c(3,4), sum);
+total.contrib_G_BC_pool<-apply(Kvals_contrib_G_BC_pool, c(3,4), sum);
+save(total.contrib_D1_BC_pool, total.contrib_D2_BC_pool, total.contrib_F_BC_pool,
+     total.contrib_G_BC_pool, 
+     file="./BC/total.contrib_BC_pool.RData")
+
+total.contrib_D1_BC_avg<-apply(Kvals_contrib_D1_BC_avg, c(3,4), sum);
+total.contrib_D2_BC_avg<-apply(Kvals_contrib_D2_BC_avg, c(3,4), sum);
+total.contrib_F_BC_avg<-apply(Kvals_contrib_F_BC_avg, c(3,4), sum);
+total.contrib_G_BC_avg<-apply(Kvals_contrib_G_BC_avg, c(3,4), sum);
+save(total.contrib_D1_BC_avg, total.contrib_D2_BC_avg, total.contrib_F_BC_avg,
+     total.contrib_G_BC_avg, 
+     file="./BC/total.contrib_BC_avg.RData")
 
 #Cape Canaveral
-total.contrib_D1_CC<-apply(Kvals_contrib_D1_CC, c(3,4), sum);
-total.contrib_D2_CC<-apply(Kvals_contrib_D2_CC, c(3,4), sum);
-total.contrib_F_CC<-apply(Kvals_contrib_F_CC, c(3,4), sum);
-total.contrib_G_CC<-apply(Kvals_contrib_G_CC, c(3,4), sum);
-save(total.contrib_D1_CC, total.contrib_D2_CC, total.contrib_F_CC, total.contrib_G_CC, 
-     file="./CC/total.contrib_CC.RData")
+total.contrib_D1_CC_pool<-apply(Kvals_contrib_D1_CC_pool, c(3,4), sum);
+total.contrib_D2_CC_pool<-apply(Kvals_contrib_D2_CC_pool, c(3,4), sum);
+total.contrib_F_CC_pool<-apply(Kvals_contrib_F_CC_pool, c(3,4), sum);
+total.contrib_G_CC_pool<-apply(Kvals_contrib_G_CC_pool, c(3,4), sum);
+save(total.contrib_D1_CC_pool, total.contrib_D2_CC_pool, total.contrib_F_CC_pool,
+     total.contrib_G_CC_pool, 
+     file="./CC/total.contrib_CC_pool.RData")
 
+total.contrib_D1_CC_avg<-apply(Kvals_contrib_D1_CC_avg, c(3,4), sum);
+total.contrib_D2_CC_avg<-apply(Kvals_contrib_D2_CC_avg, c(3,4), sum);
+total.contrib_F_CC_avg<-apply(Kvals_contrib_F_CC_avg, c(3,4), sum);
+total.contrib_G_CC_avg<-apply(Kvals_contrib_G_CC_avg, c(3,4), sum);
+save(total.contrib_D1_CC_avg, total.contrib_D2_CC_avg, total.contrib_F_CC_avg,
+     total.contrib_G_CC_avg, 
+     file="./CC/total.contrib_CC_avg.RData")
 #Chekika
-total.contrib_D1_C<-apply(Kvals_contrib_D1_C, c(3,4), sum);
-total.contrib_D2_C<-apply(Kvals_contrib_D2_C, c(3,4), sum);
-total.contrib_F_C<-apply(Kvals_contrib_F_C, c(3,4), sum);
-total.contrib_G_C<-apply(Kvals_contrib_G_C, c(3,4), sum);
-save(total.contrib_D1_C, total.contrib_D2_C, total.contrib_F_C, total.contrib_G_C, 
-     file="./C/total.contrib_C.RData")
+total.contrib_D1_C_pool<-apply(Kvals_contrib_D1_C_pool, c(3,4), sum);
+total.contrib_D2_C_pool<-apply(Kvals_contrib_D2_C_pool, c(3,4), sum);
+total.contrib_F_C_pool<-apply(Kvals_contrib_F_C_pool, c(3,4), sum);
+total.contrib_G_C_pool<-apply(Kvals_contrib_G_C_pool, c(3,4), sum);
+save(total.contrib_D1_C_pool, total.contrib_D2_C_pool, total.contrib_F_C_pool,
+     total.contrib_G_C_pool, 
+     file="./C/total.contrib_C_pool.RData")
+
+total.contrib_D1_C_avg<-apply(Kvals_contrib_D1_C_avg, c(3,4), sum);
+total.contrib_D2_C_avg<-apply(Kvals_contrib_D2_C_avg, c(3,4), sum);
+total.contrib_F_C_avg<-apply(Kvals_contrib_F_C_avg, c(3,4), sum);
+total.contrib_G_C_avg<-apply(Kvals_contrib_G_C_avg, c(3,4), sum);
+save(total.contrib_D1_C_avg, total.contrib_D2_C_avg, total.contrib_F_C_avg,
+     total.contrib_G_C_avg, 
+     file="./C/total.contrib_C_avg.RData")
 
 #Fort Pierce
-total.contrib_D1_FP<-apply(Kvals_contrib_D1_FP, c(3,4), sum);
-total.contrib_D2_FP<-apply(Kvals_contrib_D2_FP, c(3,4), sum);
-total.contrib_F_FP<-apply(Kvals_contrib_F_FP, c(3,4), sum);
-total.contrib_G_FP<-apply(Kvals_contrib_G_FP, c(3,4), sum);
-save(total.contrib_D1_FP, total.contrib_D2_FP, total.contrib_F_FP, total.contrib_G_FP, 
-     file="./FP/total.contrib_FP.RData")
+total.contrib_D1_FP_pool<-apply(Kvals_contrib_D1_FP_pool, c(3,4), sum);
+total.contrib_D2_FP_pool<-apply(Kvals_contrib_D2_FP_pool, c(3,4), sum);
+total.contrib_F_FP_pool<-apply(Kvals_contrib_F_FP_pool, c(3,4), sum);
+total.contrib_G_FP_pool<-apply(Kvals_contrib_G_FP_pool, c(3,4), sum);
+save(total.contrib_D1_FP_pool, total.contrib_D2_FP_pool, total.contrib_F_FP_pool,
+     total.contrib_G_FP_pool, 
+     file="./FP/total.contrib_FP_pool.RData")
+
+total.contrib_D1_FP_avg<-apply(Kvals_contrib_D1_FP_avg, c(3,4), sum);
+total.contrib_D2_FP_avg<-apply(Kvals_contrib_D2_FP_avg, c(3,4), sum);
+total.contrib_F_FP_avg<-apply(Kvals_contrib_F_FP_avg, c(3,4), sum);
+total.contrib_G_FP_avg<-apply(Kvals_contrib_G_FP_avg, c(3,4), sum);
+save(total.contrib_D1_FP_avg, total.contrib_D2_FP_avg, total.contrib_F_FP_avg,
+     total.contrib_G_FP_avg, 
+     file="./FP/total.contrib_FP_avg.RData")
 
 #Punta Gorda
-total.contrib_D1_PG<-apply(Kvals_contrib_D1_PG, c(3,4), sum);
-total.contrib_D2_PG<-apply(Kvals_contrib_D2_PG, c(3,4), sum);
-total.contrib_F_PG<-apply(Kvals_contrib_F_PG, c(3,4), sum);
-total.contrib_G_PG<-apply(Kvals_contrib_G_PG, c(3,4), sum);
-save(total.contrib_D1_PG, total.contrib_D2_PG, total.contrib_F_PG, total.contrib_G_PG, 
-     file="./PG/total.contrib_PG.RData")
+total.contrib_D1_PG_pool<-apply(Kvals_contrib_D1_PG_pool, c(3,4), sum);
+total.contrib_D2_PG_pool<-apply(Kvals_contrib_D2_PG_pool, c(3,4), sum);
+total.contrib_F_PG_pool<-apply(Kvals_contrib_F_PG_pool, c(3,4), sum);
+total.contrib_G_PG_pool<-apply(Kvals_contrib_G_PG_pool, c(3,4), sum);
+save(total.contrib_D1_PG_pool, total.contrib_D2_PG_pool, total.contrib_F_PG_pool,
+     total.contrib_G_PG_pool, 
+     file="./PG/total.contrib_PG_pool.RData")
+
+total.contrib_D1_PG_avg<-apply(Kvals_contrib_D1_PG_avg, c(3,4), sum);
+total.contrib_D2_PG_avg<-apply(Kvals_contrib_D2_PG_avg, c(3,4), sum);
+total.contrib_F_PG_avg<-apply(Kvals_contrib_F_PG_avg, c(3,4), sum);
+total.contrib_G_PG_avg<-apply(Kvals_contrib_G_PG_avg, c(3,4), sum);
+save(total.contrib_D1_PG_avg, total.contrib_D2_PG_avg, total.contrib_F_PG_avg,
+     total.contrib_G_PG_avg, 
+     file="./PG/total.contrib_PG_avg.RData")
 
 #Wild Turkey
-total.contrib_D1_WT<-apply(Kvals_contrib_D1_WT, c(3,4), sum);
-total.contrib_D2_WT<-apply(Kvals_contrib_D2_WT, c(3,4), sum);
-total.contrib_F_WT<-apply(Kvals_contrib_F_WT, c(3,4), sum);
-total.contrib_G_WT<-apply(Kvals_contrib_G_WT, c(3,4), sum);
-save(total.contrib_D1_WT, total.contrib_D2_WT, total.contrib_F_WT, total.contrib_G_WT, 
-     file="./WT/total.contrib_WT.RData")
+total.contrib_D1_WT_pool<-apply(Kvals_contrib_D1_WT_pool, c(3,4), sum);
+total.contrib_D2_WT_pool<-apply(Kvals_contrib_D2_WT_pool, c(3,4), sum);
+total.contrib_F_WT_pool<-apply(Kvals_contrib_F_WT_pool, c(3,4), sum);
+total.contrib_G_WT_pool<-apply(Kvals_contrib_G_WT_pool, c(3,4), sum);
+save(total.contrib_D1_WT_pool, total.contrib_D2_WT_pool, total.contrib_F_WT_pool,
+     total.contrib_G_WT_pool, 
+     file="./WT/total.contrib_WT_pool.RData")
+
+total.contrib_D1_WT_avg<-apply(Kvals_contrib_D1_WT_avg, c(3,4), sum);
+total.contrib_D2_WT_avg<-apply(Kvals_contrib_D2_WT_avg, c(3,4), sum);
+total.contrib_F_WT_avg<-apply(Kvals_contrib_F_WT_avg, c(3,4), sum);
+total.contrib_G_WT_avg<-apply(Kvals_contrib_G_WT_avg, c(3,4), sum);
+save(total.contrib_D1_WT_avg, total.contrib_D2_WT_avg, total.contrib_F_WT_avg,
+     total.contrib_G_WT_avg, 
+     file="./WT/total.contrib_WT_avg.RData")
 
 
 #Collapse contributions by site: #####
 
 
- BC<-c( 
- sum(rowSums(total.contrib_D1_BC)), 
- sum(rowSums(total.contrib_G_BC)), 
- sum(rowSums(total.contrib_F_BC)), 
- sum(rowSums(total.contrib_D2_BC)) )
- save(BC, file="./BC/BC.RData")
+ BC_pool<-c( 
+ sum(rowSums(total.contrib_D1_BC_pool)), 
+ sum(rowSums(total.contrib_G_BC_pool)), 
+ sum(rowSums(total.contrib_F_BC_pool)), 
+ sum(rowSums(total.contrib_D2_BC_pool)) )
+ save(BC_pool, file="./BC/BC_pool.RData")
+ 
+ BC_avg<-c( 
+   sum(rowSums(total.contrib_D1_BC_avg)), 
+   sum(rowSums(total.contrib_G_BC_avg)), 
+   sum(rowSums(total.contrib_F_BC_avg)), 
+   sum(rowSums(total.contrib_D2_BC_avg)) )
+ save(BC_avg, file="./BC/BC_avg.RData")
  
  
- CC<-c( 
-   sum(rowSums(total.contrib_D1_CC)), 
-   sum(rowSums(total.contrib_G_CC)), 
-   sum(rowSums(total.contrib_F_CC)), 
-   sum(rowSums(total.contrib_D2_CC)) )
- save(CC, file="./CC/CC.RData")
  
- C<-c( 
-   sum(rowSums(total.contrib_D1_C)), 
-   sum(rowSums(total.contrib_G_C)), 
-   sum(rowSums(total.contrib_F_C)), 
-   sum(rowSums(total.contrib_D2_C)) )
- save(C, file="./C/C.RData")
+ CC_pool<-c( 
+   sum(rowSums(total.contrib_D1_CC_pool)), 
+   sum(rowSums(total.contrib_G_CC_pool)), 
+   sum(rowSums(total.contrib_F_CC_pool)), 
+   sum(rowSums(total.contrib_D2_CC_pool)) )
+ save(CC_pool, file="./CC/CC_pool.RData")
  
- FP<-c( 
-   sum(rowSums(total.contrib_D1_FP)), 
-   sum(rowSums(total.contrib_G_FP)), 
-   sum(rowSums(total.contrib_F_FP)), 
-   sum(rowSums(total.contrib_D2_FP)) )
- save(FP, file="./FP/FP.RData")
+ CC_avg<-c( 
+   sum(rowSums(total.contrib_D1_CC_avg)), 
+   sum(rowSums(total.contrib_G_CC_avg)), 
+   sum(rowSums(total.contrib_F_CC_avg)), 
+   sum(rowSums(total.contrib_D2_CC_avg)) )
+ save(CC_avg, file="./CC/CC_avg.RData")
  
- PG<-c( 
-   sum(rowSums(total.contrib_D1_PG)), 
-   sum(rowSums(total.contrib_G_PG)), 
-   sum(rowSums(total.contrib_F_PG)), 
-   sum(rowSums(total.contrib_D2_PG)) )
- save(PG, file="./PG/PG.RData")
+ C_pool<-c( 
+   sum(rowSums(total.contrib_D1_C_pool)), 
+   sum(rowSums(total.contrib_G_C_pool)), 
+   sum(rowSums(total.contrib_F_C_pool)), 
+   sum(rowSums(total.contrib_D2_C_pool)) )
+ save(C_pool, file="./C/C_pool.RData")
  
+ C_avg<-c( 
+   sum(rowSums(total.contrib_D1_C_avg)), 
+   sum(rowSums(total.contrib_G_C_avg)), 
+   sum(rowSums(total.contrib_F_C_avg)), 
+   sum(rowSums(total.contrib_D2_C_avg)) )
+ save(C_avg, file="./C/C_avg.RData")
  
- WT<-c( 
-   sum(rowSums(total.contrib_D1_WT)), 
-   sum(rowSums(total.contrib_G_WT)), 
-   sum(rowSums(total.contrib_F_WT)), 
-   sum(rowSums(total.contrib_D2_WT)) )
- save(WT, file="./WT/WT.RData")
+ FP_pool<-c( 
+   sum(rowSums(total.contrib_D1_FP_pool)), 
+   sum(rowSums(total.contrib_G_FP_pool)), 
+   sum(rowSums(total.contrib_F_FP_pool)), 
+   sum(rowSums(total.contrib_D2_FP_pool)) )
+ save(FP_pool, file="./FP/FP_pool.RData")
+ 
+ FP_avg<-c( 
+   sum(rowSums(total.contrib_D1_FP_avg)), 
+   sum(rowSums(total.contrib_G_FP_avg)), 
+   sum(rowSums(total.contrib_F_FP_avg)), 
+   sum(rowSums(total.contrib_D2_FP_avg)) )
+ save(FP_avg, file="./FP/FP_avg.RData")
+ 
+ PG_pool<-c( 
+   sum(rowSums(total.contrib_D1_PG_pool)), 
+   sum(rowSums(total.contrib_G_PG_pool)), 
+   sum(rowSums(total.contrib_F_PG_pool)), 
+   sum(rowSums(total.contrib_D2_PG_pool)) )
+ save(PG_pool, file="./PG/PG_pool.RData")
+ 
+ PG_avg<-c( 
+   sum(rowSums(total.contrib_D1_PG_avg)), 
+   sum(rowSums(total.contrib_G_PG_avg)), 
+   sum(rowSums(total.contrib_F_PG_avg)), 
+   sum(rowSums(total.contrib_D2_PG_avg)) )
+ save(PG_avg, file="./PG/PG_avg.RData")
+ 
+ WT_pool<-c( 
+   sum(rowSums(total.contrib_D1_WT_pool)), 
+   sum(rowSums(total.contrib_G_WT_pool)), 
+   sum(rowSums(total.contrib_F_WT_pool)), 
+   sum(rowSums(total.contrib_D2_WT_pool)) )
+ save(WT_pool, file="./WT/WT_pool.RData")
+ 
+ WT_avg<-c( 
+   sum(rowSums(total.contrib_D1_WT_avg)), 
+   sum(rowSums(total.contrib_G_WT_avg)), 
+   sum(rowSums(total.contrib_F_WT_avg)), 
+   sum(rowSums(total.contrib_D2_WT_avg)) )
+ save(WT_avg, file="./WT/WT_avg.RData")
  
 # Variability in lambda #####
  #With six sites to compare, this part of the
@@ -483,7 +761,7 @@ save(total.contrib_D1_WT, total.contrib_D2_WT, total.contrib_F_WT, total.contrib
 
 	
 D1_BC<-readRDS("./BC/D1_BC.rds")
-D1_CC <- readRDS("./CC/D1_CC.rds")
+D1_PG <- readRDS("./PG/D1_PG.rds")
 D1_C<-readRDS("./C/D1_C.rds")
 D1_FP<-readRDS("./FP/D1_FP.rds")
 D1_PG<-readRDS("./PG/D1_PG.rds")
@@ -501,19 +779,19 @@ cv_D1<-matrix(nrow=(m1*m2), ncol=(m1*m2))
 
 for(i in 1:(m1*m2)) {
 	for(j in 1:(m1*m2)) {
-		cv_D1[i,j]<-CV(c(D1_BC[i,j], D1_CC[i,j], D1_C[i,j], D1_FP[i,j], 
+		cv_D1[i,j]<-CV(c(D1_BC[i,j], D1_PG[i,j], D1_C[i,j], D1_FP[i,j], 
 		                 D1_PG[i,j], D1_WT[i,j]))
 		if(is.na(cv_D1[i,j])) {cv_D1[i,j]<-0}
 	}
 }
 
 
-D1_avg=(D1_BC + D1_CC + D1_C + D1_FP + D1_PG + D1_WT)/6
-rm(D1_BC, D1_CC, D1_C, D1_FP, D1_PG, D1_WT)
+D1_avg=(D1_BC + D1_PG + D1_C + D1_FP + D1_PG + D1_WT)/6
+rm(D1_BC, D1_PG, D1_C, D1_FP, D1_PG, D1_WT)
 
 #G
 G_BC<-readRDS("./BC/G_BC.rds")
-G_CC<-readRDS("./CC/G_CC.rds")
+G_PG<-readRDS("./PG/G_PG.rds")
 G_C <- readRDS("./C/G_C.rds")
 G_FP <- readRDS("./FP/G_FP.rds")
 G_PG <- readRDS("./PG/G_PG.rds")
@@ -524,19 +802,19 @@ cv_G<-matrix(nrow=(m3*m4), ncol=(m1*m2))
 
 for(i in 1:(m3*m4)) {
 	for(j in 1:(m1*m2)) {
-		cv_G[i,j]<-CV(c(G_BC[i,j], G_CC[i,j], G_C[i,j], G_FP[i,j],
+		cv_G[i,j]<-CV(c(G_BC[i,j], G_PG[i,j], G_C[i,j], G_FP[i,j],
 		                G_PG[i,j], G_WT[i,j]))
 		if(is.na(cv_G[i,j])) {cv_G[i,j]<-0}
 	}
 }
 
-G_avg<-(G_BC+G_CC+G_C + G_FP + G_PG + G_WT)/6
+G_avg<-(G_BC+G_PG+G_C + G_FP + G_PG + G_WT)/6
 
-rm(G_BC, G_CC, G_C, G_FP, G_PG, G_WT)
+rm(G_BC, G_PG, G_C, G_FP, G_PG, G_WT)
 
 #F
 F_BC <- readRDS("./BC/F_BC.rds")
-F_CC <- readRDS("./CC/F_CC.rds")
+F_PG <- readRDS("./PG/F_PG.rds")
 F_C  <- readRDS("./C/F_C.rds")
 F_FP <- readRDS("./FP/F_FP.rds")
 F_PG <- readRDS("./PG/F_PG.rds")
@@ -545,15 +823,15 @@ F_WT <- readRDS("./WT/F_WT.rds")
 cv_F<-matrix(nrow=(m1*m2), ncol=(m3*m4))
 for(i in 1:(m1*m2)) {
 	for(j in 1:(m3*m4)) {
-		cv_F[i,j]<-CV(c(F_BC[i,j], F_CC[i,j], F_C[i,j], F_FP[i,j],
+		cv_F[i,j]<-CV(c(F_BC[i,j], F_PG[i,j], F_C[i,j], F_FP[i,j],
 		              F_PG[i,j], F_WT[i,j]))
 		if(is.na(cv_F[i,j])) {cv_F[i,j]<-0}
 	}
 }
 
-F_avg<-(F_BC + F_CC + F_C + F_FP + F_PG + F_WT)/6
+F_avg<-(F_BC + F_PG + F_C + F_FP + F_PG + F_WT)/6
 
-rm(F_BC, F_CC, F_C, F_FP, F_PG, F_WT)
+rm(F_BC, F_PG, F_C, F_FP, F_PG, F_WT)
 
 
 save(cv_D1, file="cv_D1.RData")
@@ -562,7 +840,7 @@ save(cv_G, file="cv_G.RData")
 rm(cv_D1, cv_F, cv_G)
 #D2
 D2_BC <- readRDS("./BC/D2_BC.rds")
-D2_CC <- readRDS("./CC/D2_CC.rds")
+D2_PG <- readRDS("./PG/D2_PG.rds")
 D2_C  <- readRDS("./C/D2_C.rds")
 D2_FP <- readRDS("./FP/D2_FP.rds")
 D2_PG <- readRDS("./PG/D2_PG.rds")
@@ -573,7 +851,7 @@ D2_WT <- readRDS("./WT/D2_WT.rds")
 cv_D2<-matrix(nrow=(m3*m4), ncol=(m3*m4))
 for(i in 1:(m3*m4)) {
 	for(j in 1:(m3*m4)) {
-		cv_D2[i,j]<-CV(c(D2_BC[i,j], D2_CC[i,j], D2_C[i,j], D2_FP,
+		cv_D2[i,j]<-CV(c(D2_BC[i,j], D2_PG[i,j], D2_C[i,j], D2_FP,
 		                 D2_PG, D2_WT))
 		if(is.na(cv_D2[i,j])) {cv_D2[i,j]<-0}
 	}

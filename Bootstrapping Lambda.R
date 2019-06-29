@@ -10,6 +10,8 @@ for (boots in 1:n.samp) {
 temp <- demog
 #reshuffle the labels for site
 temp$Site <- sample(temp$Site)
+temp2<- Stems # the allometry dataset 
+temp2$Site <- sample(temp2$Site) 
 
 
 ### Part I: Running the statistical models to determine parameters #####

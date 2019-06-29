@@ -738,13 +738,21 @@ save(boot.out, file ="boot.out.RData")
 
 lambdas_boot <- array(NA, dim=c(6, 1))
 
-lambdas_boot_BC <- boot.ci(boot.out, type="norm", index=1)
-lambdas_boot_CC <- boot.ci(boot.out, type="norm", index=2)
-lambdas_boot_C <- boot.ci(boot.out, type="norm", index=3)
-lambdas_boot_FP <- boot.ci(boot.out, type="norm", index=4)
-lambdas_boot_PG <- boot.ci(boot.out, type="norm", index=5)
-lambdas_boot_WT <- boot.ci(boot.out, type="norm", index=6)
+lambdas_boot_BC <- boot.ci(boot.out, type="perc", index=1)
+lambdas_boot_CC <- boot.ci(boot.out, type="perc", index=2)
+lambdas_boot_C <- boot.ci(boot.out, type="perc", index=3)
+lambdas_boot_FP <- boot.ci(boot.out, type="perc", index=4)
+lambdas_boot_PG <- boot.ci(boot.out, type="perc", index=5)
+lambdas_boot_WT <- boot.ci(boot.out, type="perc", index=6)
 
+median(boot.out$t[,2])
+
+lam.stable_BC <- readRDS("./BC/lam.stable_BC.rds")
+lam.stable_CC <- readRDS("./CC/lam.stable_CC.rds")
+lam.stable_C  <- readRDS("./C/lam.stable_C.rds")
+lam.stable_FP <- readRDS("./FP/lam.stable_FP.rds")
+lam.stable_PG <- readRDS("./PG/lam.stable_PG.rds")
+lam.stable_WT <- readRDS("./WT/lam.stable_WT.rds")
 lambdas <- c(1.28, 1.2, 1.09, 1.32, 1.215, 1.3)
 thing <- barplot(lambdas)
 
