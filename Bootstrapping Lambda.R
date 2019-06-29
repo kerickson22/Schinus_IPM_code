@@ -1,8 +1,17 @@
 n.samp <- 100 #for now, to test
 demog<-read.csv("demography_15_clean.csv", head=T)
-lam.boot_old <- lam.boot
-save(lam.boot_old, file="lam.boot_old.RData")
+load("Stems.RData")
+Stems <- subset(Stems, Stems$Site != "Holiday Park")
+#lam.boot_old <- lam.boot
+#save(lam.boot_old, file="lam.boot_old.RData")
 lam.boot <- array(NA, dim=c(n.samp, 6))
+p.vec_BC<-array(NA, dim=c(39, n.samp))
+p.vec_C <- array(NA, dim=c(39, n.samp))
+p.vec_FP <- array(NA, dim=c(39, n.samp))
+p.vec_WT <- array(NA, dim=c(39, n.samp))
+p.vec_PG <- array(NA, dim=c(39, n.samp))
+p.vec_CC <- array(NA, dim=c(39, n.samp))
+
 
 
 start_time <- proc.time()
@@ -13,16 +22,11 @@ temp$Site <- sample(temp$Site)
 temp2<- Stems # the allometry dataset 
 temp2$Site <- sample(temp2$Site) 
 
+temp2 <- Stems
+temp2$Site <- sample(temp2$Site)
+
 
 ### Part I: Running the statistical models to determine parameters #####
-
-p.vec_BC<-rep(0, 39)
-p.vec_C <- rep(0, 39)
-p.vec_FP <- rep(0, 39)
-p.vec_WT <- rep(0, 39)
-p.vec_PG <- rep(0, 39)
-p.vec_CC <- rep(0, 39)
-
 
 #Gather together:
 Death_Cause<-c(temp$Death_Cause_2, temp$Death_Cause_3, temp$Death_Cause_4, temp$Death_Cause_5, temp$Death_Cause_6, temp$Death_Cause_7)
@@ -83,29 +87,29 @@ larges<-subset(larges, larges$Height_t>16)
 # **Seedling Survival #####
 s1<-glm(seedlings$Surv_tplus1~ seedlings$Diameter_t + seedlings$Height_t+seedlings$Site, family=binomial)
 
-p.vec_BC[1]<-s1$coeff[1]
-p.vec_BC[2]<-s1$coeff[2]
-p.vec_BC[3]<-s1$coeff[3]
+p.vec_BC[1, boots]<-s1$coeff[1]
+p.vec_BC[2, boots]<-s1$coeff[2]
+p.vec_BC[3, boots]<-s1$coeff[3]
 
-p.vec_CC[1]<-s1$coeff[1]+s1$coeff[4]
-p.vec_CC[2]<-s1$coeff[2]
-p.vec_CC[3]<-s1$coeff[3]
+p.vec_CC[1, boots]<-s1$coeff[1]+s1$coeff[4]
+p.vec_CC[2, boots]<-s1$coeff[2]
+p.vec_CC[3, boots]<-s1$coeff[3]
 
-p.vec_C[1]<-s1$coeff[1] + s1$coeff[5]
-p.vec_C[2]<-s1$coeff[2]
-p.vec_C[3]<-s1$coeff[3]
+p.vec_C[1, boots]<-s1$coeff[1] + s1$coeff[5]
+p.vec_C[2, boots]<-s1$coeff[2]
+p.vec_C[3, boots]<-s1$coeff[3]
 
-p.vec_FP[1] <- s1$coeff[1] + s1$coeff[6]
-p.vec_FP[2] <- s1$coeff[2]
-p.vec_FP[3] <- s1$coeff[3]
+p.vec_FP[1, boots] <- s1$coeff[1] + s1$coeff[6]
+p.vec_FP[2, boots] <- s1$coeff[2]
+p.vec_FP[3, boots] <- s1$coeff[3]
 
-p.vec_PG[1] <- s1$coeff[1] + s1$coeff[7]
-p.vec_PG[2] <- s1$coeff[2]
-p.vec_PG[3] <- s1$coeff[3]
+p.vec_PG[1, boots] <- s1$coeff[1] + s1$coeff[7]
+p.vec_PG[2, boots] <- s1$coeff[2]
+p.vec_PG[3, boots] <- s1$coeff[3]
 
-p.vec_WT[1] <- s1$coeff[1] + s1$coeff[8]
-p.vec_WT[2] <- s1$coeff[2]
-p.vec_WT[3] <- s1$coeff[3]
+p.vec_WT[1, boots] <- s1$coeff[1] + s1$coeff[8]
+p.vec_WT[2, boots] <- s1$coeff[2]
+p.vec_WT[3, boots] <- s1$coeff[3]
 
 # ** Seedling Growth #####
 seedlings2<-subset(seedlings, seedlings$Diameter_tplus1<1.6)
@@ -125,67 +129,67 @@ g1<-manova(cbind(seedlings2$Diameter_tplus1, seedlings2$Height_tplus1) ~ seedlin
 
 
 #Capture parameters associated with predicting future diameter 
-p.vec_BC[4]<-g1$coeff[1,1]
-p.vec_BC[5]<-g1$coeff[2,1]
-p.vec_BC[6]<-g1$coeff[3,1]
-p.vec_BC[7]<-summary(g1_diam)$sigma
+p.vec_BC[4, boots]<-g1$coeff[1,1]
+p.vec_BC[5, boots]<-g1$coeff[2,1]
+p.vec_BC[6, boots]<-g1$coeff[3,1]
+p.vec_BC[7, boots]<-summary(g1_diam)$sigma
 
-p.vec_CC[4]<-g1$coeff[1,1] + g1$coeff[4, 1]
-p.vec_CC[5]<-g1$coeff[2,1]
-p.vec_CC[6]<-g1$coeff[3,1]
-p.vec_CC[7]<-summary(g1_diam)$sigma
+p.vec_CC[4, boots]<-g1$coeff[1,1] + g1$coeff[4, 1]
+p.vec_CC[5, boots]<-g1$coeff[2,1]
+p.vec_CC[6, boots]<-g1$coeff[3,1]
+p.vec_CC[7, boots]<-summary(g1_diam)$sigma
 
-p.vec_C[4]<-g1$coeff[1,1] + g1$coeff[5, 1]
-p.vec_C[5]<-g1$coeff[2,1]
-p.vec_C[6]<-g1$coeff[3,1]
-p.vec_C[7]<-summary(g1_diam)$sigma
+p.vec_C[4, boots]<-g1$coeff[1,1] + g1$coeff[5, 1]
+p.vec_C[5, boots]<-g1$coeff[2,1]
+p.vec_C[6, boots]<-g1$coeff[3,1]
+p.vec_C[7, boots]<-summary(g1_diam)$sigma
 
-p.vec_FP[4]<-g1$coeff[1,1] + g1$coeff[6, 1]
-p.vec_FP[5]<-g1$coeff[2,1]
-p.vec_FP[6]<-g1$coeff[3,1]
-p.vec_FP[7]<-summary(g1_diam)$sigma
+p.vec_FP[4, boots]<-g1$coeff[1,1] + g1$coeff[6, 1]
+p.vec_FP[5, boots]<-g1$coeff[2,1]
+p.vec_FP[6, boots]<-g1$coeff[3,1]
+p.vec_FP[7, boots]<-summary(g1_diam)$sigma
 
-p.vec_PG[4]<-g1$coeff[1,1] + g1$coeff[7, 1]
-p.vec_PG[5]<-g1$coeff[2,1]
-p.vec_PG[6]<-g1$coeff[3,1]
-p.vec_PG[7]<-summary(g1_diam)$sigma
+p.vec_PG[4, boots]<-g1$coeff[1,1] + g1$coeff[7, 1]
+p.vec_PG[5, boots]<-g1$coeff[2,1]
+p.vec_PG[6, boots]<-g1$coeff[3,1]
+p.vec_PG[7, boots]<-summary(g1_diam)$sigma
 
-p.vec_WT[4]<-g1$coeff[1,1] + g1$coeff[8, 1]
-p.vec_WT[5]<-g1$coeff[2,1]
-p.vec_WT[6]<-g1$coeff[3,1]
-p.vec_WT[7]<-summary(g1_diam)$sigma
+p.vec_WT[4, boots]<-g1$coeff[1,1] + g1$coeff[8, 1]
+p.vec_WT[5, boots]<-g1$coeff[2,1]
+p.vec_WT[6, boots]<-g1$coeff[3,1]
+p.vec_WT[7, boots]<-summary(g1_diam)$sigma
 
 
 #Grab parameters associated with predicting future height
-p.vec_BC[8]<-g1$coeff[1,2]
-p.vec_BC[9]<-g1$coeff[2,2]
-p.vec_BC[10]<-g1$coeff[3,2]
-p.vec_BC[11]<-summary(g1_height)$sigma
+p.vec_BC[8, boots]<-g1$coeff[1,2]
+p.vec_BC[9, boots]<-g1$coeff[2,2]
+p.vec_BC[10, boots]<-g1$coeff[3,2]
+p.vec_BC[11, boots]<-summary(g1_height)$sigma
 
-p.vec_CC[8]<-g1$coeff[1,2] + g1$coeff[4,2]
-p.vec_CC[9]<-g1$coeff[2,2]
-p.vec_CC[10]<-g1$coeff[3,2]
-p.vec_CC[11]<-summary(g1_height)$sigma
+p.vec_CC[8, boots]<-g1$coeff[1,2] + g1$coeff[4,2]
+p.vec_CC[9, boots]<-g1$coeff[2,2]
+p.vec_CC[10, boots]<-g1$coeff[3,2]
+p.vec_CC[11, boots]<-summary(g1_height)$sigma
 
-p.vec_C[8]<-g1$coeff[1,2] + g1$coeff[5,2]
-p.vec_C[9]<-g1$coeff[2,2]
-p.vec_C[10]<-g1$coeff[3,2]
-p.vec_C[11]<-summary(g1_height)$sigma
+p.vec_C[8, boots]<-g1$coeff[1,2] + g1$coeff[5,2]
+p.vec_C[9, boots]<-g1$coeff[2,2]
+p.vec_C[10, boots]<-g1$coeff[3,2]
+p.vec_C[11, boots]<-summary(g1_height)$sigma
 
-p.vec_FP[8]<-g1$coeff[1,2] + g1$coeff[6,2]
-p.vec_FP[9]<-g1$coeff[2,2]
-p.vec_FP[10]<-g1$coeff[3,2]
-p.vec_FP[11]<-summary(g1_height)$sigma
+p.vec_FP[8, boots]<-g1$coeff[1,2] + g1$coeff[6,2]
+p.vec_FP[9, boots]<-g1$coeff[2,2]
+p.vec_FP[10, boots]<-g1$coeff[3,2]
+p.vec_FP[11, boots]<-summary(g1_height)$sigma
 
-p.vec_PG[8]<-g1$coeff[1,2] + g1$coeff[7,2]
-p.vec_PG[9]<-g1$coeff[2,2]
-p.vec_PG[10]<-g1$coeff[3,2]
-p.vec_PG[11]<-summary(g1_height)$sigma
+p.vec_PG[8, boots]<-g1$coeff[1,2] + g1$coeff[7,2]
+p.vec_PG[9, boots]<-g1$coeff[2,2]
+p.vec_PG[10, boots]<-g1$coeff[3,2]
+p.vec_PG[11, boots]<-summary(g1_height)$sigma
 
-p.vec_WT[8]<-g1$coeff[1,2] + g1$coeff[8,2]
-p.vec_WT[9]<-g1$coeff[2,2]
-p.vec_WT[10]<-g1$coeff[3,2]
-p.vec_WT[11]<-summary(g1_height)$sigma
+p.vec_WT[8, boots]<-g1$coeff[1,2] + g1$coeff[8,2]
+p.vec_WT[9, boots]<-g1$coeff[2,2]
+p.vec_WT[10, boots]<-g1$coeff[3,2]
+p.vec_WT[11, boots]<-summary(g1_height)$sigma
 
 # ** Maturation #####
 grad_status<-rep(NA, length(seedlings$ID))
@@ -216,90 +220,90 @@ mu_grad_height<-mean(graduates$Height_tplus1)
 sd_grad_height<-sd(graduates$Height_tplus1)
 
 
-p.vec_BC[15]<-mu_grad_diam
-p.vec_BC[16]<-sd_grad_diam
-p.vec_BC[17]<-mu_grad_height
-p.vec_BC[18]<-sd_grad_height
+p.vec_BC[15, boots]<-mu_grad_diam
+p.vec_BC[16, boots]<-sd_grad_diam
+p.vec_BC[17, boots]<-mu_grad_height
+p.vec_BC[18, boots]<-sd_grad_height
 
-p.vec_CC[15]<-mu_grad_diam
-p.vec_CC[16]<-sd_grad_diam
-p.vec_CC[17]<-mu_grad_height
-p.vec_CC[18]<-sd_grad_height
+p.vec_CC[15, boots]<-mu_grad_diam
+p.vec_CC[16, boots]<-sd_grad_diam
+p.vec_CC[17, boots]<-mu_grad_height
+p.vec_CC[18, boots]<-sd_grad_height
 
-p.vec_C[15]<-mu_grad_diam
-p.vec_C[16]<-sd_grad_diam
-p.vec_C[17]<-mu_grad_height
-p.vec_C[18]<-sd_grad_height
+p.vec_C[15, boots]<-mu_grad_diam
+p.vec_C[16, boots]<-sd_grad_diam
+p.vec_C[17, boots]<-mu_grad_height
+p.vec_C[18, boots]<-sd_grad_height
 
-p.vec_FP[15]<-mu_grad_diam
-p.vec_FP[16]<-sd_grad_diam
-p.vec_FP[17]<-mu_grad_height
-p.vec_FP[18]<-sd_grad_height
+p.vec_FP[15, boots]<-mu_grad_diam
+p.vec_FP[16, boots]<-sd_grad_diam
+p.vec_FP[17, boots]<-mu_grad_height
+p.vec_FP[18, boots]<-sd_grad_height
 
-p.vec_PG[15]<-mu_grad_diam
-p.vec_PG[16]<-sd_grad_diam
-p.vec_PG[17]<-mu_grad_height
-p.vec_PG[18]<-sd_grad_height
+p.vec_PG[15, boots]<-mu_grad_diam
+p.vec_PG[16, boots]<-sd_grad_diam
+p.vec_PG[17, boots]<-mu_grad_height
+p.vec_PG[18, boots]<-sd_grad_height
 
-p.vec_WT[15]<-mu_grad_diam
-p.vec_WT[16]<-sd_grad_diam
-p.vec_WT[17]<-mu_grad_height
-p.vec_WT[18]<-sd_grad_height
+p.vec_WT[15, boots]<-mu_grad_diam
+p.vec_WT[16, boots]<-sd_grad_diam
+p.vec_WT[17, boots]<-mu_grad_height
+p.vec_WT[18, boots]<-sd_grad_height
 
 
 #(b) Model graduation by site
 m <-glm(seedlings$grad_status~ seedlings$Diameter_t + seedlings$Height_t + seedlings$Site, family=binomial)
 
-p.vec_BC[12]<-m$coeff[1]
-p.vec_BC[13]<-m$coeff[2]
-p.vec_BC[14]<-m$coeff[3]
+p.vec_BC[12, boots]<-m$coeff[1]
+p.vec_BC[13, boots]<-m$coeff[2]
+p.vec_BC[14, boots]<-m$coeff[3]
 
-p.vec_CC[12]<-m$coeff[1] + m$coeff[4]
-p.vec_CC[13]<-m$coeff[2]
-p.vec_CC[14]<-m$coeff[3]
+p.vec_CC[12, boots]<-m$coeff[1] + m$coeff[4]
+p.vec_CC[13, boots]<-m$coeff[2]
+p.vec_CC[14, boots]<-m$coeff[3]
 
-p.vec_C[12]<-m$coeff[1] + m$coeff[5]
-p.vec_C[13]<-m$coeff[2]
-p.vec_C[14]<-m$coeff[3]
+p.vec_C[12, boots]<-m$coeff[1] + m$coeff[5]
+p.vec_C[13, boots]<-m$coeff[2]
+p.vec_C[14, boots]<-m$coeff[3]
 
-p.vec_FP[12]<-m$coeff[1] + m$coeff[6]
-p.vec_FP[13]<-m$coeff[2]
-p.vec_FP[14]<-m$coeff[3]
+p.vec_FP[12, boots]<-m$coeff[1] + m$coeff[6]
+p.vec_FP[13, boots]<-m$coeff[2]
+p.vec_FP[14, boots]<-m$coeff[3]
 
-p.vec_PG[12]<-m$coeff[1] + m$coeff[7]
-p.vec_PG[13]<-m$coeff[2]
-p.vec_PG[14]<-m$coeff[3]
+p.vec_PG[12, boots]<-m$coeff[1] + m$coeff[7]
+p.vec_PG[13, boots]<-m$coeff[2]
+p.vec_PG[14, boots]<-m$coeff[3]
 
-p.vec_WT[12]<-m$coeff[1] + m$coeff[8]
-p.vec_WT[13]<-m$coeff[2]
-p.vec_WT[14]<-m$coeff[3]
+p.vec_WT[12, boots]<-m$coeff[1] + m$coeff[8]
+p.vec_WT[13, boots]<-m$coeff[2]
+p.vec_WT[14, boots]<-m$coeff[3]
 
 # **D2 Survival #####
 s2<-glm(larges$Surv_tplus1~larges$Diameter_t + larges$Height_t +larges$Site, family=binomial)
 
-p.vec_BC[19]<-s2$coeff[1]
-p.vec_BC[20]<-s2$coeff[2]
-p.vec_BC[21]<-s2$coeff[3]
+p.vec_BC[19, boots]<-s2$coeff[1]
+p.vec_BC[20, boots]<-s2$coeff[2]
+p.vec_BC[21, boots]<-s2$coeff[3]
 
-p.vec_CC[19]<-s2$coeff[1] + s2$coeff[4]
-p.vec_CC[20]<-s2$coeff[2]
-p.vec_CC[21]<-s2$coeff[3]
+p.vec_CC[19, boots]<-s2$coeff[1] + s2$coeff[4]
+p.vec_CC[20, boots]<-s2$coeff[2]
+p.vec_CC[21, boots]<-s2$coeff[3]
 
-p.vec_C[19]<-s2$coeff[1] + s2$coeff[5]
-p.vec_C[20]<-s2$coeff[2]
-p.vec_C[21]<-s2$coeff[3]
+p.vec_C[19, boots]<-s2$coeff[1] + s2$coeff[5]
+p.vec_C[20, boots]<-s2$coeff[2]
+p.vec_C[21, boots]<-s2$coeff[3]
 
-p.vec_FP[19]<-s2$coeff[1] + s2$coeff[6]
-p.vec_FP[20]<-s2$coeff[2]
-p.vec_FP[21]<-s2$coeff[3]
+p.vec_FP[19, boots]<-s2$coeff[1] + s2$coeff[6]
+p.vec_FP[20, boots]<-s2$coeff[2]
+p.vec_FP[21, boots]<-s2$coeff[3]
 
-p.vec_PG[19]<-s2$coeff[1] + s2$coeff[7]
-p.vec_PG[20]<-s2$coeff[2]
-p.vec_PG[21]<-s2$coeff[3]
+p.vec_PG[19, boots]<-s2$coeff[1] + s2$coeff[7]
+p.vec_PG[20, boots]<-s2$coeff[2]
+p.vec_PG[21, boots]<-s2$coeff[3]
 
-p.vec_WT[19]<-s2$coeff[1] + s2$coeff[8]
-p.vec_WT[20]<-s2$coeff[2]
-p.vec_WT[21]<-s2$coeff[3]
+p.vec_WT[19, boots]<-s2$coeff[1] + s2$coeff[8]
+p.vec_WT[20, boots]<-s2$coeff[2]
+p.vec_WT[21, boots]<-s2$coeff[3]
 
 # **D2 Growth #####
 g2_diam<-lm(larges$Diameter_tplus1 ~ larges$Diameter_t + larges$Height_t + larges$Site)
@@ -310,68 +314,68 @@ g2_height<-lm(larges$Height_tplus1 ~ larges$Diameter_t + larges$Height_t + large
 g2<-manova(cbind(larges$Diameter_tplus1, larges$Height_tplus1) ~ larges$Diameter_t+larges$Height_t+larges$Site)
 
 #Store parameters associated with growth of D2 individuals in diameter
-p.vec_BC[22]<-g2$coeff[1,1]
-p.vec_BC[23]<-g2$coeff[2,1]
-p.vec_BC[24]<-g2$coeff[3,1]
+p.vec_BC[22, boots]<-g2$coeff[1,1]
+p.vec_BC[23, boots]<-g2$coeff[2,1]
+p.vec_BC[24, boots]<-g2$coeff[3,1]
 
-p.vec_CC[22]<-g2$coeff[1,1] + g2$coeff[4,1]
-p.vec_CC[23]<-g2$coeff[2,1]
-p.vec_CC[24]<-g2$coeff[3,1]
+p.vec_CC[22, boots]<-g2$coeff[1,1] + g2$coeff[4,1]
+p.vec_CC[23, boots]<-g2$coeff[2,1]
+p.vec_CC[24, boots]<-g2$coeff[3,1]
 
-p.vec_C[22]<-g2$coeff[1,1] + g2$coeff[5,1]
-p.vec_C[23]<-g2$coeff[2,1]
-p.vec_C[24]<-g2$coeff[3,1]
+p.vec_C[22, boots]<-g2$coeff[1,1] + g2$coeff[5,1]
+p.vec_C[23, boots]<-g2$coeff[2,1]
+p.vec_C[24, boots]<-g2$coeff[3,1]
 
-p.vec_FP[22]<-g2$coeff[1,1] + g2$coeff[6,1]
-p.vec_FP[23]<-g2$coeff[2,1]
-p.vec_FP[24]<-g2$coeff[3,1]
+p.vec_FP[22, boots]<-g2$coeff[1,1] + g2$coeff[6,1]
+p.vec_FP[23, boots]<-g2$coeff[2,1]
+p.vec_FP[24, boots]<-g2$coeff[3,1]
 
-p.vec_PG[22]<-g2$coeff[1,1] + g2$coeff[7,1]
-p.vec_PG[23]<-g2$coeff[2,1]
-p.vec_PG[24]<-g2$coeff[3,1]
+p.vec_PG[22, boots]<-g2$coeff[1,1] + g2$coeff[7,1]
+p.vec_PG[23, boots]<-g2$coeff[2,1]
+p.vec_PG[24, boots]<-g2$coeff[3,1]
 
-p.vec_WT[22]<-g2$coeff[1,1] + g2$coeff[8,1]
-p.vec_WT[23]<-g2$coeff[2,1]
-p.vec_WT[24]<-g2$coeff[3,1]
+p.vec_WT[22, boots]<-g2$coeff[1,1] + g2$coeff[8,1]
+p.vec_WT[23, boots]<-g2$coeff[2,1]
+p.vec_WT[24, boots]<-g2$coeff[3,1]
 
-p.vec_BC[25]<-summary(g2_diam)$sigma
-p.vec_CC[25]<-summary(g2_diam)$sigma
-p.vec_C[25]<-summary(g2_diam)$sigma
-p.vec_FP[25]<-summary(g2_diam)$sigma
-p.vec_PG[25]<-summary(g2_diam)$sigma
-p.vec_WT[25]<-summary(g2_diam)$sigma
+p.vec_BC[25, boots]<-summary(g2_diam)$sigma
+p.vec_CC[25, boots]<-summary(g2_diam)$sigma
+p.vec_C[25, boots]<-summary(g2_diam)$sigma
+p.vec_FP[25, boots]<-summary(g2_diam)$sigma
+p.vec_PG[25, boots]<-summary(g2_diam)$sigma
+p.vec_WT[25, boots]<-summary(g2_diam)$sigma
 
 #Store parameters associated with modeling growth of D2 individuals in height
-p.vec_BC[26]<-g2$coeff[1,2]
-p.vec_BC[27]<-g2$coeff[2,2]
-p.vec_BC[28]<-g2$coeff[3,2]
+p.vec_BC[26, boots]<-g2$coeff[1,2]
+p.vec_BC[27, boots]<-g2$coeff[2,2]
+p.vec_BC[28, boots]<-g2$coeff[3,2]
 
-p.vec_CC[26]<-g2$coeff[1,2] + g2$coeff[4,2]
-p.vec_CC[27]<-g2$coeff[2,2]
-p.vec_CC[28]<-g2$coeff[3,2]
+p.vec_CC[26, boots]<-g2$coeff[1,2] + g2$coeff[4,2]
+p.vec_CC[27, boots]<-g2$coeff[2,2]
+p.vec_CC[28, boots]<-g2$coeff[3,2]
 
-p.vec_C[26]<-g2$coeff[1,2] + g2$coeff[5,2]
-p.vec_C[27]<-g2$coeff[2,2]
-p.vec_C[28]<-g2$coeff[3,2]
+p.vec_C[26, boots]<-g2$coeff[1,2] + g2$coeff[5,2]
+p.vec_C[27, boots]<-g2$coeff[2,2]
+p.vec_C[28, boots]<-g2$coeff[3,2]
 
-p.vec_FP[26]<-g2$coeff[1,2] + g2$coeff[6,2]
-p.vec_FP[27]<-g2$coeff[2,2]
-p.vec_FP[28]<-g2$coeff[3,2]
+p.vec_FP[26, boots]<-g2$coeff[1,2] + g2$coeff[6,2]
+p.vec_FP[27, boots]<-g2$coeff[2,2]
+p.vec_FP[28, boots]<-g2$coeff[3,2]
 
-p.vec_PG[26]<-g2$coeff[1,2] + g2$coeff[7,2]
-p.vec_PG[27]<-g2$coeff[2,2]
-p.vec_PG[28]<-g2$coeff[3,2]
+p.vec_PG[26, boots]<-g2$coeff[1,2] + g2$coeff[7,2]
+p.vec_PG[27, boots]<-g2$coeff[2,2]
+p.vec_PG[28, boots]<-g2$coeff[3,2]
 
-p.vec_WT[26]<-g2$coeff[1,2] + g2$coeff[8,2]
-p.vec_WT[27]<-g2$coeff[2,2]
-p.vec_WT[28]<-g2$coeff[3,2]
+p.vec_WT[26, boots]<-g2$coeff[1,2] + g2$coeff[8,2]
+p.vec_WT[27, boots]<-g2$coeff[2,2]
+p.vec_WT[28, boots]<-g2$coeff[3,2]
 
-p.vec_BC[29]<-summary(g2_height)$sigma
-p.vec_CC[29]<-summary(g2_height)$sigma
-p.vec_C[29]<-summary(g2_height)$sigma
-p.vec_FP[29]<-summary(g2_height)$sigma
-p.vec_PG[29]<-summary(g2_height)$sigma
-p.vec_WT[29]<-summary(g2_height)$sigma
+p.vec_BC[29, boots]<-summary(g2_height)$sigma
+p.vec_CC[29, boots]<-summary(g2_height)$sigma
+p.vec_C[29, boots]<-summary(g2_height)$sigma
+p.vec_FP[29, boots]<-summary(g2_height)$sigma
+p.vec_PG[29, boots]<-summary(g2_height)$sigma
+p.vec_WT[29, boots]<-summary(g2_height)$sigma
 
 # **Reproduction #####
 #(b) Model probability of being reproductive     (by site)
@@ -381,34 +385,39 @@ p_f1<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t + larges$Site, f
 p_f<-glm(larges$Rep_tplus1 ~ larges$Height_t +larges$Site, family=binomial)
 
 
-p.vec_BC[30]<-p_f$coeff[1]
-p.vec_BC[31]<-p_f$coeff[2]
+p.vec_BC[30, boots]<-p_f$coeff[1]
+p.vec_BC[31, boots]<-p_f$coeff[2]
 
-p.vec_CC[30]<-p_f$coeff[1] + p_f$coeff[3]
-p.vec_CC[31]<-p_f$coeff[2]
+p.vec_CC[30, boots]<-p_f$coeff[1] + p_f$coeff[3]
+p.vec_CC[31, boots]<-p_f$coeff[2]
 
-p.vec_C[30]<-p_f$coeff[1] + p_f$coeff[4]
-p.vec_C[31]<-p_f$coeff[2]
+p.vec_C[30, boots]<-p_f$coeff[1] + p_f$coeff[4]
+p.vec_C[31, boots]<-p_f$coeff[2]
 
-p.vec_FP[30]<-p_f$coeff[1] + p_f$coeff[5]
-p.vec_FP[31]<-p_f$coeff[2]
+p.vec_FP[30, boots]<-p_f$coeff[1] + p_f$coeff[5]
+p.vec_FP[31, boots]<-p_f$coeff[2]
 
-p.vec_PG[30]<-p_f$coeff[1] + p_f$coeff[6]
-p.vec_PG[31]<-p_f$coeff[2]
+p.vec_PG[30, boots]<-p_f$coeff[1] + p_f$coeff[6]
+p.vec_PG[31, boots]<-p_f$coeff[2]
 
-p.vec_WT[30]<-p_f$coeff[1] + p_f$coeff[7]
-p.vec_WT[31]<-p_f$coeff[2]
+p.vec_WT[30, boots]<-p_f$coeff[1] + p_f$coeff[7]
+p.vec_WT[31, boots]<-p_f$coeff[2]
 
 # **Fecundity #####
 
+x<-temp2$diam_base*10 #convert from cm to mm
+x <- x*x
+f<-lm(temp2$Seed_No ~ 0 + x:temp2$Site)
 
 #(b) Model fecundity (by biotype)
-p.vec_BC[32] <-6.244343
-p.vec_CC[32] <-1.655202
-p.vec_C[32]  <-4.372614
-p.vec_FP[32] <- 2.702628
-p.vec_PG[32] <- 3.102713
-p.vec_WT[32] <- 5.801386
+p.vec_BC[32, boots]<-f$coeff[1]
+p.vec_CC[32, boots]<-f$coeff[2]
+p.vec_C[32, boots]<-f$coeff[3]
+p.vec_FP[32, boots] <- f$coeff[4]
+p.vec_PG[32, boots] <- f$coeff[5]
+p.vec_WT[32, boots] <- f$coeff[6]
+
+
 
 #Determine new recruits size
 recruit4_diam<-temp$Diam_4[temp$Status_4=="tagged"&temp$Location=="SeedlingPlot"]
@@ -445,75 +454,75 @@ var_height<-var(recruits_height[recruits_height<16],na.rm=T)
 
 
 #Parameters associated with distribution of recruits diameter
-p.vec_BC[33]<-mu_diam
-p.vec_BC[34]<-sd_diam
+p.vec_BC[33, boots]<-mu_diam
+p.vec_BC[34, boots]<-sd_diam
 
-p.vec_CC[33]<-mu_diam
-p.vec_CC[34]<-sd_diam
+p.vec_CC[33, boots]<-mu_diam
+p.vec_CC[34, boots]<-sd_diam
 
-p.vec_C[33]<-mu_diam
-p.vec_C[34]<-sd_diam
+p.vec_C[33, boots]<-mu_diam
+p.vec_C[34, boots]<-sd_diam
 
-p.vec_FP[33]<-mu_diam
-p.vec_FP[34]<-sd_diam
+p.vec_FP[33, boots]<-mu_diam
+p.vec_FP[34, boots]<-sd_diam
 
-p.vec_PG[33]<-mu_diam
-p.vec_PG[34]<-sd_diam
+p.vec_PG[33, boots]<-mu_diam
+p.vec_PG[34, boots]<-sd_diam
 
-p.vec_WT[33]<-mu_diam
-p.vec_WT[34]<-sd_diam
+p.vec_WT[33, boots]<-mu_diam
+p.vec_WT[34, boots]<-sd_diam
 
 #Parameters associated with distribution of recruits heights
 
-p.vec_BC[35]<-mu_height
-p.vec_BC[36]<-sd_height
+p.vec_BC[35, boots]<-mu_height
+p.vec_BC[36, boots]<-sd_height
 
-p.vec_CC[35]<-mu_height
-p.vec_CC[36]<-sd_height
+p.vec_CC[35, boots]<-mu_height
+p.vec_CC[36, boots]<-sd_height
 
-p.vec_C[35]<-mu_height
-p.vec_C[36]<-sd_height
+p.vec_C[35, boots]<-mu_height
+p.vec_C[36, boots]<-sd_height
 
-p.vec_FP[35]<-mu_height
-p.vec_FP[36]<-sd_height
+p.vec_FP[35, boots]<-mu_height
+p.vec_FP[36, boots]<-sd_height
 
-p.vec_PG[35]<-mu_height
-p.vec_PG[36]<-sd_height
+p.vec_PG[35, boots]<-mu_height
+p.vec_PG[36, boots]<-sd_height
 
-p.vec_WT[35]<-mu_height
-p.vec_WT[36]<-sd_height
+p.vec_WT[35, boots]<-mu_height
+p.vec_WT[36, boots]<-sd_height
 
 
 ##### Some additional (fixed parameters)
 # TAU_1: Pre-dispersal seed survival 
 #Rethinking this parameter value: Isn't this already encapsulated in tau_2? 
 
-p.vec_BC[37]<-0.002
-p.vec_CC[37]<-0.002
-p.vec_C[37]<-0.002
-p.vec_FP[37]<-0.002
-p.vec_PG[37]<-0.002
-p.vec_WT[37]<-0.002
+p.vec_BC[37, boots]<-0.002
+p.vec_CC[37, boots]<-0.002
+p.vec_C[37, boots]<-0.002
+p.vec_FP[37, boots]<-0.002
+p.vec_PG[37, boots]<-0.002
+p.vec_WT[37, boots]<-0.002
 
 
 #Revised based on calculations for appendix 
 
-p.vec_BC[38]<-0.19
-p.vec_CC[38]<-0.19
-p.vec_C[38]<-0.19
-p.vec_FP[38]<-0.19
-p.vec_PG[38]<-0.19
-p.vec_WT[38]<-0.19
+p.vec_BC[38, boots]<-0.19
+p.vec_CC[38, boots]<-0.19
+p.vec_C[38, boots]<-0.19
+p.vec_FP[38, boots]<-0.19
+p.vec_PG[38, boots]<-0.19
+p.vec_WT[38, boots]<-0.19
 
 #TAU_2: Post-dispersal seed survival
 
 #p.vec_overall[39]<- 0.5072 #Selected the highest survival probability (could have selected lowest)
-p.vec_BC[39]<-0.5072
-p.vec_CC[39]<-0.5072
-p.vec_C[39]<-0.5072
-p.vec_FP[39]<-0.5072
-p.vec_PG[39]<-0.5072
-p.vec_WT[39]<-0.5072
+p.vec_BC[39, boots]<-0.5072
+p.vec_CC[39, boots]<-0.5072
+p.vec_C[39, boots]<-0.5072
+p.vec_FP[39, boots]<-0.5072
+p.vec_PG[39, boots]<-0.5072
+p.vec_WT[39, boots]<-0.5072
 
 # Part II: Building the IPM #####
 m1=10
@@ -566,7 +575,8 @@ y4=(h4/2)*((0:(m4-1))+(1:m4))+16; #for height in D2
 # Compute the iteration matrix. With a bit of vectorizing it's not too slow,
 # though you can probably do better if you need to. The shortcuts here have 
 # been checked against the results from code that uses loops for everything. (comment from Ellner and Rees)
-p.vecs <- list(p.vec_BC, p.vec_CC, p.vec_C, p.vec_FP, p.vec_PG, p.vec_WT)
+p.vecs <- list(p.vec_BC[, boots], p.vec_CC[, boots], p.vec_C[, boots], 
+               p.vec_FP[, boots], p.vec_PG[, boots], p.vec_WT[, boots])
 
 for (j in 1:6) {
   
@@ -732,6 +742,16 @@ cat("Bootstrap:", boots,"Site:", j,"\n");
 end_time <- proc.time() - start_time
 
 save(lam.boot, file = "lam.boot.RData")
+save(p.vec_BC, file="p.vec_BC.RData")
+save(p.vec_CC, file="p.vec_CC.RData")
+save(p.vec_C,  file="p.vec_C.RData")
+save(p.vec_FP, file="p.vec_FP.RData")
+save(p.vec_PG, file="p.vec_PG.RData")
+save(p.vec_WT, file="p.vec_WT.RData")
+
+
+
+
 colnames(lam.boot) <- c("BC", "CC", "C", "FP", "PG", "WT")
 differences <- data.frame(BC_CC = rep(NA, nrow(lam.boot)),
                           BC_C  = rep(NA, nrow(lam.boot)),
