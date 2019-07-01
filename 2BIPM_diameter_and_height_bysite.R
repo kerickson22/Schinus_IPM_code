@@ -64,6 +64,48 @@ load('./PG/p.vec_PG.RData')
 load('./WT/p.vec_WT.RData')
 load("./Overall/p.vec_overall.RData")
 
+#p.vec[1]:seedling survival intercept
+#p.vec[2]:seedling survival diameter slope
+#p.vec[3]:seedling survival height slope
+#p.vec[4]:seedling diameter growth intercept
+#p.vec[5]:seedling diameter growth diameter slope
+#p.vec[6]:seedling diameter growth height intercept
+#p.vec[7]:variance in seedling diameter growth 
+#p.vec[8]:seedling height growth intercept
+#p.vec[9]:seedling height growth diameter slope
+#p.vec[10]:seedling height growth height slope 
+#p.vec[11]:variance in seedling height growth 
+#p.vec[12]: maturation intercept 
+#p.vec[13]: maturation diameter slope 
+#p.vec[14]: maturation height slope 
+#p.vec[15]: mean graduates diameter
+#p.vec[16]: sd graduates diameter 
+#p.vec[17]: mean graduates height 
+#p.vec[18]: sd graduates height 
+#p.vec[19]: D2 survival intercept 
+#p.vec[20]: D2 survival diameter slope 
+#p.vec[21]: D2 survival height slope 
+#p.vec[22]: D2 diameter growth intercept 
+#p.vec[23]: D2 diameter growth diameter slope 
+#p.vec[24]: D2 diameter growth height slope 
+#p.vec[25]: variance in D2 diameter growth 
+#p.vec[26]: D2 height growth intercept 
+#p.vec[27]: D2 height growth diameter slope 
+#p.vec[28]: D2 height growth height slope 
+#p.vec[29]: variance in D2 height growth 
+#p.vec[30]: probability of reproduction intercept 
+#p.vec[31]: probability of reproduction height slope 
+#p.vec[32]: fecundity diameter slope 
+#p.vec[33]: mean diameter of new  recruits 
+#p.vec[34]: sd diameter of new recruits
+#p.vec[35]: mean height of new recruits
+#p.vec[36]: sd height of new recruits 
+#p.vec[37]: tau1 (pre-dispersal seed survival)
+#p.vec[38]: delta (probability of dispersal)
+#p.vec[39]: tau2 (post-dispersal seed survival)
+
+
+
 
 # Define the kernels and iteration matrix:
 #Domain 1: Seedling Domain
@@ -326,7 +368,7 @@ build_G = function(p.vec) {
  #Wild Turkey
  thing <- build_G(p.vec_WT)
  saveRDS(thing$G, file = "./WT/G_WT.rds")
- saveRDS(thing$Kvals_G, file ="./BC/Kvals_G_WT.rds" )
+ saveRDS(thing$Kvals_G, file ="./WT/Kvals_G_WT.rds" )
  #Overall
  thing <- build_G(p.vec_overall)
  saveRDS(thing$G, file = "./Overall/G_overall.rds")
