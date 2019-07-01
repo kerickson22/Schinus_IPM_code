@@ -257,7 +257,7 @@ p.vec_WT[3] <- s1$coeff[3]
 
 
 
-##### Seedling(D1) GROWTH #####
+##### D1 Growth #####
 
 #Size at t+1 is a function of height_t AND diam_t
 #Important: Seedling growth should only include individuals that remained in the 
@@ -705,6 +705,7 @@ p.vec_overall[31] <- p_f_overall$coeff[2]
 #(a) Overall 
 
 load("Stems.RData")
+Stems <- subset(Stems, Stems$Site != "Holiday Park")
 
 x<-Stems$diam_base*10 #convert from cm to mm
 x <- x*x
@@ -720,8 +721,8 @@ p.vec_BC[32]<-f$coeff[1]
 p.vec_CC[32]<-f$coeff[2]
 p.vec_C[32]<-f$coeff[3]
 p.vec_FP[32] <- f$coeff[4]
-p.vec_PG[32] <- f$coeff[6]
-p.vec_WT[32] <- f$coeff[7]
+p.vec_PG[32] <- f$coeff[5]
+p.vec_WT[32] <- f$coeff[6]
 p.vec_overall[32] <- f_overall$coeff[1]
 
 
