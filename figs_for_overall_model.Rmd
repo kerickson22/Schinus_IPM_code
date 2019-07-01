@@ -1,0 +1,401 @@
+---
+title: "Overall model figures"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(RColorBrewer)
+library(viridis)
+library(ggplot2)
+
+#Default width requested by journal: 
+width.cm <- 12.9
+width.cm_onepanel<-8.4
+width.cm_onepanel_small<-3.9
+height.cm <- 6.45
+pointsize <- 8
+x11(width = width.cm/2.54, height = height.cm/2.54, 
+    pointsize = pointsize)
+
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.3,0.3,0.1,0.1))
+
+cols <- viridis(6)
+m1=10
+m2=m1+1
+m3=100
+m4=m3+1
+
+h1=1.6/m1; 
+y1=(h1/2)*((0:(m1-1))+(1:m1)); #for diameter in D1
+h2=16/m2
+y2=(h2/2)*((0:(m2-1))+(1:m2)); #for height in D1
+h3=(700-1.6)/m3;
+y3=(h3/2)*((0:(m3-1))+(1:m3))+1.6; #for diameter in D2
+h4=(800-16)/m4
+y4=(h4/2)*((0:(m4-1))+(1:m4))+16; #for height in D2
+
+
+seedlings2<-subset(seedlings, seedlings$Diameter_tplus1<1.6)
+seedlings2<-subset(seedlings2, seedlings2$Height_tplus1<16)
+
+display.brewer.all(colorblindFriendly=TRUE)
+my.palette <- brewer.pal(11, "RdYlBu")
+my.palette2 <- brewer.pal(9, "YlGnBu")
+
+x1seq_seedlings<-seq(0, 1.6, length.out=50)
+
+x2seq_seedlings<-seq(0, 16, length.out=50)
+x1seq_larges <- seq(1.6, 800, length.out = 50 )
+x2seq_larges <- seq (16, 800, length.out = 50)
+load("./Overall/p.vec_overall.RData")
+df1 <- expand.grid(x1seq_seedlings, x2seq_seedlings)
+df2 <- expand.grid(x1seq_larges, x2seq_larges)
+
+
+```
+
+## Figure 1: D1 Survival 
+```{r figure 1}
+
+b0 <- p.vec_overall[1]
+b1 <- p.vec_overall[2]
+b2 <- p.vec_overall[3]
+df1$s1 <- invlogit(b0 + b1*df1$Var1 + b2*df1$Var2)
+
+ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df1, aes(x=Var1, y = Var2, fill= s1)) + 
+  scale_fill_gradientn(colors=my.palette, limits=c(0,1)) + 
+  geom_point(data=subset(seedlings, !is.na(seedlings$Surv_tplus1)),
+             aes(x=Diameter_t, y=Height_t, shape = factor(Surv_tplus1))) +
+  scale_shape_manual(values=c(1, 16)) +
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=10), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n survival \n at time \n t + 1") +
+  labs(shape = "Measured \n survival \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(shape = guide_legend(title.position = "right", order =1)) +
+  guides(fill = guide_colorbar(title.position = "right", order =2))
+
+
+```
+
+## Figure 2 D1 Growth
+```{r fig 2}
+b0<-p.vec_overall[4]
+b1<-p.vec_overall[5]
+b2<-p.vec_overall[6]
+
+b3<-p.vec_overall[8]
+b4<-p.vec_overall[9]
+b5<-p.vec_overall[10]
+
+df1$g1_diam <- b0 + b1*df1$Var1 + b2*df1$Var2
+df1$g1_height <- b3 + b4*df1$Var1 + b5*df1$Var2
+
+ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df1, aes(x=Var1, y = Var2, fill= g1_diam)) +
+  scale_fill_viridis_c(limits = c(0, 1.6)) +
+ geom_point(data=seedlings2, 
+            aes(x=Diameter_t, y=Height_t, size = Diameter_tplus1), shape=1)+
+  scale_size_continuous(breaks = c(0.3, 0.6, 0.9, 1.2, 1.5),
+                        limits=c(0.3, 1.5), range= c(0,3)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n diameter \n at time \n t + 1 (mm)") +
+  labs(size = "Measured \n diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order =1)) +
+  guides(fill = guide_colorbar(title.position = "right", order =2))
+
+ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df1, aes(x=Var1, y = Var2, fill= g1_height)) + 
+  scale_fill_viridis_c(limits = c(0, 16)) +
+  geom_point(data=seedlings2, 
+             aes(x=Diameter_t, y=Height_t, size = Height_tplus1), shape=1 ) +
+  scale_size_continuous(breaks = c(3, 6, 9, 12, 15), limits=c(3, 15), 
+                        range = c(0, 3)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n height \n at time \n t + 1 (cm)") +
+  labs(size = "Measured \n height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order = 1)) +
+  guides(fill = guide_colorbar(title.position = "right", order = 2))
+
+```
+
+## Figure 3: D2 Survival
+```{r fig 3}
+b0 <- p.vec_overall[19]
+b1 <- p.vec_overall[20]
+b2 <- p.vec_overall[21]
+df2$s2 <- invlogit(b0 + b1*df2$Var1 + b2*df2$Var2)
+
+
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= s2 )) + 
+  scale_fill_gradientn(colors=my.palette, limits=c(0.6,1)) + 
+  geom_point(data=larges,
+             aes(x=Diameter_t, y=Height_t, col = factor(Surv_tplus1)), 
+             shape=1, size=0.8) +
+  scale_color_manual(values=c("red", "black")) +
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=10), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n survival \n at time \n t + 1") +
+  labs(shape = "Measured \n survival \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(shape = guide_legend(title.position = "right", order =1)) +
+  guides(fill = guide_colorbar(title.position = "right", order =2))
+
+#Separated
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= s2)) + 
+  scale_fill_gradientn(colors=my.palette, limits=c(0.6,1)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=10), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n survival \n at time \n t + 1") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+ guides(fill = guide_colorbar(title.position = "right", order =2))
+
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+geom_point(data=subset(larges,
+                !is.na(larges$Surv_tplus1)),
+           aes(x=Diameter_t, y=Height_t, col = factor(Surv_tplus1)), 
+           shape=1, size=0.8) +
+  scale_color_manual(values=c("red", "black")) +
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=10), plot.margin = margin(c(10,2,2,2))) + 
+  labs(col = "Measured \n survival \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(col = guide_legend(title.position = "right", order =1)) 
+```
+
+## Figure 4: D2 Growth
+```{r fig 4}
+#Grab parameters associated with future diameter
+b0<-p.vec_overall[22]
+b1<-p.vec_overall[23]
+b2<- p.vec_overall[24]
+
+#Grab parameters associated with future height
+b3<-p.vec_overall[26]
+b4<-p.vec_overall[27]
+b5<-p.vec_overall[28]
+
+df2$g2_diam <- b0 + b1*df2$Var1 + b2*df2$Var2
+df2$g2_height <- b3 + b4*df2$Var1 + b5*df2$Var2
+
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= g2_diam)) +
+  scale_fill_viridis_c(limits = c(1.6, 950)) +
+  geom_point(data=larges, 
+             aes(x=Diameter_t, y=Height_t, size = Diameter_tplus1), shape=1)+
+  scale_size_continuous(limits=c(1.6, 800), range= c(0,8)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n diameter \n at time \n t + 1 (mm)") +
+  labs(size = "Measured \n diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order =1)) +
+  guides(fill = guide_colorbar(title.position = "right", order =2))
+
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= g2_height)) + 
+  scale_fill_viridis_c(limits = c(16, 950)) +
+  geom_point(data=larges, 
+             aes(x=Diameter_t, y=Height_t, size = Height_tplus1), shape=1 ) +
+  scale_size_continuous(limits=c(16, 800), 
+                        range = c(0, 8)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n height \n at time \n t + 1 (cm)") +
+  labs(size = "Measured \n height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(size = guide_legend(title.position = "right", order = 1)) +
+  guides(fill = guide_colorbar(title.position = "right", order = 2))
+
+```
+## Figure 5: Maturation
+```{r fig5}
+b0 <- p.vec_overall[12]
+b1 <- p.vec_overall[13]
+b2 <- p.vec_overall[14]
+df1$m <- invlogit(b0 + b1*df1$Var1 + b2*df1$Var2)
+
+ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df1, aes(x=Var1, y = Var2, fill= m)) + 
+  scale_fill_gradientn(colors=my.palette, limits=c(0,1)) + 
+  geom_point(data=subset(seedlings, !is.na(seedlings$grad_status)),
+             aes(x=Diameter_t, y=Height_t, shape = factor(grad_status))) +
+  scale_shape_manual(values=c(1, 16)) +
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=10), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Predicted \n maturation \n at time \n t + 1") +
+  labs(shape = "Measured \n maturation \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(shape = guide_legend(title.position = "right", order =1)) +
+  guides(fill = guide_colorbar(title.position = "right", order =2))
+```
+
+## Figure 6: P(Reproduction)
+```{r fig6}
+
+b0<-p.vec_overall[30]
+b1<-p.vec_overall[31]
+pf <- invlogit(b0 + b1*x2seq_larges)
+
+plot(x2seq_larges, pf, xlab="Height at time t (cm)", ylim=c(0,1),
+     ylab="\n \n Probability of Reproducing", lwd=2, type='l', lty=1, col=cols[1])
+points(larges$Height_t, 
+       larges$Rep_tplus1,
+       col=cols[1])
+
+
+
+```
+
+## Figure 7: Fecundity
+```{r fig7}
+f <- p.vec_overall[32]*x1seq_larges*x1seq_larges
+
+load("Stems.RData")
+x<-Stems$diam_base*10 #convert from cm to mm
+
+
+Stems <- cbind(Stems, x)
+
+plot(x1seq_larges, f, xlab="Diameter at time t (mm)",
+     ylab="\n \n Number of Offspring",  lwd=2, type='l', lty=1, col=cols[1])
+points(Stems$x, Stems$Seed_No, col=cols[1])
+```
+## Figure 8: Lambda
+```{r fig 8}
+lam.stable <- readRDS("./Overall/lam.stable_overall.rds")
+lam.stable
+```
+
+## Figure 9: 
+Not relevant for overall model 
+## Figure 10: 
+```{r fig10}
+load("./Overall/y_diam.RData")
+load("./Overall/y_height.RData")
+load("./Overall/ss_diam_overall.RData")
+load("./Overall/ss_height_overall.RData")
+load("./Overall/rv_diam_overall.RData")
+load("./Overall/rv_height_overall.RData")
+
+
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.4,0.3,0.2,0.1),
+    mfrow=c(2, 2))
+
+plot(y_diam, ss_diam_overall,xlab="Diameter (mm)",ylab="frequency",
+     type="l", cex=1, cex.axis=1, cex.lab=1, lwd=2, ylim=c(0, 0.24), col=cols[1])
+title(main="(a) Stable diameter distribution", cex.main=1)
+
+plot(y_height,ss_height_overall,xlab="Height (cm)",ylab="frequency",
+     type="l", cex=1, cex.axis=1, cex.lab=1, lty=1, lwd=2, ylim=c(0, 0.24), col=cols[1]) 
+title(main="(b) Stable height distribution", cex.main=1)
+
+plot(y_diam, rv_diam_overall, xlab="Diameter(mm)", ylab="frequency",
+     type="l", cex=1, cex.axis=1, cex.lab=1, lty=1, lwd=2, ylim=c(0, 0.022), col=cols[1])
+title(main="(c) Reproductive value: by diameter", cex.main=1)
+
+plot(y_height, rv_height_overall, xlab="Height (cm)", ylab="frequency",
+     type="l", cex=1, cex.axis=1, cex.lab=1, lty=1, lwd=2, ylim=c(0, 0.022), col=cols[1])
+title(main="(d) Reproductive value: by height", cex.main=1)
+```
+
+## Figure 11: Marginal elasticity
+
+```{r fig11}
+load("./Overall/total.elas.RData")
+
+x1_seedlings <- seq(0, 1.6, length.out=10)
+x1_adults <- seq(1.6, 800, length.out=100)
+x2_seedlings <- seq(0, 16, length.out=11)
+x2_adults <- seq(16, 800, length.out=101)
+
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, .5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=F,
+    mai=c(0.3,0.4,0.35,0.1),
+    mfrow=c(4, 2))
+
+plot(x1_seedlings, rowSums(total.elas_D1_overall), ylim=c(0, 0.03), xlim=c(0, 1.6), xlab="", 
+     ylab="", main="",  type='l', lwd=2, lty=1, cex.axis=1.5, col=cols[1])
+text(0.2, 0.029, "Seedling", cex=1.5)
+mtext(side=3, "(a) Marginal elasticity over diameter", line=1, cex=1.2, adj=0)
+mtext(side=2, "Elasticity", line=2, cex=1)
+mtext(side=1, "Diameter (mm)", line=2,cex=1)
+
+plot(x1_adults, rowSums(total.elas_F_overall), ylim=c(0, 0.03), xlim=c(1.6, 800), xlab="", 
+     ylab= "", main="", type='l', lwd=2, lty=1, cex.axis=1.5, col=cols[1])
+text(65, 0.029, "Fertility", cex=1.5)
+mtext(side=2, "Elasticity", line=2, cex=1)
+mtext(side=1, "Diameter (mm)", line=2,cex=1)
+
+plot(x1_seedlings, rowSums(total.elas_G_overall), ylim= c(0, 0.03), xlim=c(0, 1.6), xlab="",
+     ylab="", main="", type='l', lwd=2, lty=1, cex.axis=1.5, col=cols[1])
+text(0.2, 0.029, "Maturation", cex=1.5)
+mtext(side=2, "Elasticity", line=2, cex=1)
+mtext(side=1, "Diameter (mm)", line=2,cex=1)
+
+plot(x1_adults, rowSums(total.elas_D2_overall), ylim= c(0, 0.03), xlim=c(1.6, 800), xlab=" ",
+     ylab="", main="",  type='l',  lwd=2, lty=1, cex.axis=1.5, col=cols[1])
+text(65, 0.029, "Adult", cex=1.5)
+
+mtext(side=2, "Elasticity", line=2, cex=1)
+mtext(side=1, "Diameter (mm)", line=2,cex=1)
+
+# By height:
+plot(x2_seedlings, colSums(total.elas_D1_overall), ylim=c(0, 0.03), xlim=c(0, 16), xlab=" ", 
+     ylab="", main="",  type='l', lwd=2, lty=1, cex.axis=1.5, col=cols[1])
+text(2, 0.029, "Seedling", cex=1.5)
+mtext(side=3, "(b) Marginal elasticity over height", line=1, cex=1.2, adj=0)
+mtext(side=2, "Elasticity", line=2, cex=1)
+mtext(side=1, "Height (cm)", line=2,cex=1)
+
+plot(x2_adults, colSums(total.elas_F_overall), ylim=c(0, 0.03), xlim=c(16,800),  xlab=" ",
+     ylab= "", main="", type='l', lwd=2, lty=1, cex.axis=1.5, col=cols[1])
+text(65, 0.029, "Fertility", cex=1.5)
+mtext(side=2, "Elasticity", line=2, cex=1)
+mtext(side=1, "Height (cm)", line=2,cex=1)
+
+plot(x2_seedlings, colSums(total.elas_G_overall), ylim= c(0, 0.03), xlim=c(0, 16), xlab="",
+     ylab="", main="", type='l', lwd=2, lty=1, cex.axis=1.5, col=cols[1])
+text(2, 0.029, "Maturation", cex=1.5)
+mtext(side=2, "Elasticity", line=2, cex=1)
+mtext(side=1, "Height (cm)", line=2,cex=1)
+
+plot(x2_adults, colSums(total.elas_D2_overall), ylim= c(0, 0.03), xlim=c(16, 800),  xlab=" ", 
+     ylab="", main="",  type='l',  lwd=2, lty=1, cex.axis=1.5, col=cols[1])
+text(75, 0.029, "Adult", cex=1.5)
+mtext(side=2, "Elasticity", line=2, cex=1)
+mtext(side=1, "Height (cm)", line=2,cex=1)
+
+
+
+```
+
+## Figure 11: 
