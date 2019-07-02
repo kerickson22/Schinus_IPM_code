@@ -385,6 +385,15 @@ seedlings<-cbind(seedlings, grad_status)
 
 graduates<-subset(seedlings, seedlings$grad_status==1)
 
+kruskal.test(Diameter_tplus1 ~ Site, data = graduates) 
+
+graduates_BC <-subset(graduates, graduates$Site == "Big Cypress")
+graduates_CC <-subset(graduates, graduates$Site == "Cape Canaveral")
+graduates_C <- subset(graduates, graduates$Site == "Chekika")
+graduates_FP <- subset(graduates, graduates$Site == "Fort Pierce")
+graduates_PG <- subset(graduates, graduates$Site == "Punta Gorda")
+graduates_WT <- subset(graduates, graduates$Site == "Wild Turkey")
+
 
 #Get distribution of new recruits sizes (these are not modeled by biotype) 
 summary(graduates$Diameter_tplus1)
