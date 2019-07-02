@@ -172,6 +172,9 @@ restrict<-subset(pooled, is.na(Death_Cause))
 #Remove outliers (very large diameters)
 restrict2<-subset(restrict, Diameter_t<800)
 
+#Remove the individual with an incorrect diameter 
+restrict2 <- subset(restrict2, restrict2$ID != 5)
+
 #Range of diameter: [0, 800]
 0.9*max(restrict2$Diameter_t) #700
 #Range of height:  [0, 800]
@@ -244,11 +247,15 @@ p.vec_W[3]<-surv_mod_seedlings_lineage2$coeff[3]
 
 
 ##### Seedling(D1) GROWTH 
+#Growth should only be based on individuals that remain in the seedling domain
+seedlings2<-subset(seedlings, seedlings$Diameter_tplus1<1.6)
+seedlings2<-subset(seedlings2, seedlings2$Height_tplus1<16)
+
 
 #Size at t+1 is a function of height_t AND diam_t
 
 #(a) Overall model 
-growth_mod_seedlings<-manova(cbind(seedlings$Diameter_tplus1, seedlings$Height_tplus1) ~ seedlings$Diameter_t+seedlings$Height_t)
+growth_mod_seedlings<-manova(cbind(seedlings2$Diameter_tplus1, seedlings2$Height_tplus1) ~ seedlings2$Diameter_t+seedlings2$Height_t)
 summary(growth_mod_seedlings)
 
 #Grab parameters associated with future diameter
@@ -258,7 +265,7 @@ p.vec_overall[6]<-growth_mod_seedlings$coeff[3,1]
 
 #To model variance in D1 growth for diameter and height, use separate linear models and store the variance: 
 #First, model variance in growth for future diameter
-growth_mod_diam_seedlings<-lm(seedlings$Diameter_tplus1 ~ seedlings$Diameter_t+seedlings$Height_t)
+growth_mod_diam_seedlings<-lm(seedlings2$Diameter_tplus1 ~ seedlings2$Diameter_t+seedlings2$Height_t)
 summary(growth_mod_diam_seedlings)
 p.vec_overall[7]<-summary(growth_mod_diam_seedlings)$sigma
 
@@ -269,20 +276,21 @@ p.vec_overall[10]<-growth_mod_seedlings$coeff[3,2]
 
 
 #Then, model variance in growth for future height
-growth_mod_height_seedlings<-lm(seedlings$Height_tplus1 ~ seedlings$Diameter_t + seedlings$Height_t)
+growth_mod_height_seedlings<-lm(seedlings2$Height_tplus1 ~ seedlings2$Diameter_t + seedlings2$Height_t)
 summary(growth_mod_height_seedlings)
 p.vec_overall[11]<-summary(growth_mod_height_seedlings)$sigma
 
 
 #(b) By Biotype: 
-growth_mod_seedlings_lineage<-manova(cbind(seedlings$Diameter_tplus1, seedlings$Height_tplus1) ~ seedlings$Diameter_t+seedlings$Height_t+seedlings$Genetic_type)
+growth_mod_seedlings_lineage<-manova(cbind(seedlings2$Diameter_tplus1, seedlings2$Height_tplus1) ~ seedlings2$Diameter_t+seedlings2$Height_t+seedlings2$Genetic_type)
 summary(growth_mod_seedlings_lineage)
-#Lineage does not appear to have an effect on seedling growth, so use overall model for all biotypes
+
+#Lineage does NOT appear to have an effect on seedling growth, so use overall model for all biotypes
 
 #Capture parameters associated with predicting future diameter 
-p.vec_E[4]<-growth_mod_seedlings$coeff[1,1]
-p.vec_E[5]<-growth_mod_seedlings$coeff[2,1]
-p.vec_E[6]<-growth_mod_seedlings$coeff[3,1]
+p.vec_E[4]<-growth_mod_seedlings_lineage$coeff[1,1]
+p.vec_E[5]<-growth_mod_seedlings_lineage$coeff[2,1]
+p.vec_E[6]<-growth_mod_seedlings_lineage$coeff[3,1]
 p.vec_E[7]<-summary(growth_mod_diam_seedlings)$sigma
 
 p.vec_H[4]<-growth_mod_seedlings$coeff[1,1]
@@ -536,7 +544,7 @@ p.vec_W[29]<-summary(growth_mod_height_larges_lineage)$sigma
 
 #(a) Model probability of being reproductive (overall)
 mod_repro1<-glm(larges$Rep_tplus1 ~ larges$Diameter_t+larges$Height_t, family=binomial)
-summary(mod_repro)
+summary(mod_repro1)
 #Diameter term is not significant, so remove it: 
 mod_repro<-glm(larges$Rep_tplus1 ~ larges$Height_t, family=binomial)
 
