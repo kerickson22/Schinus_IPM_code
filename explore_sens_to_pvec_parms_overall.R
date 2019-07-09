@@ -2,10 +2,17 @@
 
 #Load the parameter vectors calculated from the dataset where the one problematic individual 
 # at Big Cypress whose future diameter was recorded incorrectly is removed . 
+require(Matrix);
+library(MASS)
+library(mvtnorm)
+library(msm)
 
 
-load("/Users/curculion/Documents/GitHub/Schinus_IPM_code/Overall/p.vec_overall.RData")
-results <- read.csv("/Users/curculion/Documents/GitHub/Schinus_IPM_code/parms_to_explore.csv")
+load("./Overall/p.vec_overall.RData")
+results <- read.csv("parms_to_explore.csv", head=T)
+results2 <- read.csv("parms_to_explore2.csv", head=T)
+results <- rbind(results, results2)
+names(results) <- c("pos", "value")
 
 lambda <- rep(NA, nrow(results))
 results <- cbind(results, lambda)
@@ -228,7 +235,7 @@ getLambda <- function(p.vec) {
 
 
 time_start <- proc.time()
-for(i in 1:nrow(results)) {
+for(i in 101:nrow(results)) {
   cat("Param: ", i, "of ", nrow(results), ": \n");
   p.vec_new <- p.vec_overall
   p.vec_new[results$pos[i]] <- results$value[i]
@@ -236,7 +243,7 @@ for(i in 1:nrow(results)) {
 }
 time_end <- proc.time() - time_start 
 
-
+save(results, file ="sens_results.RData")
 
 #And finally for the standard deviation of graduate diameter: 
 #Now go through and see what happens as the parameter value 
