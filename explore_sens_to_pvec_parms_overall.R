@@ -9,13 +9,20 @@ library(msm)
 
 
 load("./Overall/p.vec_overall.RData")
-results <- read.csv("parms_to_explore.csv", head=T)
-results2 <- read.csv("parms_to_explore2.csv", head=T)
-results <- rbind(results, results2)
-names(results) <- c("pos", "value")
+#results <- read.csv("parms_to_explore.csv", head=T)
+#results2 <- read.csv("parms_to_explore2.csv", head=T)
+#results <- rbind(results, results2)
+#names(results) <- c("pos", "value")
 
-lambda <- rep(NA, nrow(results))
-results <- cbind(results, lambda)
+percentages <- c(0.5, 0.6, 0.7, 0.8, 0.9, 1.1, 1.2, 1.3, 1.4, 1.5)
+
+results <- expand.grid(percentages, p.vec_overall)
+names(results) <- c("percent", "par_original")
+results$pos <- rep(1:length(p.vec_overall), times = 1, each = length(percentages))
+results$new_par <- results$percent * results$par_original
+
+results$lambda <- rep(NA, nrow(results))
+
 
 
 getLambda <- function(p.vec) {
@@ -238,118 +245,853 @@ time_start <- proc.time()
 for(i in 101:nrow(results)) {
   cat("Param: ", i, "of ", nrow(results), ": \n");
   p.vec_new <- p.vec_overall
-  p.vec_new[results$pos[i]] <- results$value[i]
+  p.vec_new[results$pos[i]] <- results$new_par[i]
   results$lambda[i] <- getLambda(p.vec_new)
 }
 time_end <- proc.time() - time_start 
 
-save(results, file ="sens_results.RData")
 
-#And finally for the standard deviation of graduate diameter: 
-#Now go through and see what happens as the parameter value 
-# for mean graduate diameter is changed
+lam.stable_overall <- readRDS("./Overall/lam.stable_overall.rds")
+lam.stable_BC <- readRDS("./BC/lam.stable_BC.rds")
+lam.stable_CC <- readRDS("./CC/lam.stable_CC.rds")
+lam.stable_C  <- readRDS("./C/lam.stable_C.rds")
+lam.stable_FP <- readRDS("./C/lam.stable_C.rds")
+lam.stable_PG <- readRDS("./FP/lam.stable_FP.rds")
+lam.stable_WT <- readRDS("./WT/lam.stable_WT.rds")
 
-results_sd <- data.frame( sd_diam = rep(NA, 4),
-                          lambda_BC = rep(NA, 4),
-                          lambda_CC = rep(NA, 4),
-                          lambda_C  = rep(NA, 4),
-                          lambda_FP = rep(NA, 4),
-                          lambda_PG = rep(NA, 4),
-                          lambda_WT = rep(NA, 4))
+load("./BC/p.vec_BC.RData")
+load("./CC/p.vec_CC.RData")
+load("./C/p.vec_C.RData")
+load("./FP/p.vec_FP.RData")
+load("./PG/p.vec_PG.RData")
+load("./WT/p.vec_WT.RData")
 
-results_sd[1,1] <- p.vec_BC[16]
-results_sd[, 2:7] <- results_mu[, 2:7]
+results$delta <- results$lambda - lam.stable_overall
 
-for(i in 1:length(sim_grad_diams_sd)) {
-  p.vec_BC_new <- p.vec_BC
-  p.vec_CC_new <- p.vec_CC
-  p.vec_C_new  <- p.vec_C
-  p.vec_FP_new <- p.vec_FP
-  p.vec_PG_new <- p.vec_PG
-  p.vec_WT_new <- p.vec_WT
-  p.vecs <- list(p.vec_BC_new, p.vec_CC_new, p.vec_C_new, 
-                 p.vec_FP_new, p.vec_PG_new, p.vec_WT_new)
-  
-  for (k in 1:6){
-    p.vecs[[k]][16] <- sim_grad_diams_sd[i]
-  }
-  thing <- getLambdas(p.vecs)
-  results_sd[i+1,] <- c(sim_grad_diams_sd[i], thing)
-  cat("Param: ", i,"\n"); 
+delt_BC <- lam.stable_BC - lam.stable_overall
+delt_CC <- lam.stable_CC - lam.stable_overall
+delt_C <- lam.stable_C - lam.stable_overall
+delt_FP <- lam.stable_FP - lam.stable_overall
+delt_PG <- lam.stable_PG - lam.stable_overall
+delt_WT <- lam.stable_WT - lam.stable_overall
+
+# -Seedling Survival  #####
+#logit(Ss) = B0 + B1*diam + B2*height
+par(mfrow=c(2,2))
+plot(1, type="n", xlab="", ylab="", xlim=c(0, 10), ylim=c(0, 10), axes=F)
+text(3,8, "Seedling Survival", cex=1)
+expression('title'[2])
+text(4, 7, expression("Logit (S"[s]*") = B"[0]*" + B"[1]*"*diam + B"[2]*" * height"),
+     cex=0.8)
+
+plot(results$new_par[1:10], results$delta[1:10],
+     xlim=c(-4.1, -1),
+     xlab = expression("B"[0]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[1], col="red")
+abline(h =0)
+abline(v = p.vec_BC[1], lty=3, col=cols[1])
+text(p.vec_BC[1], 1e-06, "BC")
+abline(v = p.vec_CC[1], lty=3, col=cols[2])
+text(p.vec_CC[1], 1e-06, "CC")
+abline(v = p.vec_C[1],  lty=3, col=cols[3])
+text(p.vec_C[1], 1e-06, "C")
+abline(v = p.vec_FP[1], lty=3, col=cols[4])
+text(p.vec_FP[1], 1e-06, "FP")
+abline(v = p.vec_PG[1], lty=3, col=cols[5])
+text(p.vec_PG[1], 8.5e-07, "PG")
+abline(v = p.vec_WT[1], lty=3, col=cols[6])
+text(p.vec_WT[1], 7e-07, "WT")
+
+plot(results$new_par[11:20], results$delta[11:20],
+     xlab = expression("B"[1]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[11], col="red")
+abline(h =0)
+abline(v = p.vec_BC[2], lty=3, col=cols[1])
+text(p.vec_BC[2], 3e-7, "BC")
+text(p.vec_CC[2], 2.5e-7, "CC")
+text(p.vec_C[2], 2e-7, "C")
+text(p.vec_FP[2], 1.5e-7, "FP")
+text(p.vec_PG[2], 1e-7, "PG")
+text(p.vec_WT[2], 6.5e-8, "WT")
+
+plot(results$new_par[21:30], results$delta[21:30],
+     xlab = expression("B"[2]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[21], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[3], lty=3, col=cols[1])
+text(p.vec_BC[3], 4e-7, "BC")
+text(p.vec_CC[3], 3.5e-7, "CC")
+text(p.vec_C[3], 3e-7, "C")
+text(p.vec_FP[3], 2.5e-7, "FP")
+text(p.vec_PG[3], 2e-7, "PG")
+text(p.vec_WT[3], 1.5e-7, "WT")
+dev.copy(pdf, 'seedling_survival_sens.pdf')
+dev.off()
+
+#-- Seedling Growth #####
+
+par(mfrow=c(4, 2))
+
+
+#Seedling Survival logit(Ss)  = B0 + B1*diam + B2*height
+x11(width=11)
+par(mfrow=c(2,4))
+
+#Diameter
+plot(results$new_par[31:40], results$delta[31:40],
+     xlab = expression("B"[0]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[31], col="red")
+abline(h =0)
+abline(v = p.vec_BC[4], lty=3, col=cols[1])
+text(p.vec_BC[4], 1.5e-07, "BC")
+abline(v = p.vec_CC[4], lty=3, col=cols[2])
+text(p.vec_CC[4], 1.5e-07, "CC")
+abline(v = p.vec_C[4],  lty=3, col=cols[3])
+text(p.vec_C[4], 1e-07, "C")
+abline(v = p.vec_FP[4], lty=3, col=cols[4])
+text(p.vec_FP[4], 1e-07, "FP")
+abline(v = p.vec_PG[4], lty=3, col=cols[5])
+text(p.vec_PG[4], 1.25e-07, "PG")
+abline(v = p.vec_WT[4], lty=3, col=cols[6])
+text(p.vec_WT[4], 0.5e-07, "WT")
+
+plot(results$new_par[41:50], results$delta[41:50],
+     xlab = expression("B"[1]), 
+     ylab=expression(Delta*lambda))
+mtext(side=3, expression(mu[diam]*" = B"[0]*" + B"[1]*"*diam + B"[2]*" * height"),
+      cex=0.8)
+abline(v = results$par_original[41], col="red")
+abline(h =0)
+abline(v = p.vec_BC[5], lty=3, col=cols[1])
+text(p.vec_BC[5],1.5e-7, "BC")
+text(p.vec_CC[5], 1.25e-7, "CC")
+text(p.vec_C[5], 10e-8, "C")
+text(p.vec_FP[5], 8e-8, "FP")
+text(p.vec_PG[5], 6.5e-8, "PG")
+text(p.vec_WT[5], 5e-8, "WT")
+
+plot(results$new_par[51:60], results$delta[51:60],
+     xlab = expression("B"[2]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[51], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[6], lty=3, col=cols[1])
+text(p.vec_BC[6], 4e-8, "BC")
+text(p.vec_CC[6], 3.5e-8, "CC")
+text(p.vec_C[6], 3e-8, "C")
+text(p.vec_FP[6], 2.5e-8, "FP")
+text(p.vec_PG[6], 2e-8, "PG")
+text(p.vec_WT[6], 1.5e-8, "WT")
+
+plot(results$new_par[61:70], results$delta[61:70],
+     xlab = expression(sigma[diam]^2), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[61], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[7], lty=3, col=cols[1])
+text(p.vec_BC[7], -1.5e-9, "BC")
+text(p.vec_CC[7], -2e-9, "CC")
+text(p.vec_C[7], -2.5e-9, "C")
+text(p.vec_FP[7], -3e-9, "FP")
+text(p.vec_PG[7], -3.5e-9, "PG")
+text(p.vec_WT[7], -4e-9, "WT")
+
+#Height
+plot(results$new_par[71:80], results$delta[71:80],
+     xlab = expression("B"[0]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[71], col="red")
+abline(h =0)
+abline(v = p.vec_BC[8], lty=3, col=cols[1])
+text(p.vec_BC[8], 2e-07, "BC")
+abline(v = p.vec_CC[8], lty=3, col=cols[2])
+text(p.vec_CC[8], 2e-07, "CC")
+abline(v = p.vec_C[8],  lty=3, col=cols[3])
+text(p.vec_C[8], 1.5e-07, "C")
+abline(v = p.vec_FP[8], lty=3, col=cols[4])
+text(p.vec_FP[8], 1.25e-07, "FP")
+abline(v = p.vec_PG[8], lty=3, col=cols[5])
+text(p.vec_PG[8], 1e-07, "PG")
+abline(v = p.vec_WT[8], lty=3, col=cols[6])
+text(p.vec_WT[8], 2e-07, "WT")
+
+plot(results$new_par[81:90], results$delta[81:90],
+     xlab = expression("B"[1]), 
+     ylab=expression(Delta*lambda))
+mtext(side=3, expression(mu[height]*" = B"[0]*" + B"[1]*"*diam + B"[2]*" * height"),
+      cex=0.8)
+abline(v = results$par_original[81], col="red")
+abline(h =0)
+abline(v = p.vec_BC[9], lty=3, col=cols[1])
+text(p.vec_BC[9],4e-8, "BC")
+text(p.vec_CC[9], 3.5e-8, "CC")
+text(p.vec_C[9], 3e-8, "C")
+text(p.vec_FP[9], 2.5e-8, "FP")
+text(p.vec_PG[9], 2e-8, "PG")
+text(p.vec_WT[9], 1.5e-8, "WT")
+
+plot(results$new_par[91:100], results$delta[91:100],
+     xlab = expression("B"[2]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[91], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[10], lty=3, col=cols[1])
+text(p.vec_BC[10], 9e-8, "BC")
+text(p.vec_CC[10], 7.5e-8, "CC")
+text(p.vec_C[10], 6e-8, "C")
+text(p.vec_FP[10], 4.5e-8, "FP")
+text(p.vec_PG[10], 3e-8, "PG")
+text(p.vec_WT[10], 1.5e-8, "WT")
+
+plot(results$new_par[101:110], results$delta[101:110],
+     xlab = expression(sigma[height]^2), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[101], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[11], lty=3, col=cols[1])
+text(p.vec_BC[11], -1e-9, "BC")
+text(p.vec_CC[11], -2e-9, "CC")
+text(p.vec_C[11], -3e-9, "C")
+text(p.vec_FP[11], -4e-9, "FP")
+text(p.vec_PG[11], -5e-9, "PG")
+text(p.vec_WT[11], -6e-9, "WT")
+
+dev.copy(pdf, 'seedling_growth_sens.pdf')
+dev.off()
+
+## Maturation ##### 
+x11(width=11)
+par(mfrow=c(2,4))
+plot(1, type="n", xlab="", ylab="", xlim=c(0, 10), ylim=c(0, 10), axes=F)
+text(3,8, "Maturation", cex=1)
+expression('title'[2])
+text(4, 7, expression("Logit (m) = B"[0]*" + B"[1]*"*diam + B"[2]*" * height"),
+     cex=0.8)
+
+plot(results$new_par[111:120], results$delta[111:120],
+     xlab = expression("B"[0]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[111], col="red")
+abline(h =0)
+abline(v = p.vec_BC[12], lty=3, col=cols[1])
+text(p.vec_BC[12], 1e-06, "BC")
+abline(v = p.vec_CC[12], lty=3, col=cols[2])
+text(p.vec_CC[12], 9e-07, "CC")
+abline(v = p.vec_C[12],  lty=3, col=cols[3])
+text(p.vec_C[12], 1e-06, "C")
+abline(v = p.vec_FP[12], lty=3, col=cols[4])
+text(p.vec_FP[12], 7.5e-07, "FP")
+abline(v = p.vec_PG[12], lty=3, col=cols[5])
+text(p.vec_PG[12], 6e-07, "PG")
+abline(v = p.vec_WT[12], lty=3, col=cols[6])
+text(p.vec_WT[12], 1e-06, "WT")
+
+plot(results$new_par[121:130], results$delta[121:130],
+     xlab = expression("B"[1]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[121], col="red")
+abline(h =0)
+abline(v = p.vec_BC[13], lty=3, col=cols[1])
+text(p.vec_BC[13], 4e-7, "BC")
+text(p.vec_CC[13], 3.5e-7, "CC")
+text(p.vec_C[13], 3e-7, "C")
+text(p.vec_FP[13], 2.5e-7, "FP")
+text(p.vec_PG[13], 2e-7, "PG")
+text(p.vec_WT[13], 1.5e-7, "WT")
+
+plot(results$new_par[131:140], results$delta[131:140],
+     xlab = expression("B"[2]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[131], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[14], lty=3, col=cols[1])
+text(p.vec_BC[14], 3e-7, "BC")
+text(p.vec_CC[14], 2.5e-7, "CC")
+text(p.vec_C[14], 2e-7, "C")
+text(p.vec_FP[14], 1.5e-7, "FP")
+text(p.vec_PG[14], 1e-7, "PG")
+text(p.vec_WT[14], .5e-7, "WT")
+
+plot(results$new_par[144:150], results$delta[144:150],
+     xlab = expression(mu[diam]), 
+     ylab=expression(Delta*lambda), main = "Distribution of Diameter")
+abline(v = results$par_original[144], col="red")
+abline(h =0)
+abline(v = p.vec_BC[15], lty=3, col=cols[1])
+text(p.vec_BC[15], 0.025, "BC")
+text(p.vec_CC[15], 0.0225, "CC")
+text(p.vec_C[15], 0.02, "C")
+text(p.vec_FP[15], 0.0175, "FP")
+text(p.vec_PG[15], 0.015, "PG")
+text(p.vec_PG[15], 0.0125, "WT")
+
+plot(results$new_par[151:160], results$delta[151:160],
+     xlab = expression(sd[diam]^2), 
+     ylab=expression(Delta*lambda), main = "")
+abline(v = results$par_original[151], col="red")
+abline(h =0)
+abline(v = p.vec_BC[16], lty=3, col=cols[1])
+text(p.vec_BC[16], 0.012, "BC")
+text(p.vec_CC[16], 0.011, "CC")
+text(p.vec_C[16], 0.01, "C")
+text(p.vec_FP[16], 0.009, "FP")
+text(p.vec_PG[16], 0.008, "PG")
+text(p.vec_PG[16], 0.007, "WT")
+
+plot(results$new_par[163:170], results$delta[163:170],
+     xlab = expression(mu[height]), 
+     ylab=expression(Delta*lambda), main = "Distribution of Height")
+abline(v = results$par_original[163], col="red")
+abline(h =0)
+abline(v = p.vec_BC[17], lty=3, col=cols[1])
+text(p.vec_BC[17], 2e-9, "BC")
+text(p.vec_CC[17], 1.5e-9, "CC")
+text(p.vec_C[17], 1e-9, "C")
+text(p.vec_FP[17], 5e-10, "FP")
+text(p.vec_PG[17], 0, "PG")
+text(p.vec_PG[17], -5e-10, "WT")
+
+plot(results$new_par[171:180], results$delta[171:180],
+     xlab = expression(sd[height]^2), 
+     ylab=expression(Delta*lambda), main = "")
+abline(v = results$par_original[171], col="red")
+abline(h =0)
+abline(v = p.vec_BC[18], lty=3, col=cols[1])
+text(p.vec_BC[18], -0.5e-8, "BC")
+text(p.vec_CC[18], -1e-8, "CC")
+text(p.vec_C[18], -1.5e-8, "C")
+text(p.vec_FP[18], -2e-8, "FP")
+text(p.vec_PG[18], -2.5e-8, "PG")
+text(p.vec_PG[18], -3e-8, "WT")
+
+dev.copy(pdf, 'maturation_sens.pdf')
+dev.off()
+
+# -Adult Survival  #####
+#logit(Ss) = B0 + B1*diam + B2*height
+x11()
+par(mfrow=c(2,2))
+plot(1, type="n", xlab="", ylab="", xlim=c(0, 10), ylim=c(0, 10), axes=F)
+text(3,8, "Adult Survival", cex=1)
+expression('title'[2])
+text(4, 7, expression("Logit (S"[A]*") = B"[0]*" + B"[1]*"*diam + B"[2]*" * height"),
+     cex=0.8)
+
+plot(results$new_par[181:190], results$delta[181:190],
+     xlab = expression("B"[0]), 
+     ylab=expression(Delta*lambda), xlim=c(0,2.5 ))
+abline(v = results$par_original[19], col="red")
+abline(h =0)
+abline(v = p.vec_BC[19], lty=3, col=cols[1])
+text(p.vec_BC[19], 4.5e-08, "BC")
+abline(v = p.vec_CC[19], lty=3, col=cols[2])
+text(p.vec_CC[19], 3e-08, "CC")
+abline(v = p.vec_C[19],  lty=3, col=cols[3])
+text(p.vec_C[19], 4.5e-08, "C")
+abline(v = p.vec_FP[19], lty=3, col=cols[4])
+text(p.vec_FP[19], 4.5e-08, "FP")
+abline(v = p.vec_PG[19], lty=3, col=cols[5])
+text(p.vec_PG[19], 1.5e-8, "PG")
+abline(v = p.vec_WT[19], lty=3, col=cols[6])
+text(p.vec_WT[19], 4.5e-8, "WT")
+
+plot(results$new_par[191:200], results$delta[191:200],
+     xlab = expression("B"[1]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[191], col="red")
+abline(h =0)
+abline(v = p.vec_BC[20], lty=3, col=cols[1])
+text(p.vec_BC[20], 2e-8, "BC")
+text(p.vec_CC[20], 1.25e-8, "CC")
+text(p.vec_C[20], 5e-09, "C")
+text(p.vec_FP[20], -2.5e-9, "FP")
+text(p.vec_PG[20], -1e-8, "PG")
+text(p.vec_WT[20], -1.75e-8, "WT")
+
+plot(results$new_par[201:210], results$delta[201:210],
+     xlab = expression("B"[2]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[201], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[21], lty=3, col=cols[1])
+text(p.vec_BC[21], 2e-8, "BC")
+text(p.vec_CC[21], 1.25e-8, "CC")
+text(p.vec_C[21], 5e-09, "C")
+text(p.vec_FP[21], -2.5e-9, "FP")
+text(p.vec_PG[21], -1e-8, "PG")
+text(p.vec_WT[21], -1.75e-8, "WT")
+dev.copy(pdf, 'adult_survival_sens.pdf')
+dev.off()
+
+#-- Adult Growth #####
+
+
+#Adult Survival logit(Ss)  = B0 + B1*diam + B2*height
+x11(width=11)
+par(mfrow=c(2,4))
+
+#Diameter
+plot(results$new_par[211:220], results$delta[211:220],
+     xlab = expression("B"[0]), 
+     ylab=expression(Delta*lambda),
+     xlim=c(-0.4, 9.1))
+abline(v = results$par_original[211], col="red")
+abline(h =0)
+abline(v = p.vec_BC[22], lty=3, col=cols[1])
+text(p.vec_BC[22], -1e-5, "BC")
+abline(v = p.vec_CC[22], lty=3, col=cols[2])
+text(p.vec_CC[22], -1e-5, "CC")
+abline(v = p.vec_C[22],  lty=3, col=cols[3])
+text(p.vec_C[22], -1e-5, "C")
+abline(v = p.vec_FP[22], lty=3, col=cols[4])
+text(p.vec_FP[22], -1e-5, "FP")
+abline(v = p.vec_PG[22], lty=3, col=cols[5])
+text(p.vec_PG[22], -2e-5, "PG")
+abline(v = p.vec_WT[22], lty=3, col=cols[6])
+text(p.vec_WT[22], -2e-5, "WT")
+
+plot(results$new_par[221:230], results$delta[221:230],
+     xlab = expression("B"[1]), 
+     ylab=expression(Delta*lambda))
+mtext(side=3, expression(mu[diam]*" = B"[0]*" + B"[1]*"*diam + B"[2]*" * height"),
+      cex=0.8)
+abline(v = results$par_original[221], col="red")
+abline(h =0)
+abline(v = p.vec_BC[23], lty=3, col=cols[1])
+text(p.vec_BC[23],-0.03, "BC")
+text(p.vec_CC[23], -0.045, "CC")
+text(p.vec_C[23], -0.06, "C")
+text(p.vec_FP[23], -0.075, "FP")
+text(p.vec_PG[23], -0.09, "PG")
+text(p.vec_WT[23], -0.105, "WT")
+
+plot(results$new_par[231:240], results$delta[231:240],
+     xlab = expression("B"[2]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[231], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[24], lty=3, col=cols[1])
+text(p.vec_BC[24], 2e-4, "BC")
+text(p.vec_CC[24], 1e-4, "CC")
+text(p.vec_C[24], 0, "C")
+text(p.vec_FP[24], -1e-4, "FP")
+text(p.vec_PG[24], -2e-4, "PG")
+text(p.vec_WT[24], -3e-4, "WT")
+
+plot(results$new_par[241:250], results$delta[241:250],
+     xlab = expression(sigma[diam]^2), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[241], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[25], lty=3, col=cols[1])
+text(p.vec_BC[25], -0.01, "BC")
+text(p.vec_CC[25], -0.015, "CC")
+text(p.vec_C[25], -0.02, "C")
+text(p.vec_FP[25], -0.025, "FP")
+text(p.vec_PG[25], -0.03, "PG")
+text(p.vec_WT[25], -0.035, "WT")
+
+#Height
+plot(results$new_par[251:260], results$delta[251:260],
+     xlab = expression("B"[0]), 
+     ylab=expression(Delta*lambda),
+     xlim=c(12, 65))
+abline(v = results$par_original[251], col="red")
+abline(h =0)
+abline(v = p.vec_BC[26], lty=3, col=cols[1])
+text(p.vec_BC[26], 2e-4, "BC")
+abline(v = p.vec_CC[26], lty=3, col=cols[2])
+text(p.vec_CC[26], 2e-04, "CC")
+abline(v = p.vec_C[26],  lty=3, col=cols[3])
+text(p.vec_C[26], 2e-4, "C")
+abline(v = p.vec_FP[26], lty=3, col=cols[4])
+text(p.vec_FP[26], 2e-4, "FP")
+abline(v = p.vec_PG[26], lty=3, col=cols[5])
+text(p.vec_PG[26], 2e-04, "PG")
+abline(v = p.vec_WT[26], lty=3, col=cols[6])
+text(p.vec_WT[26], 2e-04, "WT")
+
+plot(results$new_par[261:270], results$delta[261:270],
+     xlab = expression("B"[1]), 
+     ylab=expression(Delta*lambda))
+mtext(side=3, expression(mu[height]*" = B"[0]*" + B"[1]*"*diam + B"[2]*" * height"),
+      cex=0.8)
+abline(v = results$par_original[261], col="red")
+abline(h =0)
+abline(v = p.vec_BC[27], lty=3, col=cols[1])
+text(p.vec_BC[27],-5e-4, "BC")
+text(p.vec_CC[27], -7e-4, "CC")
+text(p.vec_C[27], -10e-4, "C")
+text(p.vec_FP[27], -13e-4, "FP")
+text(p.vec_PG[27], -16e-4, "PG")
+text(p.vec_WT[27], -19e-4, "WT")
+
+plot(results$new_par[271:280], results$delta[271:280],
+     xlab = expression("B"[2]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[271], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[28], lty=3, col=cols[1])
+text(p.vec_BC[28], -0.005, "BC")
+text(p.vec_CC[28], -0.006, "CC")
+text(p.vec_C[28], -0.007, "C")
+text(p.vec_FP[28], -0.008, "FP")
+text(p.vec_PG[28], -0.009, "PG")
+text(p.vec_WT[28], -0.010, "WT")
+
+plot(results$new_par[281:290], results$delta[281:290],
+     xlab = expression(sigma[height]^2), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[281], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[29], lty=3, col=cols[1])
+text(p.vec_BC[29], -0.005, "BC")
+text(p.vec_CC[29], -0.006, "CC")
+text(p.vec_C[29], -0.007, "C")
+text(p.vec_FP[29], -0.008, "FP")
+text(p.vec_PG[29], -0.009, "PG")
+text(p.vec_WT[29], -0.010, "WT")
+
+dev.copy(pdf, 'adult_growth_sens.pdf')
+dev.off()
+
+##- Reproduction #####
+
+x11(width=11)
+par(mfrow=c(2, 5))
+plot(results$new_par[291:300], results$delta[291:300],
+     xlab = expression(B[0]), 
+     ylab=expression(Delta*lambda), 
+     xlim=c(-4.5, 1.6),
+     main=expression("logit("*p[f]*") = B"[0]*"+ B"[1]*" * height"))
+abline(v = results$par_original[291], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[30], lty=3, col=cols[1])
+text(p.vec_BC[30], -1.5e-8, "BC")
+abline(v = p.vec_CC[30], lty=3, col=cols[2])
+text(p.vec_CC[30], -2e-8, "CC")
+abline(v = p.vec_C[30], lty=3, col=cols[3])
+text(p.vec_C[30], -1.5e-8, "C")
+abline(v=p.vec_FP[30], lty=3, col=cols[4])
+text(p.vec_FP[30], -2.5e-8, "FP")
+abline(v=p.vec_PG[30], lty=3, col=cols[5])
+text(p.vec_PG[30], -1.5e-8, "PG")
+abline(v=p.vec_WT[30], lty=3, col=cols[6])
+text(p.vec_WT[30], -1.5e-8, "WT")
+
+plot(results$new_par[301:310], results$delta[301:310],
+     xlab = expression(B[1]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[301], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[31], lty=3, col=cols[1])
+text(p.vec_BC[31], -1.5e-8, "BC")
+text(p.vec_CC[31], -2.5e-8, "CC")
+text(p.vec_C[31], -3.5e-8, "C")
+text(p.vec_FP[31], -4.5e-8, "FP")
+text(p.vec_PG[31], -5.5e-8, "PG")
+text(p.vec_WT[31], -6.5e-8, "WT")
+
+plot(results$new_par[311:320], results$delta[311:320],
+     xlab = expression(B[0]), 
+     ylab=expression(Delta*lambda),
+     xlim=c(1.5, 7),
+     main=expression("logit(F) = B"[0]*x^2))
+abline(v = results$par_original[311], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[32], lty=3, col=cols[1])
+text(p.vec_BC[32], -.5e-7, "BC")
+abline(v = p.vec_CC[32], lty=3, col=cols[2])
+text(p.vec_CC[32], -.5e-7, "CC")
+abline(v = p.vec_C[32], lty=3, col=cols[3])
+text(p.vec_C[32], -.5e-7, "C")
+abline(v=p.vec_FP[32], lty=3, col=cols[4])
+text(p.vec_FP[32], -.5e-7, "FP")
+abline(v=p.vec_PG[32], lty=3, col=cols[5])
+text(p.vec_PG[32], -.5e-7, "PG")
+abline(v=p.vec_WT[32], lty=3, col=cols[6])
+text(p.vec_WT[32], -.5e-7, "WT")
+
+plot(results$new_par[321:330], results$delta[321:330],
+     xlab = expression(mu[diam]), 
+     ylab=expression(Delta*lambda),
+     main="Seedling diameter distribution")
+abline(v = results$par_original[321], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[33], lty=3, col=cols[1])
+text(p.vec_BC[33], 4e-7, "BC")
+text(p.vec_CC[33], 3.5e-7, "CC")
+text(p.vec_C[33], 3e-7, "C")
+text(p.vec_FP[33], 2.5e-7, "FP")
+text(p.vec_PG[33], 2e-7, "PG")
+text(p.vec_WT[33], 1.5e-7, "WT")
+
+plot(results$new_par[331:340], results$delta[331:340],
+     xlab = expression(sigma[diam]^2), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[331], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[34], lty=3, col=cols[1])
+text(p.vec_BC[34], 4e-8, "BC")
+text(p.vec_CC[34], 3.5e-8, "CC")
+text(p.vec_C[34], 3e-8, "C")
+text(p.vec_FP[34], 2.5e-8, "FP")
+text(p.vec_PG[34], 2e-8, "PG")
+text(p.vec_WT[34], 1.5e-8, "WT")
+
+plot(results$new_par[341:350], results$delta[341:350],
+     xlab = expression(mu[height]), 
+     ylab=expression(Delta*lambda),
+     main="Seedling height distribution")
+abline(v = results$par_original[341], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[35], lty=3, col=cols[1])
+text(p.vec_BC[35], 3e-7, "BC")
+text(p.vec_CC[35], 2.5e-7, "CC")
+text(p.vec_C[35], 2e-7, "C")
+text(p.vec_FP[35], 1.5e-7, "FP")
+text(p.vec_PG[35], 1e-7, "PG")
+text(p.vec_WT[35], .5e-7, "WT")
+
+plot(results$new_par[351:360], results$delta[351:360],
+     xlab = expression(sigma[height]^2), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[351], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[36], lty=3, col=cols[1])
+text(p.vec_BC[36], 4e-8, "BC")
+text(p.vec_CC[36], 3.5e-8, "CC")
+text(p.vec_C[36], 3e-8, "C")
+text(p.vec_FP[36], 2.5e-8, "FP")
+text(p.vec_PG[36], 2e-8, "PG")
+text(p.vec_WT[36], 1.5e-8, "WT")
+
+
+plot(results$new_par[361:370], results$delta[361:370],
+     xlab = expression(tau[1]), 
+     ylab=expression(Delta*lambda),
+     main="Pre-dispersal seed survival")
+abline(v = results$par_original[361], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[37], lty=3, col=cols[1])
+text(p.vec_BC[37], 2e-7, "BC")
+text(p.vec_CC[37], 1.8e-7, "CC")
+text(p.vec_C[37], 1.6e-7, "C")
+text(p.vec_FP[37], 1.4e-7, "FP")
+text(p.vec_PG[37], 1.2e-7, "PG")
+text(p.vec_WT[37], 1.e-7, "WT")
+
+plot(results$new_par[371:380], results$delta[371:380],
+     xlab = expression(delta), 
+     ylab=expression(Delta*lambda),
+     main="P(dispersal)")
+abline(v = results$par_original[371], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[38], lty=3, col=cols[1])
+text(p.vec_BC[38], 2e-7, "BC")
+text(p.vec_CC[38], 1.8e-7, "CC")
+text(p.vec_C[38], 1.6e-7, "C")
+text(p.vec_FP[38], 1.4e-7, "FP")
+text(p.vec_PG[38], 1.2e-7, "PG")
+text(p.vec_WT[38], 1.e-7, "WT")
+
+plot(results$new_par[381:390], results$delta[381:390],
+     xlab = expression(tau[2]), 
+     ylab=expression(Delta*lambda),
+     main="Post-dispersal seed survival")
+abline(v = results$par_original[381], col="red")
+abline(h =0)
+
+abline(v = p.vec_BC[39], lty=3, col=cols[1])
+text(p.vec_BC[39], 2e-7, "BC")
+text(p.vec_CC[39], 1.8e-7, "CC")
+text(p.vec_C[39], 1.6e-7, "C")
+text(p.vec_FP[39], 1.4e-7, "FP")
+text(p.vec_PG[39], 1.2e-7, "PG")
+text(p.vec_WT[39], 1.e-7, "WT")
+dev.copy(pdf, 'reproduction_sens.pdf')
+dev.off()
+
+
+#Some additional params 
+thing1 <- c("min", NA, 22, -0.4, NA, NA)
+thing2<-c("max", NA, 22, 9.1, NA, NA)
+thing3 <- c("min", NA, 26, 12, NA, NA)
+thing4 <- c("max", NA, 26, 64, NA, NA)
+#results <- rbind(results, thing1, thing2, thing3, thing4)
+
+
+#Extremes of p.vec[22]
+for(i in 391:nrow(results)) {
+  cat("Param: ", i, "of ", nrow(results), ": \n");
+  p.vec_new <- p.vec_overall
+  p.vec_new[as.numeric(results$pos[i])] <- as.numeric(results$new_par[i])
+  results$lambda[i] <- getLambda(p.vec_new)
 }
 
-#Plot the relationship between parameter choice for mean graduate diameter and lambda
-par(mfrow=c(2,3))
-plot(sim_grad_diams_mu, results_mu[2:6,2], main = "BC", 
-     xlab="Mean diameter of graduates", ylab="Lambda")
-points(results_mu[1,1], results_mu[1,2], col="red", pch=19)
+results$delta <- as.numeric(results$lambda) - lam.stable_overall
 
-plot(sim_grad_diams_mu, results_mu[2:6,3], main = "CC",
-     xlab="Mean diameter of graduates", ylab="Lambda")
-points(results_mu[1,1], results_mu[1,3], col="red", pch=19)
+results$new_par <- as.numeric(results$new_par)
+## REDO ADULT GROWTH #####
+x11(width=11)
+par(mfrow=c(2,4))
 
-plot(sim_grad_diams_mu, results_mu[2:6,4], main = "C",
-     xlab="Mean diameter of graduates", ylab="Lambda")
-points(results_mu[1,1], results_mu[1,4], col="red", pch=19)
+#Diameter
+plot(results$new_par[211:220], results$delta[211:220],
+     xlab = expression("B"[0]), 
+     ylab=expression(Delta*lambda),
+     xlim=c(-1, 9.5), ylim=c(-0.002, 0.0003))
+points(results$new_par[391], results$delta[391])
+points(results$new_par[392], results$delta[392])
+abline(v = results$par_original[211], col="red")
+abline(h =0)
+abline(v = p.vec_BC[22], lty=3, col=cols[1])
+#text(p.vec_BC[22], -1e-5, "BC")
+abline(v = p.vec_CC[22], lty=3, col=cols[2])
+#text(p.vec_CC[22], -1e-5, "CC")
+abline(v = p.vec_C[22],  lty=3, col=cols[3])
+#text(p.vec_C[22], -1e-5, "C")
+abline(v = p.vec_FP[22], lty=3, col=cols[4])
+#text(p.vec_FP[22], -1e-5, "FP")
+abline(v = p.vec_PG[22], lty=3, col=cols[5])
+#text(p.vec_PG[22], -2e-5, "PG")
+abline(v = p.vec_WT[22], lty=3, col=cols[6])
+#text(p.vec_WT[22], -2e-5, "WT")
 
-plot(sim_grad_diams_mu, results_mu[2:6,5], main = "FP",
-     xlab="Mean diameter of graduates", ylab="Lambda")
-points(results_mu[1,1], results_mu[1,5], col="red", pch=19)
+plot(results$new_par[221:230], results$delta[221:230],
+     xlab = expression("B"[1]), 
+     ylab=expression(Delta*lambda))
+mtext(side=3, expression(mu[diam]*" = B"[0]*" + B"[1]*"*diam + B"[2]*" * height"),
+      cex=0.8)
+abline(v = results$par_original[221], col="red")
+abline(h =0)
+abline(v = p.vec_BC[23], lty=3, col=cols[1])
+text(p.vec_BC[23],-0.03, "BC")
+text(p.vec_CC[23], -0.045, "CC")
+text(p.vec_C[23], -0.06, "C")
+text(p.vec_FP[23], -0.075, "FP")
+text(p.vec_PG[23], -0.09, "PG")
+text(p.vec_WT[23], -0.105, "WT")
 
-plot(sim_grad_diams_mu, results_mu[2:6,6], main = "PG",
-     xlab="Mean diameter of graduates", ylab="Lambda")
-points(results_mu[1,1], results_mu[1,6], col="red", pch=19)
+plot(results$new_par[231:240], results$delta[231:240],
+     xlab = expression("B"[2]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[231], col="red")
+abline(h =0)
 
-plot(sim_grad_diams_mu, results_mu[2:6,7], main = "WT",
-     xlab="Mean diameter of graduates", ylab="Lambda")
-points(results_mu[1,1], results_mu[1,7], col="red", pch=19)
+abline(v = p.vec_BC[24], lty=3, col=cols[1])
+text(p.vec_BC[24], 2e-4, "BC")
+text(p.vec_CC[24], 1e-4, "CC")
+text(p.vec_C[24], 0, "C")
+text(p.vec_FP[24], -1e-4, "FP")
+text(p.vec_PG[24], -2e-4, "PG")
+text(p.vec_WT[24], -3e-4, "WT")
 
+plot(results$new_par[241:250], results$delta[241:250],
+     xlab = expression(sigma[diam]^2), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[241], col="red")
+abline(h =0)
 
+abline(v = p.vec_BC[25], lty=3, col=cols[1])
+text(p.vec_BC[25], -0.01, "BC")
+text(p.vec_CC[25], -0.015, "CC")
+text(p.vec_C[25], -0.02, "C")
+text(p.vec_FP[25], -0.025, "FP")
+text(p.vec_PG[25], -0.03, "PG")
+text(p.vec_WT[25], -0.035, "WT")
 
-#Plot the relationship between parameter choice for standard deviation of graduate diameter and lambda
-par(mfrow=c(2,3))
-plot(sim_grad_diams_sd, results_sd[2:4,2], main = "BC", 
-     xlab="sd of graduate diameter", ylab="Lambda")
-points(results_sd[1,1], results_sd[1,2], col="red", pch=19)
+#Height
+plot(results$new_par[251:260], results$delta[251:260],
+     xlab = expression("B"[0]), 
+     ylab=expression(Delta*lambda),
+     xlim=c(12, 65),
+     ylim=c(-0.00075, 0.0004))
+points(results$new_par[393], results$delta[393])
+points(results$new_par[394], results$delta[394])
+abline(v = results$par_original[251], col="red")
+abline(h =0)
+abline(v = p.vec_BC[26], lty=3, col=cols[1])
+text(p.vec_BC[26], 2e-4, "BC")
+abline(v = p.vec_CC[26], lty=3, col=cols[2])
+text(p.vec_CC[26], 2e-04, "CC")
+abline(v = p.vec_C[26],  lty=3, col=cols[3])
+text(p.vec_C[26], 2e-4, "C")
+abline(v = p.vec_FP[26], lty=3, col=cols[4])
+text(p.vec_FP[26], 2e-4, "FP")
+abline(v = p.vec_PG[26], lty=3, col=cols[5])
+text(p.vec_PG[26], 2e-04, "PG")
+abline(v = p.vec_WT[26], lty=3, col=cols[6])
+text(p.vec_WT[26], 2e-04, "WT")
 
-plot(sim_grad_diams_sd, results_sd[2:4,3], main = "CC",
-     xlab="sd of graduate diameter", ylab="Lambda")
-points(results_sd[1,1], results_sd[1,3], col="red", pch=19)
+plot(results$new_par[261:270], results$delta[261:270],
+     xlab = expression("B"[1]), 
+     ylab=expression(Delta*lambda))
+mtext(side=3, expression(mu[height]*" = B"[0]*" + B"[1]*"*diam + B"[2]*" * height"),
+      cex=0.8)
+abline(v = results$par_original[261], col="red")
+abline(h =0)
+abline(v = p.vec_BC[27], lty=3, col=cols[1])
+text(p.vec_BC[27],-5e-4, "BC")
+text(p.vec_CC[27], -7e-4, "CC")
+text(p.vec_C[27], -10e-4, "C")
+text(p.vec_FP[27], -13e-4, "FP")
+text(p.vec_PG[27], -16e-4, "PG")
+text(p.vec_WT[27], -19e-4, "WT")
 
-plot(sim_grad_diams_sd, results_sd[2:4,4], main = "C",
-     xlab="sd of graduate diameter", ylab="Lambda")
-points(results_sd[1,1], results_sd[1,4], col="red", pch=19)
+plot(results$new_par[271:280], results$delta[271:280],
+     xlab = expression("B"[2]), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[271], col="red")
+abline(h =0)
 
-plot(sim_grad_diams_sd, results_sd[2:4,5], main = "FP",
-     xlab="sd of graduate diameter", ylab="Lambda")
-points(results_sd[1,1], results_sd[1,5], col="red", pch=19)
+abline(v = p.vec_BC[28], lty=3, col=cols[1])
+text(p.vec_BC[28], -0.005, "BC")
+text(p.vec_CC[28], -0.006, "CC")
+text(p.vec_C[28], -0.007, "C")
+text(p.vec_FP[28], -0.008, "FP")
+text(p.vec_PG[28], -0.009, "PG")
+text(p.vec_WT[28], -0.010, "WT")
 
-plot(sim_grad_diams_sd, results_sd[2:4,6], main = "PG",
-     xlab="sd of graduate diameter", ylab="Lambda")
-points(results_sd[1,1], results_sd[1,6], col="red", pch=19)
+plot(results$new_par[281:290], results$delta[281:290],
+     xlab = expression(sigma[height]^2), 
+     ylab=expression(Delta*lambda))
+abline(v = results$par_original[281], col="red")
+abline(h =0)
 
-plot(sim_grad_diams_sd, results_sd[2:4,7], main = "WT",
-     xlab="sd of graduate diameter", ylab="Lambda")
-points(results_sd[1,1], results_sd[1,7], col="red", pch=19)
+abline(v = p.vec_BC[29], lty=3, col=cols[1])
+text(p.vec_BC[29], -0.005, "BC")
+text(p.vec_CC[29], -0.006, "CC")
+text(p.vec_C[29], -0.007, "C")
+text(p.vec_FP[29], -0.008, "FP")
+text(p.vec_PG[29], -0.009, "PG")
+text(p.vec_WT[29], -0.010, "WT")
 
+dev.copy(pdf, 'adult_growth_sens.pdf')
+dev.off()
 
-sim_grad_diams_mu2 <- c(3, 6, 9, 12, 15,18)
-
-for(i in 1:length(sim_grad_diams_mu)) {
-  p.vec_BC_new <- p.vec_BC
-  p.vec_CC_new <- p.vec_CC
-  p.vec_C_new  <- p.vec_C
-  p.vec_FP_new <- p.vec_FP
-  p.vec_PG_new <- p.vec_PG
-  p.vec_WT_new <- p.vec_WT
-  p.vecs <- list(p.vec_BC_new, p.vec_CC_new, p.vec_C_new, 
-                 p.vec_FP_new, p.vec_PG_new, p.vec_WT_new)
-  
-  for (k in 1:6){
-    p.vecs[[k]][15] <- sim_grad_diams_mu[i]
-  }
-  thing <- getLambdas(p.vecs)
-  results_mu[i+1,] <- c(sim_grad_diams_mu2[i], thing)
-  cat("Param: ", i,"\n"); 
-}
-
+save(results, file="results_sens_pvec.RData")

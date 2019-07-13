@@ -407,7 +407,7 @@ df$height_WT <- b3 + b4*df$Var1 + b5*df$Var2
 require(gridExtra)
 library(grid)
 
-#*-- ggplot #####
+#*-- Version 1: ggplot original #####
 #Big Cypress
 plot1_BC<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
   geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_BC)) +
@@ -671,7 +671,568 @@ grid.arrange(plot2_BC2, plot2_CC2,plot2_C2, plot2_FP2,
              layout_matrix=lay, widths=c(1, 1, 1, 1, 1, .7))
 dev.off()
 
+#*-- Version 2: ggplot with color #####
+#Big Cypress
+plot1_BC<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_BC)) +
+  scale_fill_viridis_c(limits = c(0, 1.6)) +
+  ggtitle("(a) Big Cypress") + 
+  geom_point(data=subset(seedlings2, seedlings2$Site == "Big Cypress"), 
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1),
+             shape=1, show.legend=F)+
+  scale_color_viridis(limits=c(0,1.6)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
 
+plot2_BC<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= height_BC)) + 
+  scale_fill_viridis_c(limits = c(0, 16)) +
+  ggtitle("(a) Big Cypress") + 
+  geom_point(data=subset(seedlings2,seedlings2$Site == "Big Cypress"), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1),
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(3, 15)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+
+#Cape Canaveral
+plot1_CC<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_CC)) + 
+  scale_fill_viridis_c(limits = c(0, 1.6)) +
+  ggtitle("(b) Cape Canaveral") + 
+  geom_point(data=subset(seedlings2, seedlings2$Site == "Cape Canaveral"), 
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1), 
+             shape=1, show.legend = F)+
+  scale_color_viridis(limits=c(0.3, 1.5)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+plot2_CC<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= height_CC)) + 
+  scale_fill_viridis_c(limits = c(0, 16)) +
+  ggtitle("(b) Cape Canaveral") + 
+  geom_point(data=subset(seedlings2,seedlings2$Site == "Cape Canaveral"), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1), 
+             show.legend=F, shape=1 ) +
+  scale_color_viridis(limits=c(3, 15)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+
+#Chekika
+plot1_C<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_C)) + 
+  scale_fill_viridis_c(limits = c(0, 1.6)) +
+  ggtitle("(c) Chekika") + 
+  geom_point(data=subset(seedlings2, seedlings2$Site == "Chekika"),
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1), 
+             shape=1, show.legend=F)+
+  scale_color_viridis(limits=c(0.3, 1.5)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+
+plot2_C<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= height_C)) + 
+  scale_fill_viridis_c(limits = c(0, 16)) +
+  ggtitle("(c) Chekika") + 
+  geom_point(data=subset(seedlings2,seedlings2$Site == "Chekika"), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1), 
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(3, 15)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+
+#Fort Pierce
+plot1_FP<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_FP)) + 
+  scale_fill_viridis_c(limits = c(0, 1.6)) +
+  ggtitle("(d) Fort Pierce") + 
+  geom_point(data=subset(seedlings2, seedlings2$Site == "Fort Pierce"),
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1), 
+             show.legend=F,shape=1)+
+  scale_color_viridis(limits=c(0.3, 1.5)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+plot2_FP<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= height_FP)) + 
+  scale_fill_viridis_c(limits = c(0, 16)) +
+  ggtitle("(d) Fort Pierce") + 
+  geom_point(data=subset(seedlings2,seedlings2$Site == "Fort Pierce"), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1),
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(3, 15)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+
+#Punta Gorda
+plot1_PG<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_PG)) + 
+  scale_fill_viridis_c(limits = c(0, 1.7)) +
+  ggtitle("(e) Punta Gorda") + 
+  geom_point(data=subset(seedlings2, seedlings2$Site == "Punta Gorda"),
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1), 
+             show.legend=F,shape=1)+
+  scale_color_viridis(limits=c(0.3, 1.5)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+plot2_PG<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= height_PG)) + 
+  scale_fill_viridis_c(limits = c(0, 16)) +
+  ggtitle("(e) Punta Gorda") + 
+  geom_point(data=subset(seedlings2,seedlings2$Site == "Punta Gorda"), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1), 
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(3, 15)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+
+#Wild Turkey
+plot1_WT<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= diam_WT)) + 
+  scale_fill_viridis_c(limits = c(0, 1.6)) +
+  ggtitle("(f) Wild Turkey") + 
+  geom_point(data=subset(seedlings2, seedlings2$Site == "Wild Turkey"), 
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1),
+             show.legend=F,shape=1)+
+  scale_color_viridis(limits=c(0.3, 1.5)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+plot2_WT<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
+  geom_tile(data = df, aes(x=Var1, y = Var2, fill= height_WT)) + 
+  scale_fill_viridis_c(limits = c(0, 16)) +
+  ggtitle("(f) Wild Turkey") + 
+  geom_point(data=subset(seedlings2,seedlings2$Site == "Wild Turkey"), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1),
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(3, 15)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+
+
+
+g <- ggplotGrob(plot1_BC + theme(legend.position = "right"))$grobs
+legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+
+plot1_BC2 <- plot1_BC + theme(legend.position ="none")
+plot1_CC2 <- plot1_CC + theme(legend.position ="none")
+plot1_C2  <- plot1_C  + theme(legend.position = "none")
+plot1_FP2 <- plot1_FP + theme(legend.position = "none")
+plot1_PG2 <- plot1_PG + theme(legend.position = "none")
+plot1_WT2 <- plot1_WT + theme(legend.position = "none")
+
+postscript("./Figures/D1_growth_diameter2.eps", width=width.cm/2.54, 
+           height=(3*height.cm)/2.54, pointsize=pointsize, 
+           encoding = "TeXtext.enc")
+lay <- rbind(c(1, 1, 2, 2, 7, 7),
+             c(1, 1, 2, 2, 7, 7),
+             c(3, 3, 4, 4, 7, 7),
+             c(3, 3, 4, 4, 7, 7),
+             c(5, 5, 6, 6, 7, 7),
+             c(5, 5, 6, 6, 7, 7))
+grid.arrange(plot1_BC2, plot1_CC2,plot1_C2, plot1_FP2,
+             plot1_PG2, plot1_WT2, legend,
+             layout_matrix=lay, widths=c(1, 1, 1, 1, 1, .7))
+dev.off()
+
+
+g <- ggplotGrob(plot2_BC + theme(legend.position = "right"))$grobs
+legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+
+plot2_BC2 <- plot2_BC + theme(legend.position ="none")
+plot2_CC2 <- plot2_CC + theme(legend.position ="none")
+plot2_C2  <- plot2_C  + theme(legend.position = "none")
+plot2_FP2 <- plot2_FP + theme(legend.position = "none")
+plot2_PG2 <- plot2_PG + theme(legend.position = "none")
+plot2_WT2 <- plot2_WT + theme(legend.position = "none")
+
+
+
+postscript("./Figures/D1_growth_height2.eps", width=width.cm/2.54, 
+           height=(3*height.cm)/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+lay <- rbind(c(1, 1, 2, 2, 7, 7),
+             c(1, 1, 2, 2, 7, 7),
+             c(3, 3, 4, 4, 7, 7),
+             c(3, 3, 4, 4, 7, 7),
+             c(5, 5, 6, 6, 7, 7),
+             c(5, 5, 6, 6, 7, 7))
+grid.arrange(plot2_BC2, plot2_CC2,plot2_C2, plot2_FP2,
+             plot2_PG2, plot2_WT2, legend,
+             layout_matrix=lay, widths=c(1, 1, 1, 1, 1, .7))
+dev.off()
+
+
+#setEPS(horizontal=F, onefile=F, paper="special")
+#postscript("./Figures/D1_growth.eps", width=width.cm/2.54, 
+
+
+
+
+
+
+
+#*-- Version 3: persp plot #####
+
+#Grab parameters associated with future diameter
+b0<-p.vec_BC[4]
+b1<-p.vec_BC[5]
+b2<-p.vec_BC[6]
+z1_BC<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b))
+
+b0<-p.vec_CC[4]
+b1<-p.vec_CC[5]
+b2<-p.vec_CC[6]
+z1_CC<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b))
+
+b0<-p.vec_C[4]
+b1<-p.vec_C[5]
+b2<-p.vec_C[6]
+z1_C<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b))
+
+b0<-p.vec_FP[4]
+b1<-p.vec_FP[5]
+b2<-p.vec_FP[6]
+z1_FP<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b))
+
+b0<-p.vec_PG[4]
+b1<-p.vec_PG[5]
+b2<-p.vec_PG[6]
+z1_PG<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b))
+
+b0<-p.vec_WT[4]
+b1<-p.vec_WT[5]
+b2<-p.vec_WT[6]
+z1_WT<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b0 + b1*a + b2*b))
+
+
+
+
+
+
+
+
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/D2_growth_diam3.eps", width=width.cm/2.54, 
+           height=3*height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+ #x11(width = width.cm/2.54, height = 3*height.cm/2.54, 
+   #  pointsize = pointsize)
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.1,0.5,0.1,0.1),
+    mfrow=c(3, 2))
+
+#A) Big Cypress
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1_BC, ticktype="detailed",
+            theta=-30, zlim=c(0,1.6), zlab="\n Diameter at t+1 (mm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(a) Big Cypress", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings2$Diameter_t[seedlings2$Site == "Big Cypress"],
+                    seedlings2$Height_t[seedlings2$Site == "Big Cypress"],
+                    seedlings2$Diameter_tplus1[seedlings2$Site == "Big Cypress"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#B) Cape Canaveral
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1_CC, ticktype="detailed",
+            theta=-30, zlim=c(0,1.6), zlab="\n Diameter at t+1 (mm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(b) Cape Canaveral", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings2$Diameter_t[seedlings2$Site == "Cape Canaveral"],
+                    seedlings2$Height_t[seedlings2$Site == "Cape Canaveral"],
+                    seedlings2$Diameter_tplus1[seedlings2$Site == "Cape Canaveral"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#C) Chekika
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1_C, ticktype="detailed",
+            theta=-30, zlim=c(0,1.6), zlab="\n Diameter at t+1 (mm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(c) Chekika", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings2$Diameter_t[seedlings2$Site == "Chekika"],
+                    seedlings2$Height_t[seedlings2$Site == "Chekika"],
+                    seedlings2$Diameter_tplus1[seedlings2$Site == "Chekika"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#D) Fort Pierce
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1_FP, ticktype="detailed",
+            theta=-30, zlim=c(0,1.6), zlab="\n Diameter at t+1 (mm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(d) Fort Pierce", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings2$Diameter_t[seedlings2$Site == "Fort Pierce"],
+                    seedlings2$Height_t[seedlings2$Site == "Fort Pierce"],
+                    seedlings2$Diameter_tplus1[seedlings2$Site == "Fort Pierce"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#E) Punta Gorda
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1_PG, ticktype="detailed",
+            theta=-30, zlim=c(0,1.6), zlab="\n Diameter at t+1 (mm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(e) Punta Gorda", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings2$Diameter_t[seedlings2$Site == "Punta Gorda"],
+                    seedlings2$Height_t[seedlings2$Site == "Punta Gorda"],
+                    seedlings2$Diameter_tplus1[seedlings2$Site == "Punta Gorda"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#F) Wild Turkey
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z1_WT, ticktype="detailed",
+            theta=-30, zlim=c(0,1.6), zlab="\n Diameter at t+1 (mm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(f) Wild Turkey", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings2$Diameter_t[seedlings2$Site == "Wild Turkey"],
+                    seedlings2$Height_t[seedlings2$Site == "Wild Turkey"],
+                    seedlings2$Diameter_tplus1[seedlings2$Site == "Wild Turkey"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+dev.off()
+
+
+#Now for future height:
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z2, ticktype="detailed",
+            theta=-30, zlim=c(0,44), zlab="\n Height at t+1 (mm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1, col=topo.colors)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings2$Diameter_t, seedlings2$Height_t, seedlings2$Height_tplus1, pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+
+#Now for height
+#Grab parameters associated with future height
+b3<-p.vec_BC[8]
+b4<-p.vec_BC[9]
+b5<-p.vec_BC[10]
+z2_BC<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
+
+b3<-p.vec_CC[8]
+b4<-p.vec_CC[9]
+b5<-p.vec_CC[10]
+z2_CC<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
+
+b3<-p.vec_C[8]
+b4<-p.vec_C[9]
+b5<-p.vec_C[10]
+z2_C<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
+
+b3<-p.vec_FP[8]
+b4<-p.vec_FP[9]
+b5<-p.vec_FP[10]
+z2_FP<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
+
+b3<-p.vec_PG[8]
+b4<-p.vec_PG[9]
+b5<-p.vec_PG[10]
+z2_PG<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
+
+b3<-p.vec_WT[8]
+b4<-p.vec_WT[9]
+b5<-p.vec_WT[10]
+z2_WT<- outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (b3+ b4*a + b5*b))
+
+
+
+
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/D2_growth_height3.eps", width=width.cm/2.54, 
+           height=3*height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+#x11(width = width.cm/2.54, height = 3*height.cm/2.54, 
+#  pointsize = pointsize)
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.1,0.5,0.1,0.1),
+    mfrow=c(3, 2))
+
+#A) Big Cypress
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z2_BC, ticktype="detailed",
+            theta=-30, zlim=c(0,16), zlab="\n Height at t+1 (cm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(a) Big Cypress", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings2$Diameter_t[seedlings2$Site == "Big Cypress"],
+                    seedlings2$Height_t[seedlings2$Site == "Big Cypress"],
+                    seedlings2$Height_tplus1[seedlings2$Site == "Big Cypress"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#B) Cape Canaveral
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z2_CC, ticktype="detailed",
+            theta=-30, zlim=c(0,16), zlab="\n Height at t+1 (cm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(b) Cape Canaveral", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings2$Diameter_t[seedlings2$Site == "Cape Canaveral"],
+                    seedlings2$Height_t[seedlings2$Site == "Cape Canaveral"],
+                    seedlings2$Height_tplus1[seedlings2$Site == "Cape Canaveral"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#C) Chekika
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z2_C, ticktype="detailed",
+            theta=-30, zlim=c(0,16), zlab="\n Height at t+1 (cm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(c) Chekika", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings2$Diameter_t[seedlings2$Site == "Chekika"],
+                    seedlings2$Height_t[seedlings2$Site == "Chekika"],
+                    seedlings2$Height_tplus1[seedlings2$Site == "Chekika"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#D) Fort Pierce
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z2_FP, ticktype="detailed",
+            theta=-30, zlim=c(0,16), zlab="\n Height at t+1 (cm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(d) Fort Pierce", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings2$Diameter_t[seedlings2$Site == "Fort Pierce"],
+                    seedlings2$Height_t[seedlings2$Site == "Fort Pierce"],
+                    seedlings2$Height_tplus1[seedlings2$Site == "Fort Pierce"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#E) Punta Gorda
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z2_PG, ticktype="detailed",
+            theta=-30, zlim=c(0,16), zlab="\n Height at t+1 (cm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(e) Punta Gorda", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings2$Diameter_t[seedlings2$Site == "Punta Gorda"],
+                    seedlings2$Height_t[seedlings2$Site == "Punta Gorda"],
+                    seedlings2$Height_tplus1[seedlings2$Site == "Punta Gorda"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#F) Wild Turkey
+pmat<-persp(x1seq_seedlings, x2seq_seedlings, z2_WT, ticktype="detailed",
+            theta=-30, zlim=c(0,16), zlab="\n Height at t+1 (cm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(f) Wild Turkey", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(seedlings2$Diameter_t[seedlings2$Site == "Wild Turkey"],
+                    seedlings2$Height_t[seedlings2$Site == "Wild Turkey"],
+                    seedlings2$Height_tplus1[seedlings2$Site == "Wild Turkey"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+dev.off()
+
+
+
+
+
+#*-- Version 4:....#####
 #setEPS(horizontal=F, onefile=F, paper="special")
 #postscript("./Figures/D1_growth.eps", width=width.cm/2.54, 
            #height=height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
@@ -1038,7 +1599,7 @@ grid.arrange(plot_BCs2_pred, plot_BCs2_meas,
              layout_matrix=lay, widths=c(1, 1, 1, 1, 1, .7))
 dev.off()
 
-###FIG 4: GROWTH OF D2 INDIVIDUALS #####
+###FIG 4:D2 GROWTH OF D2 INDIVIDUALS #####
 
 ### Plot Growth Mod Eastern Larges
 
@@ -1476,6 +2037,559 @@ grid.arrange(plot2_BC2, plot2_CC2,plot2_C2, plot2_FP2,
              layout_matrix=lay, widths=c(1, 1, 1, 1, 1, .7))
 dev.off()
 
+#*-- Version 2: Color #####
+
+
+#Big Cypress
+plot1_BC<- ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= diam2_BC)) +
+  scale_fill_viridis_c(limits = c(1.6, 860)) +
+  ggtitle("(a) Big Cypress") + 
+  geom_point(data=subset(larges, larges$Site == "Big Cypress" &
+                           !is.na(larges$Diameter_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1), 
+             shape=1, show.legend=F)+
+  scale_color_viridis(limits=c(1, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+plot2_BC<- ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= height2_BC)) + 
+  scale_fill_viridis_c(limits = c(16, 950)) +
+  ggtitle("(a) Big Cypress") + 
+  geom_point(data=subset(larges,larges$Site == "Big Cypress"&
+                           !is.na(larges$Height_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1),
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(16, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+
+#Cape Canaveral
+plot1_CC<- ggplot() + xlim(1.6, 800) + ylim(1.6, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= diam2_CC)) + 
+  scale_fill_viridis_c(limits = c(1.6, 950)) +
+  ggtitle("(b) Cape Canaveral") + 
+  geom_point(data=subset(larges, larges$Site == "Cape Canaveral"&
+                           !is.na(larges$Diameter_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1), 
+             shape=1, show.legend = F)+
+  scale_color_viridis(limits=c(1, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+plot2_CC<- ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= height2_CC)) + 
+  scale_fill_viridis_c(limits = c(16, 950)) +
+  ggtitle("(b) Cape Canaveral") + 
+  geom_point(data=subset(larges,larges$Site == "Cape Canaveral"&
+                           !is.na(larges$Height_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1), 
+             show.legend=F, shape=1 ) +
+  scale_color_viridis(limits=c(6.5, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+
+#Chekika
+plot1_C<- ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= diam2_C)) + 
+  scale_fill_viridis_c(limits = c(1.6, 950)) +
+  ggtitle("(c) Chekika") + 
+  geom_point(data=subset(larges, larges$Site == "Chekika"&
+                           !is.na(larges$Diameter_tplus1)),
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1), 
+             shape=1, show.legend=F)+
+  scale_color_viridis(limits=c(1.6, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+
+plot2_C<- ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= height2_C)) + 
+  scale_fill_viridis_c(limits = c(16, 950)) +
+  ggtitle("(c) Chekika") + 
+  geom_point(data=subset(larges,larges$Site == "Chekika"&
+                           !is.na(larges$Height_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1), 
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(16, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+
+#Fort Pierce
+plot1_FP<- ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= diam2_FP)) + 
+  scale_fill_viridis_c(limits = c(1.6, 950)) +
+  ggtitle("(d) Fort Pierce") + 
+  geom_point(data=subset(larges, larges$Site == "Fort Pierce"&
+                           !is.na(larges$Diameter_tplus1)),
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1), 
+             show.legend=F,shape=1)+
+  scale_color_viridis(limits=c(1.6, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+plot2_FP<- ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= height2_FP)) + 
+  scale_fill_viridis_c(limits = c(16, 950)) +
+  ggtitle("(d) Fort Pierce") + 
+  geom_point(data=subset(larges,larges$Site == "Fort Pierce"&
+                           !is.na(larges$Height_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1),
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(16, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+
+#Punta Gorda
+plot1_PG<- ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= diam2_PG)) + 
+  scale_fill_viridis_c(limits = c(1.6, 950)) +
+  ggtitle("(e) Punta Gorda") + 
+  geom_point(data=subset(larges, larges$Site == "Punta Gorda"&
+                           !is.na(larges$Diameter_tplus1)),
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1), 
+             show.legend=F,shape=1)+
+  scale_color_viridis(limits=c(1.6, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+plot2_PG<- ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= height2_PG)) + 
+  scale_fill_viridis_c(limits = c(16, 950)) +
+  ggtitle("(e) Punta Gorda") + 
+  geom_point(data=subset(larges,larges$Site == "Punta Gorda"&
+                           !is.na(larges$Height_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1), 
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(16, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+
+#Wild Turkey
+plot1_WT<- ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= diam_WT)) + 
+  scale_fill_viridis_c(limits = c(1.6, 950)) +
+  ggtitle("(f) Wild Turkey") + 
+  geom_point(data=subset(larges, larges$Site == "Wild Turkey"&
+                           !is.na(larges$Diameter_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1),
+             show.legend=F,shape=1)+
+  scale_color_viridis(limits=c(1.6, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+plot2_WT<- ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= height_WT)) + 
+  scale_fill_viridis_c(limits = c(16, 971)) +
+  ggtitle("(f) Wild Turkey") + 
+  geom_point(data=subset(larges,larges$Site == "Wild Turkey"&
+                           !is.na(larges$Height_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1),
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(16, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=8), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+
+
+
+g <- ggplotGrob(plot1_BC + theme(legend.position = "right"))$grobs
+legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+
+plot1_BC2 <- plot1_BC + theme(legend.position ="none")
+plot1_CC2 <- plot1_CC + theme(legend.position ="none")
+plot1_C2  <- plot1_C  + theme(legend.position = "none")
+plot1_FP2 <- plot1_FP + theme(legend.position = "none")
+plot1_PG2 <- plot1_PG + theme(legend.position = "none")
+plot1_WT2 <- plot1_WT + theme(legend.position = "none")
+
+postscript("./Figures/D2_growth_diameter2.eps", width=width.cm/2.54, 
+           height=(3*height.cm)/2.54, pointsize=pointsize, 
+           encoding = "TeXtext.enc")
+lay <- rbind(c(1, 1, 2, 2, 7, 7),
+             c(1, 1, 2, 2, 7, 7),
+             c(3, 3, 4, 4, 7, 7),
+             c(3, 3, 4, 4, 7, 7),
+             c(5, 5, 6, 6, 7, 7),
+             c(5, 5, 6, 6, 7, 7))
+grid.arrange(plot1_BC2, plot1_CC2,plot1_C2, plot1_FP2,
+             plot1_PG2, plot1_WT2, legend,
+             layout_matrix=lay, widths=c(1, 1, 1, 1, 1, .7))
+dev.off()
+
+
+g <- ggplotGrob(plot2_BC + theme(legend.position = "right"))$grobs
+legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+
+plot2_BC2 <- plot2_BC + theme(legend.position ="none")
+plot2_CC2 <- plot2_CC + theme(legend.position ="none")
+plot2_C2  <- plot2_C  + theme(legend.position = "none")
+plot2_FP2 <- plot2_FP + theme(legend.position = "none")
+plot2_PG2 <- plot2_PG + theme(legend.position = "none")
+plot2_WT2 <- plot2_WT + theme(legend.position = "none")
+
+
+
+postscript("./Figures/D2_growth_height2.eps", width=width.cm/2.54, 
+           height=(3*height.cm)/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+lay <- rbind(c(1, 1, 2, 2, 7, 7),
+             c(1, 1, 2, 2, 7, 7),
+             c(3, 3, 4, 4, 7, 7),
+             c(3, 3, 4, 4, 7, 7),
+             c(5, 5, 6, 6, 7, 7),
+             c(5, 5, 6, 6, 7, 7))
+grid.arrange(plot2_BC2, plot2_CC2,plot2_C2, plot2_FP2,
+             plot2_PG2, plot2_WT2, legend,
+             layout_matrix=lay, widths=c(1, 1, 1, 1, 1, .7))
+dev.off()
+
+#*-- Version 3: Persp
+
+#Grab parameters associated with future diameter
+b0<-p.vec_BC[22]
+b1<-p.vec_BC[23]
+b2<-p.vec_BC[24]
+z1_BC<-outer(x1seq_larges, x2seq_larges, function(a,b) (b0 + b1*a + b2*b))
+
+b0<-p.vec_CC[22]
+b1<-p.vec_CC[23]
+b2<-p.vec_CC[24]
+z1_CC<-outer(x1seq_larges, x2seq_larges, function(a,b) (b0 + b1*a + b2*b))
+
+b0<-p.vec_C[22]
+b1<-p.vec_C[23]
+b2<-p.vec_C[24]
+z1_C<-outer(x1seq_larges, x2seq_larges, function(a,b) (b0 + b1*a + b2*b))
+
+b0<-p.vec_FP[22]
+b1<-p.vec_FP[23]
+b2<-p.vec_FP[24]
+z1_FP<-outer(x1seq_larges, x2seq_larges, function(a,b) (b0 + b1*a + b2*b))
+
+b0<-p.vec_PG[22]
+b1<-p.vec_PG[23]
+b2<-p.vec_PG[24]
+z1_PG<-outer(x1seq_larges, x2seq_larges, function(a,b) (b0 + b1*a + b2*b))
+
+b0<-p.vec_WT[22]
+b1<-p.vec_WT[23]
+b2<-p.vec_WT[24]
+z1_WT<-outer(x1seq_larges, x2seq_larges, function(a,b) (b0 + b1*a + b2*b))
+
+
+
+
+
+
+
+
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/D2_growth_diameter3.eps", width=width.cm/2.54, 
+           height=3*height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+#x11(width = width.cm/2.54, height = 3*height.cm/2.54, 
+#  pointsize = pointsize)
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.1,0.5,0.1,0.1),
+    mfrow=c(3, 2))
+
+#A) Big Cypress
+pmat<-persp(x1seq_larges, x2seq_larges, z1_BC, ticktype="detailed",
+            theta=-30, zlim=c(1.6, 1200), zlab="\n Diameter at t+1 (mm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(a) Big Cypress", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(larges$Diameter_t[larges$Site == "Big Cypress"],
+                    larges$Height_t[larges$Site == "Big Cypress"],
+                    larges$Diameter_tplus1[larges$Site == "Big Cypress"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#B) Cape Canaveral
+pmat<-persp(x1seq_larges, x2seq_larges, z1_CC, ticktype="detailed",
+            theta=-30, zlim=c(1.6, 1200), zlab="\n Diameter at t+1 (mm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(b) Cape Canaveral", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(larges$Diameter_t[larges$Site == "Cape Canaveral"],
+                    larges$Height_t[larges$Site == "Cape Canaveral"],
+                    larges$Diameter_tplus1[larges$Site == "Cape Canaveral"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#C) Chekika
+pmat<-persp(x1seq_larges, x2seq_larges, z1_C, ticktype="detailed",
+            theta=-30, zlim=c(1.6, 1200), zlab="\n Diameter at t+1 (mm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(c) Chekika", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(larges$Diameter_t[larges$Site == "Chekika"],
+                    larges$Height_t[larges$Site == "Chekika"],
+                    larges$Diameter_tplus1[larges$Site == "Chekika"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#D) Fort Pierce
+pmat<-persp(x1seq_larges, x2seq_larges, z1_FP, ticktype="detailed",
+            theta=-30, zlim=c(1.6, 1200), zlab="\n Diameter at t+1 (mm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(d) Fort Pierce", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(larges$Diameter_t[larges$Site == "Fort Pierce"],
+                    larges$Height_t[larges$Site == "Fort Pierce"],
+                    larges$Diameter_tplus1[larges$Site == "Fort Pierce"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#E) Punta Gorda
+pmat<-persp(x1seq_larges, x2seq_larges, z1_PG, ticktype="detailed",
+            theta=-30, zlim=c(1.6, 1200), zlab="\n Diameter at t+1 (mm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(e) Punta Gorda", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(larges$Diameter_t[larges$Site == "Punta Gorda"],
+                    larges$Height_t[larges$Site == "Punta Gorda"],
+                    larges$Diameter_tplus1[larges$Site == "Punta Gorda"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#F) Wild Turkey
+pmat<-persp(x1seq_larges, x2seq_larges, z1_WT, ticktype="detailed",
+            theta=-30, zlim=c(1.6, 1200), zlab="\n Diameter at t+1 (mm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(f) Wild Turkey", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(larges$Diameter_t[larges$Site == "Wild Turkey"],
+                    larges$Height_t[larges$Site == "Wild Turkey"],
+                    larges$Diameter_tplus1[larges$Site == "Wild Turkey"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+dev.off()
+
+
+
+
+#Now for height
+#Grab parameters associated with future height
+b3<-p.vec_BC[26]
+b4<-p.vec_BC[27]
+b5<-p.vec_BC[28]
+z2_BC<- outer(x1seq_larges, x2seq_larges, function(a,b) (b3+ b4*a + b5*b))
+
+b3<-p.vec_CC[26]
+b4<-p.vec_CC[27]
+b5<-p.vec_CC[28]
+z2_CC<- outer(x1seq_larges, x2seq_larges, function(a,b) (b3+ b4*a + b5*b))
+
+b3<-p.vec_C[26]
+b4<-p.vec_C[27]
+b5<-p.vec_C[27]
+z2_C<- outer(x1seq_larges, x2seq_larges, function(a,b) (b3+ b4*a + b5*b))
+
+b3<-p.vec_FP[26]
+b4<-p.vec_FP[27]
+b5<-p.vec_FP[28]
+z2_FP<- outer(x1seq_larges, x2seq_larges, function(a,b) (b3+ b4*a + b5*b))
+
+b3<-p.vec_PG[26]
+b4<-p.vec_PG[27]
+b5<-p.vec_PG[28]
+z2_PG<- outer(x1seq_larges, x2seq_larges, function(a,b) (b3+ b4*a + b5*b))
+
+b3<-p.vec_WT[26]
+b4<-p.vec_WT[27]
+b5<-p.vec_WT[28]
+z2_WT<- outer(x1seq_larges, x2seq_larges, function(a,b) (b3+ b4*a + b5*b))
+
+
+
+
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/D2_growth_height3.eps", width=width.cm/2.54, 
+           height=3*height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+#x11(width = width.cm/2.54, height = 3*height.cm/2.54, 
+#  pointsize = pointsize)
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.1,0.5,0.1,0.1),
+    mfrow=c(3, 2))
+
+#A) Big Cypress
+pmat<-persp(x1seq_larges, x2seq_larges, z2_BC, ticktype="detailed",
+            theta=-30, zlim=c(16, 950), zlab="\n Height at t+1 (cm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(a) Big Cypress", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(larges$Diameter_t[larges$Site == "Big Cypress"],
+                    larges$Height_t[larges$Site == "Big Cypress"],
+                    larges$Height_tplus1[larges$Site == "Big Cypress"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#B) Cape Canaveral
+pmat<-persp(x1seq_larges, x2seq_larges, z2_CC, ticktype="detailed",
+            theta=-30, zlim=c(16, 950), zlab="\n Height at t+1 (cm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(b) Cape Canaveral", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(larges$Diameter_t[larges$Site == "Cape Canaveral"],
+                    larges$Height_t[larges$Site == "Cape Canaveral"],
+                    larges$Height_tplus1[larges$Site == "Cape Canaveral"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#C) Chekika
+pmat<-persp(x1seq_larges, x2seq_larges, z2_C, ticktype="detailed",
+            theta=-30, zlim=c(16, 950), zlab="\n Height at t+1 (cm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(c) Chekika", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(larges$Diameter_t[larges$Site == "Chekika"],
+                    larges$Height_t[larges$Site == "Chekika"],
+                    larges$Height_tplus1[larges$Site == "Chekika"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#D) Fort Pierce
+pmat<-persp(x1seq_larges, x2seq_larges, z2_FP, ticktype="detailed",
+            theta=-30, zlim=c(16, 950), zlab="\n Height at t+1 (cm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(d) Fort Pierce", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(larges$Diameter_t[larges$Site == "Fort Pierce"],
+                    larges$Height_t[larges$Site == "Fort Pierce"],
+                    larges$Height_tplus1[larges$Site == "Fort Pierce"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#E) Punta Gorda
+pmat<-persp(x1seq_larges, x2seq_larges, z2_PG, ticktype="detailed",
+            theta=-30, zlim=c(16, 950), zlab="\n Height at t+1 (cm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(e) Punta Gorda", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(larges$Diameter_t[larges$Site == "Punta Gorda"],
+                    larges$Height_t[larges$Site == "Punta Gorda"],
+                    larges$Height_tplus1[larges$Site == "Punta Gorda"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+
+#F) Wild Turkey
+pmat<-persp(x1seq_larges, x2seq_larges, z2_WT, ticktype="detailed",
+            theta=-30, zlim=c(16, 950), zlab="\n Height at t+1 (cm)", 
+            shade=0.1, nticks=4, xlab="\n Diameter at t(mm)", 
+            ylab="\n Height at t(cm)",  lwd=1, xaxs="i", 
+            main="", cex.main=1)
+mtext(side=3, "(f) Wild Turkey", line=-3)
+
+# from 3D to 2D coordinates
+mypoints <- trans3d(larges$Diameter_t[larges$Site == "Wild Turkey"],
+                    larges$Height_t[larges$Site == "Wild Turkey"],
+                    larges$Height_tplus1[larges$Site == "Wild Turkey"],
+                    pmat=pmat)
+# plot in 2D space with pointsize related to distance
+points(mypoints, col=4)
+dev.off()
+
+
+
+
 
 
 ###FIGURE 5: GRADUATION #####
@@ -1580,7 +2694,7 @@ plot_Cm<- ggplot() + xlim(0, 1.6) + ylim(0, 16) +
 plot_WTm<- ggplot() + xlim(0, 1.6) + ylim(0, 16) + 
   geom_tile(data = df, aes(x=Var1, y = Var2, fill= WT_m)) + 
   scale_fill_gradientn(colors=my.palette, limits=c(0,1)) + 
-  ggtitle("(a) BC, CC, FP, PG") + 
+  ggtitle("(c) WT") + 
   geom_point(data=subset(seedlings, !is.na(seedlings$grad_status) &
                            (seedlings$Site == "Wild Turkey")),
              aes(x=Diameter_t, y=Height_t, shape = factor(grad_status))) +
@@ -2125,7 +3239,14 @@ load("./PG/rv_height_PG.RData")
 load("./WT/rv_diam_WT.RData")
 load("./WT/rv_height_WT.RData")
 
-plot(y_diam, ss_diam_BC,xlab="Diameter (mm)",ylab="frequency",
+load("./Overall/ss_diam_overall.RData")
+load("./Overall/ss_height_overall.RData")
+load("./Overall/rv_diam_overall.RData")
+load("./Overall/rv_height_overall.RData")
+
+y_diam <- c(y1,y3)
+
+plot(y_diam, ss_diam_overall,xlab="Diameter (mm)",ylab="frequency",
      type="l", cex=1, cex.axis=1, cex.lab=1, lty=5, lwd=1, ylim=c(0, 0.24), col=cols[1]); 
 lines(y_diam, ss_diam_CC, lwd=1, lty=3, col=cols[2])
 lines(y_diam, ss_diam_C, lwd=1, lty=1, col=cols[3])
@@ -2170,8 +3291,88 @@ title(main="(d) Reproductive value: by height", cex.main=1);
 
 dev.off()
 
+#*-- Stable Stage Distribution #####
+
+postscript("./Figures/ss.eps", width=width.cm/2.54, 
+           height=(2*height.cm)/2.54, pointsize=pointsize, 
+           encoding = "TeXtext.enc")
+ss_diam1 <- sum(ss_diam_overall[1:2]) #0-0.24
+ss_diam2 <- sum(ss_diam_overall[3:4]) #0.4-0.56
+ss_diam3 <- sum(ss_diam_overall[5:6]) #0.72 - 0.88
+ss_diam4 <- sum(ss_diam_overall[7:8]) #1.04 - 1.2
+ss_diam5 <- sum(ss_diam_overall[9:10]) #1.36- 1.52
+ss_diam6 <- sum(ss_diam_overall[11:110])
+
+ss_height1 <- sum(ss_height_overall[1:2])
+ss_height2 <- sum(ss_height_overall[3:4])
+ss_height3 <- sum(ss_height_overall[5:6])
+ss_height4 <- sum(ss_height_overall[7:8])
+ss_height5 <- sum(ss_height_overall[9:11])
+ss_height6 <- sum(ss_height_overall[12:112])
+
+par(mfrow=c(2,1))
+par(mar = c(2, 4, 2, 0))
+names <- c("D1:\n (0, 0.4)", "D1:\n [0.4, 0.72)", "D1:\n [0.72, 1.04)",
+           "D1:\n [1.04, 1.36)", "D1:\n [1.36, 1.6)", "D2")
+barplot(c(ss_diam1, ss_diam2, ss_diam3, ss_diam4, ss_diam5, ss_diam6),
+        names.arg=names, ylab="Frequency", cex.names=0.8)
+abline(v=6, lty=3)
+mtext(side=3, "(a) Diameter", adj=0)
+
+par(mar = c(2, 4, 2, 0))
+names <- c("D1:\n (0, 3.64)", "D1:\n [3.64, 0.6.55)", "D1:\n [6.55, 9.45)",
+           "D1:\n [9.45, 12.36)", "D1:\n [12.36, 16)", "D2")
+barplot(c(ss_height1, ss_height2, ss_height3, ss_height4, ss_height5,
+          ss_height6),
+        names.arg=names, ylab="Frequency", cex.names=0.8)
+abline(v=6, lty=3)
+mtext(side=3, "(b) Height", adj=0)
+dev.off()
+
+#*-- Reproductive Value #####
+
+postscript("./Figures/rv.eps", width=width.cm/2.54, 
+           height=(2*height.cm)/2.54, pointsize=pointsize, 
+           encoding = "TeXtext.enc")
+rv_diam1 <- sum(rv_diam_overall[1:10]) #0-0.24
+rv_diam2 <- sum(rv_diam_overall[11:70]) #5-417
+rv_diam3 <- sum(rv_diam_overall[71:90]) #424-557
+rv_diam4 <- sum(rv_diam_overall[91:100]) #564-627
+rv_diam5 <- sum(rv_diam_overall[101:105]) #634-662
+rv_diam6 <- sum(rv_diam_overall[106:108]) #669-683
+rv_diam7 <- sum(rv_diam_overall[109:110]) #690-696
 
 
+
+rv_height1 <- sum(rv_height_overall[1:11])
+rv_height2 <- sum(rv_height_overall[12:71]) #19- 478 y4[60] #width = 459
+rv_height3 <- sum(rv_height_overall[72:91]) #485-633.11  #width = 148
+rv_height4 <- sum(rv_height_overall[92:101]) #641- 711 #width = 70
+rv_height5 <- sum(rv_height_overall[102:106]) #718 - 750 #width= 32
+rv_height6 <- sum(rv_height_overall[107:109]) #749 - 765 # width=16
+rv_height7 <- sum(rv_height_overall[110:112]) #781 -796 #width= 15
+
+par(mfrow=c(2,1))
+par(mar = c(2, 4, 2, 0))
+names <- c("D1", "D2:\n (5-424)", "D2:\n [424, 564)", 
+           "D2:\n [564, 634)", "D2:\n [634, 669)", "D2:\n [669, 690)",
+           "D2:\n [690, 696]")
+barplot(c(rv_diam1, rv_diam2, rv_diam3, rv_diam4, rv_diam5, rv_diam6,
+          rv_diam7), rep(5,7),
+        names.arg=names, ylab="Frequency", cex.names=0.8)
+abline(v=6, lty=3)
+mtext(side=3, "(a) Diameter", adj=0)
+
+par(mar = c(2, 4, 2, 0))
+names <- c("D1","D2:\n (16-485)", "D2:\n [485, 641)", 
+           "D2:\n [641, 718)", "D2:\n [718, 750)", "D2:\n [750, 781)",
+           "D2:\n [781, 800]")
+barplot(c(rv_height1, rv_height2, rv_height3, rv_height4, rv_height5, 
+          rv_height6, rv_height7), rep(5,7),
+        names.arg=names, ylab="Frequency", cex.names=0.8)
+abline(v=6, lty=3)
+mtext(side=3, "(b) Height", adj=0)
+dev.off()
 
 #Figure A2: Marginal elasticity by diameter ######
 #setwd("/Users/curculion/Dropbox/matrix/outputs/sites/Eastern")
@@ -2186,6 +3387,7 @@ load("./C/total.elas.RData")
 load("./FP/total.elas.RData")
 load("./PG/total.elas.RData")
 load("./WT/total.elas.RData")
+
 
 #setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data/MSFigures")
 
@@ -2309,6 +3511,60 @@ mtext(side=1, "Height (cm)", line=2,cex=1)
 dev.off() #x11(width = width.cm/2.54, height = 1.5*width.cm/(2.54), 
   #   pointsize = pointsize)
 
+#*-- Group ##### 
+load("./Overall/total.elas.RData")
+#Marginal Elasticity by Diameter
+D1_elas_diam <- sum(rowSums(total.elas_D1_overall))
+G_elas_diam <- sum(rowSums(total.elas_G_overall))
+F_elas_diam <- sum(rowSums(total.elas_F_overall))
+temp <- rowSums(total.elas_D2_overall)
+D2_elas_diam1 <- sum(temp[1:60]) #5-417
+D2_elas_diam2 <- sum(temp[61:80]) #424-557
+D2_elas_diam3 <- sum(temp[81:90]) #564-627
+D2_elas_diam4 <- sum(temp[91:95]) #634-662
+D2_elas_diam5 <- sum(temp[96:98]) #669-683
+D2_elas_diam6 <- sum(temp[99:10]) #690-696
+
+#Now for diam
+D1_elas_height <- sum(colSums(total.elas_D1_overall))
+G_elas_height <- sum(colSums(total.elas_G_overall))
+F_elas_height <- sum(colSums(total.elas_F_overall))
+temp <- colSums(total.elas_D2_overall)
+D2_elas_height1 <- sum(temp[1:60]) #19- 478 y4[60] #width = 459
+D2_elas_height2 <- sum(temp[61:80]) #485-633.11  #width = 148
+D2_elas_height3 <- sum(temp[81:90]) #641- 711 #width = 70
+D2_elas_height4 <- sum(temp[91:95]) #718 - 750 #width= 32
+D2_elas_height5 <- sum(temp[96:98]) #749 - 765 # width=16
+D2_elas_height6 <- sum(temp[99:101]) #781 -796 #width= 15
+
+
+postscript("./Figures/elasticity.eps", width=width.cm/2.54, 
+           height=(2*height.cm)/2.54, pointsize=pointsize, 
+           encoding = "TeXtext.enc")
+#barplot(heights, widths, space=0, col=cols, xlim=c(16,800), ylim=c(0,0.43))
+par(mar = c(2, 2.5, 2, 0))
+par(mfrow=c(2,1))
+names <- c("D1", "M", "F", "D2:\n (5-424)", "D2:\n [424, 564)", 
+           "D2:\n [564, 634)", "D2:\n [634, 669)", "D2:\n [669, 690)",
+           "D2:\n [690, 696]")
+barplot(c(D1_elas_diam, G_elas_diam, F_elas_diam, D2_elas_diam1, 
+          D2_elas_diam2, D2_elas_diam3, D2_elas_diam4, D2_elas_diam5, 
+          D2_elas_diam6), c(rep(1, 3), rep(5,8)), names.arg= names,
+        cex.names=0.8, ylab="Elasticity")
+mtext(side = 3, "(a) Diameter", adj=0)
+#Marginal Elasticity by Height
+
+#barplot(heights, widths, space=0, col=cols, xlim=c(16,800), ylim=c(0,0.43))
+
+names <- c("D1", "M", "F", "D2:\n (16-485)", "D2:\n [485, 641)", 
+           "D2:\n [641, 718)", "D2:\n [718, 750)", "D2:\n [750, 781)",
+           "D2:\n [781, 800]")
+barplot(c(D1_elas_height, G_elas_height, F_elas_height, D2_elas_height1, 
+        D2_elas_height2, D2_elas_height3, D2_elas_height4, D2_elas_height5, 
+        D2_elas_height6), c(rep(1, 3), rep(5,8)), names.arg= names,
+        cex.names=0.8, ylab="Elasticity")
+mtext(side = 3, "(b) Height", adj=0)
+dev.off()
 
 
 
