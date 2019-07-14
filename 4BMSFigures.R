@@ -1327,6 +1327,13 @@ dev.off()
 
 ### FIG 3: D2 Survival ##### 
 df2 <- expand.grid(x1seq_larges, x2seq_larges)
+df3 <- expand.grid(x1seq_larges, x2seq_larges[1])
+df4 <- expand.grid(x1seq_larges[1], x2seq_larges)
+df5 <- expand.grid(x1seq_larges[10], x2seq_larges)
+df7 <- expand.grid(x1seq_larges[20], x2seq_larges)
+df8 <- expand.grid(x1seq_larges[30], x2seq_larges)
+df9 <- expand.grid(x1seq_larges[40], x2seq_larges)
+df10 <- expand.grid(x1seq_larges[50], x2seq_larges)
 #BC, CC, and PG
 b0 <- p.vec_BC[19]
 b1 <- p.vec_BC[20]
@@ -1350,6 +1357,14 @@ b0 <- p.vec_WT[19]
 b1 <- p.vec_WT[20]
 b2 <- p.vec_WT[21]
 df2$WT_s2 <- invlogit(b0 + b1*df2$Var1 + b2*df2$Var2)
+
+#Overall
+#Wild Turkey
+b0 <- p.vec_overall[19]
+b1 <- p.vec_overall[20]
+b2 <- p.vec_overall[21]
+df2$overall_s2 <- invlogit(b0 + b1*df2$Var1 + b2*df2$Var2)
+df3$overall_s2 <- invlogit(b0 + b1*df3$Var1 + b2*df3$Var2)
 
 #Figure 3 in ggplot
 #Big Cypress, Cape Canaveral and Punta Gorda
@@ -1599,6 +1614,10 @@ grid.arrange(plot_BCs2_pred, plot_BCs2_meas,
              layout_matrix=lay, widths=c(1, 1, 1, 1, 1, .7))
 dev.off()
 
+
+ ggplot() + xlim(1.6, 100) + ylim(15, 18) + 
+  geom_tile(data = df3, aes(x=Var1, y = Var2, fill= overall_s2)) + 
+  scale_fill_gradientn(colors=my.palette, limits=c(0.6,1)) + 
 ###FIG 4:D2 GROWTH OF D2 INDIVIDUALS #####
 
 ### Plot Growth Mod Eastern Larges
@@ -1775,6 +1794,31 @@ b5<-p.vec_WT[28]
 
 df2$diam_WT <- b0 + b1*df2$Var1 + b2*df2$Var2
 df2$height_WT <- b3 + b4*df2$Var1 + b5*df2$Var2
+
+#overall
+b0<-p.vec_overall[26]
+b1<-p.vec_overall[27]
+b2<-p.vec_overall[28]
+
+df3$diam_WT <- b0 + b1*df3$Var1 + b2*df3$Var2
+
+df4$height <-b0 + b1*df4$Var1 + b2*df4$Var2 
+df5$height <-b0 + b1*df5$Var1 + b2*df5$Var2 
+df6$height <-b0 + b1*df6$Var1 + b2*df6$Var2 
+df7$height <-b0 + b1*df7$Var1 + b2*df7$Var2 
+df8$height <-b0 + b1*df8$Var1 + b2*df8$Var2 
+df9$height<- b0 + b1*df9$Var1 + b2*df9$Var2
+df10$height <-b0 + b1*df10$Var1 + b2*df10$Var2
+
+
+plot(df4$Var2, df4$height, ylim=c(0,900), col=cols[1])
+points(df5$Var2, df5$height, col=cols[2])
+points(df6$Var2, df6$height, col=cols[3])
+points(df7$Var2, df7$height, col=cols[4])
+points(df8$Var2, df8$height, col=cols[5])
+points(df9$Var2, df9$height, col=cols[6])
+points(df10$Var2, df10$height, col=cols[7])
+
 
 
 #x11(width = width.cm/2.54, height = height.cm/2.54, 

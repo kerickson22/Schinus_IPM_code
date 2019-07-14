@@ -38,8 +38,10 @@ memory.limit(memory.limit() *2^30)
 # until the calculated value of lambda stabilized 
 m1=10
 m2=m1+1
-m3=100
-m4=m3+1
+#m3=100
+m3=300
+#m4=m3+1
+m4=101
 tol=1.e-8; 
 
 
@@ -148,6 +150,7 @@ y1=(h1/2)*((0:(m1-1))+(1:m1)); #for diameter in D1
 h2=16/m2
 y2=(h2/2)*((0:(m2-1))+(1:m2)); #for height in D1
 h3=(700-1.6)/m3;
+#h3=3
 y3=(h3/2)*((0:(m3-1))+(1:m3))+1.6; #for diameter in D2
 h4=(800-16)/m4
  y4=(h4/2)*((0:(m4-1))+(1:m4))+16; #for height in D2
@@ -566,7 +569,7 @@ saveRDS(thing$stable.dist, file = "./WT/stable.dist_WT.rds")
 saveRDS(thing$v, file = "./WT/v_WT.rds")
 rm(A_WT)
 
-#Wild Turkey
+#Overall
 load("./Overall/A_overall.RData")
 thing <- find_lambda(A_overall)
 saveRDS(thing$lam.stable, file = "./Overall/lam.stable_overall.rds")
