@@ -29,19 +29,24 @@ library(msm)
 memory.limit(memory.limit() *2^30)
 
 # Set matrix size: 
-# m1: The number of categories of diameter that the seedling domain (D1) is divided into
-# m2: The number of categories of height that the seedling domain (D1) is divided into
-# m3: The number of categories of diameter that the large plant domain (D2) is divided into
-# m4: The number of categories of height that the large plant domain (D2) is divided into
+# m1: # of categories seedling diameter divided into
+# m2: # of categories seedling height divided into 
+# m3a: # of categories small adult diameter divided into 
+# m4a: # of categories small adult height divided into
+# m3b: # of categories large adult diameter divided into
+# m4b: # of categories large adult height divided into 
 
 #The values used here were chosen by continuing to increase the dimensions of the matrix 
 # until the calculated value of lambda stabilized 
 m1=10
 m2=m1+1
-#m3=100
-m3=300
-#m4=m3+1
-m4=101
+m3a=250
+m4a=50
+
+m3b = 120
+m4b = 100
+m3=m3a + m3b
+m4=m4a + m4b
 tol=1.e-8; 
 
 
@@ -58,12 +63,12 @@ matrix.image=function(x,y,A,col=topo.colors(200),...) {
 # (I) Parameters and demographic functions for computing the kernel #####
 
 #p.vecs are defined externally in script 1demography_models.R
-load('./BC/p.vec_BC.RData')
-load('./CC/p.vec_CC.RData')
-load('./C/p.vec_C.RData')
-load('./FP/p.vec_FP.RData')
-load('./PG/p.vec_PG.RData')
-load('./WT/p.vec_WT.RData')
+#load('./BC/p.vec_BC.RData')
+#load('./CC/p.vec_CC.RData')
+#load('./C/p.vec_C.RData')
+#load('./FP/p.vec_FP.RData')
+#load('./PG/p.vec_PG.RData')
+#load('./WT/p.vec_WT.RData')
 load("./Overall/p.vec_overall.RData")
 
 #p.vec[1]:seedling survival intercept
@@ -116,6 +121,7 @@ load("./Overall/p.vec_overall.RData")
 #Domain 2: Larger Domain
 #	 for diam=diameter in range [1.6,700]
 #and for height=height in range [16, 800]
+# Domain 2 is split into a 
 #============================================================================# 
 
 
@@ -149,11 +155,22 @@ h1=1.6/m1;
 y1=(h1/2)*((0:(m1-1))+(1:m1)); #for diameter in D1
 h2=16/m2
 y2=(h2/2)*((0:(m2-1))+(1:m2)); #for height in D1
-h3=(700-1.6)/m3;
-#h3=3
-y3=(h3/2)*((0:(m3-1))+(1:m3))+1.6; #for diameter in D2
-h4=(800-16)/m4
- y4=(h4/2)*((0:(m4-1))+(1:m4))+16; #for height in D2
+
+h3a = (150-1.6)/m3a; 
+
+y3a=(h3a/2)*((0:(m3a-1))+(1:m3a))+1.6; #for diameter in D2a
+h3b = (700-150)/m3b
+y3b=(h3b/2)*((0:(m3b-1))+(1:m3b))+150; #for diameter in D2b
+y3 <- c(y3a, y3b)
+
+#h4=(800-16)/m4
+h4a = (300-16)/m4a
+y4a=(h4a/2)*((0:(m4a-1))+(1:m4a))+16;
+h4b = (800-300)/m4b 
+y4b=(h4b/2)*((0:(m4b-1))+(1:m4b))+300;
+y4 = c(y4a, y4b)
+
+
 
 # Compute the iteration matrix. With a bit of vectorizing it's not too slow,
 # though you can probably do better if you need to. The shortcuts here have 
@@ -219,175 +236,581 @@ h4=(800-16)/m4
  saveRDS(thing$D1, file="./Overall/D1_overall.rds")
  saveRDS(thing$Kvals_D1, file="./Overall/Kvals_D1_overall.rds")
 		
-# Construct D2 (Large Domain): #####
- build_D2 = function(p.vec) {
-  plop=function(i,j) {(j-1)*m3+i} # for putting values in proper place in A 
-  Plop=outer(1:m3,1:m4,plop); 
-
-  D2=matrix(0,m3*m4,m3*m4);
-  Kvals_D2=array(0,c(m3,m4,m3,m4));  
-
-  for(i in 1:m3){
-	  for(j in 1:m4){
-		  for(k in 1:m3){
-			  	kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec)
-				  D2[Plop[k,1:m4],Plop[i,j]]=kvals
-				Kvals_D2[k,1:m4,i,j]=kvals
-			
-	  }}
-	cat(i,"\n"); 
-  }		
-  D2=D2*h3*h4 #Multiply D2 by widths
-  return(list(D2 = D2, Kvals_D2 = Kvals_D2))
+# Construct D2AA (Large Domain): #####
+ build_D2AA = function(p.vec) {
+   plop=function(i,j) {(j-1)*m3a+i} # for putting values in proper place in A 
+   Plop=outer(1:m3a,1:m4a,plop); 
+   
+   D2AA=matrix(0,m3a*m4a,m3a*m4a);
+   Kvals_D2AA=array(0,c(m3a,m4a,m3a,m4a));  
+   
+   for(i in 1:m3a){
+     for(j in 1:m4a){
+       for(k in 1:m3a){
+         kvals=pyx2(y3a[k],y4a[1:m4a],y3a[i],y4a[j], p.vec)
+         D2AA[Plop[k,1:m4a],Plop[i,j]]=kvals
+         Kvals_D2AA[k,1:m4a,i,j]=kvals
+         
+       }}
+     cat(i,"\n"); 
+   }		
+   D2AA=D2AA*h3a*h4a #Multiply D2 by widths
+  return(list(D2AA = D2AA, Kvals_D2AA = Kvals_D2AA))
  }
  
  #Big Cypress
- thing <- build_D2(p.vec_BC)
- saveRDS(thing$D2, file = "./BC/D2_BC.rds")
- saveRDS(thing$Kvals_D2, file ="./BC/Kvals_D2_BC.rds" )
+ thing <- build_D2AA(p.vec_BC)
+ saveRDS(thing$D2AA, file = "./BC/D2AA_BC.rds")
+ saveRDS(thing$Kvals_D2AA, file ="./BC/Kvals_D2AA_BC.rds" )
  #Cape Canaveral
- thing <- build_D2(p.vec_CC)
- saveRDS(thing$D2, file = "./CC/D2_CC.rds")
- saveRDS(thing$Kvals_D2, file ="./CC/Kvals_D2_CC.rds" )
+ thing <- build_D2AA(p.vec_CC)
+ saveRDS(thing$D2AA, file = "./CC/D2AA_CC.rds")
+ saveRDS(thing$Kvals_D2AA, file ="./CC/Kvals_D2AA_CC.rds" )
  #Chekika
- thing <- build_D2(p.vec_C)
- saveRDS(thing$D2, file = "./C/D2_C.rds")
- saveRDS(thing$Kvals_D2, file ="./C/Kvals_D2_C.rds" )
+ thing <- build_D2AA(p.vec_C)
+ saveRDS(thing$D2AA, file = "./C/D2AA_C.rds")
+ saveRDS(thing$Kvals_D2AA, file ="./C/Kvals_D2AA_C.rds" )
  #Fort Pierce
- thing <- build_D2(p.vec_FP)
- saveRDS(thing$D2, file = "./FP/D2_FP.rds")
- saveRDS(thing$Kvals_D2, file ="./FP/Kvals_D2_FP.rds" )
+ thing <- build_D2AA(p.vec_FP)
+ saveRDS(thing$D2AA, file = "./FP/D2AA_FP.rds")
+ saveRDS(thing$Kvals_D2AA, file ="./FP/Kvals_D2AA_FP.rds" )
  #Punta Gorda
- thing <- build_D2(p.vec_PG)
- saveRDS(thing$D2, file = "./PG/D2_PG.rds")
- saveRDS(thing$Kvals_D2, file ="./PG/Kvals_D2_PG.rds" )
+ thing <- build_D2AA(p.vec_PG)
+ saveRDS(thing$D2AA, file = "./PG/D2AA_PG.rds")
+ saveRDS(thing$Kvals_D2AA, file ="./PG/Kvals_D2AA_PG.rds" )
  #Wild Turkey
- thing <- build_D2(p.vec_WT)
- saveRDS(thing$D2, file = "./WT/D2_WT.rds")
- saveRDS(thing$Kvals_D2, file ="./WT/Kvals_D2_WT.rds" )
+ thing <- build_D2AA(p.vec_WT)
+ saveRDS(thing$D2AA, file = "./WT/D2AA_WT.rds")
+ saveRDS(thing$Kvals_D2AA, file ="./WT/Kvals_D2AA_WT.rds" )
  
  #Overall
- thing <- build_D2(p.vec_overall)
- saveRDS(thing$D2, file="./Overall/D2_overall.rds")
- saveRDS(thing$Kvals_D2, file="./Overall/Kvals_D2_overall.rds")
+ thing <- build_D2AA(p.vec_overall)
+ saveRDS(thing$D2AA, file="./Overall/D2AA_overall.rds")
+ saveRDS(thing$Kvals_D2AA, file="./Overall/Kvals_D2AA_overall.rds")
  
-# Construct F (Fertility): #####
- build_F = function(p.vec) {
-  plop1=function(i, j) {(j-1)*m1 + i}
-  plop2=function(i, j) {(j-1)*m3 + i}
-  Plop1=outer(1:m1,1:m2,plop1); 
-  Plop2=outer(1:m3, 1:m4, plop2);
-
-  F=matrix(0,m1*m2,m3*m4); 
-  Kvals_F=array(0, c(m1, m2, m3, m4))
-
-  for(i in 1:m3) {
-	  for (j in 1:m4) {
-		  for (k in 1:m1) {
-			  kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec)
-			  F[Plop1[k, 1:m2], Plop2[i,j]]=kvals
-			  Kvals_F[k, 1:m2, i, j]=kvals
-		  }}
-		  cat(i, "\n");
-  }
-  F=F*h1*h2
-  return(list(F = F, Kvals_F = Kvals_F))
-}
+ # Construct D2BB (Large Domain): #####
+ build_D2BB = function(p.vec) {
+   
+   plop=function(i,j) {(j-1)*m3b+i} # for putting values in proper place in A 
+   Plop=outer(1:m3b,1:m4b,plop); 
+   
+   D2BB=matrix(0,m3b*m4b,m3b*m4b);
+   Kvals_D2BB=array(0,c(m3b,m4b,m3b,m4b));  
+   
+   for(i in 1:m3b){
+     for(j in 1:m4b){
+       for(k in 1:m3b){
+         kvals=pyx2(y3b[k],y4b[1:m4b],y3b[i],y4b[j], p.vec)
+         D2BB[Plop[k,1:m4b],Plop[i,j]]=kvals
+         Kvals_D2BB[k,1:m4b,i,j]=kvals
+         
+       }}
+     cat(i,"\n"); 
+   }		
+   D2BB=D2BB*h3b*h4b #Multiply D2 by widths
+   return(list(D2BB = D2BB, Kvals_D2BB = Kvals_D2BB))
+ }
+ 
+ #Big Cypress
+ thing <- build_D2BB(p.vec_BC)
+ saveRDS(thing$D2BB, file = "./BC/D2BB_BC.rds")
+ saveRDS(thing$Kvals_D2BB, file ="./BC/Kvals_D2BB_BC.rds" )
+ #Cape Canaveral
+ thing <- build_D2BB(p.vec_CC)
+ saveRDS(thing$D2BB, file = "./CC/D2BB_CC.rds")
+ saveRDS(thing$Kvals_D2BB, file ="./CC/Kvals_D2BB_CC.rds" )
+ #Chekika
+ thing <- build_D2BB(p.vec_C)
+ saveRDS(thing$D2BB, file = "./C/D2BB_C.rds")
+ saveRDS(thing$Kvals_D2BB, file ="./C/Kvals_D2BB_C.rds" )
+ #Fort Pierce
+ thing <- build_D2BB(p.vec_FP)
+ saveRDS(thing$D2BB, file = "./FP/D2BB_FP.rds")
+ saveRDS(thing$Kvals_D2BB, file ="./FP/Kvals_D2BB_FP.rds" )
+ #Punta Gorda
+ thing <- build_D2BB(p.vec_PG)
+ saveRDS(thing$D2BB, file = "./PG/D2BB_PG.rds")
+ saveRDS(thing$Kvals_D2BB, file ="./PG/Kvals_D2BB_PG.rds" )
+ #Wild Turkey
+ thing <- build_D2BB(p.vec_WT)
+ saveRDS(thing$D2BB, file = "./WT/D2BB_WT.rds")
+ saveRDS(thing$Kvals_D2BB, file ="./WT/Kvals_D2BB_WT.rds" )
+ 
+ #Overall
+ thing <- build_D2BB(p.vec_overall)
+ saveRDS(thing$D2BB, file="./Overall/D2BB_overall.rds")
+ saveRDS(thing$Kvals_D2BB, file="./Overall/Kvals_D2BB_overall.rds")
+ 
+ # Construct D2BA (Large Domain): #####
+ build_D2BA = function(p.vec) {
+   
+   plop1=function(i, j) {(j-1)*m3a + i}
+   plop2=function(i, j) {(j-1)*m3b + i}
+   Plop1=outer(1:m3a,1:m4a,plop1); 
+   Plop2=outer(1:m3b, 1:m4b, plop2);
+   
+   D2BA=matrix(0,m3a*m4a,m3b*m4b); 
+   Kvals_D2BA=array(0, c(m3a, m4a, m3b, m4b))
+   
+   for(i in 1:m3b) {
+     for (j in 1:m4b) {
+       for (k in 1:m3a) {
+         kvals=pyx2(y3a[k], y4a[1:m4a], y3b[i], y4b[j], p.vec)
+         D2BA[Plop1[k, 1:m4a], Plop2[i,j]]=kvals
+         Kvals_D2BA[k, 1:m4a, i, j]=kvals
+       }}
+     cat(i, "\n");
+   }
+   D2BA=D2BA*h3a*h4a
+   return(list(D2BA = D2BA, Kvals_D2BA = Kvals_D2BA))
+ }
+ 
+ #Big Cypress
+ thing <- build_D2BA(p.vec_BC)
+ saveRDS(thing$D2BA, file = "./BC/D2BA_BC.rds")
+ saveRDS(thing$Kvals_D2BA, file ="./BC/Kvals_D2BA_BC.rds" )
+ #Cape Canaveral
+ thing <- build_D2BA(p.vec_CC)
+ saveRDS(thing$D2BA, file = "./CC/D2BA_CC.rds")
+ saveRDS(thing$Kvals_D2BA, file ="./CC/Kvals_D2BA_CC.rds" )
+ #Chekika
+ thing <- build_D2BA(p.vec_C)
+ saveRDS(thing$D2BA, file = "./C/D2BA_C.rds")
+ saveRDS(thing$Kvals_D2BA, file ="./C/Kvals_D2BA_C.rds" )
+ #Fort Pierce
+ thing <- build_D2BA(p.vec_FP)
+ saveRDS(thing$D2BA, file = "./FP/D2BA_FP.rds")
+ saveRDS(thing$Kvals_D2BA, file ="./FP/Kvals_D2BA_FP.rds" )
+ #Punta Gorda
+ thing <- build_D2BA(p.vec_PG)
+ saveRDS(thing$D2BA, file = "./PG/D2BA_PG.rds")
+ saveRDS(thing$Kvals_D2BA, file ="./PG/Kvals_D2BA_PG.rds" )
+ #Wild Turkey
+ thing <- build_D2BA(p.vec_WT)
+ saveRDS(thing$D2BA, file = "./WT/D2BA_WT.rds")
+ saveRDS(thing$Kvals_D2BA, file ="./WT/Kvals_D2BA_WT.rds" )
+ 
+ #Overall
+ thing <- build_D2BA(p.vec_overall)
+ saveRDS(thing$D2BA, file="./Overall/D2BA_overall.rds")
+ saveRDS(thing$Kvals_D2BA, file="./Overall/Kvals_D2BA_overall.rds")
+ 
+ # Construct D2AB (Large Domain): #####
+ build_D2AB = function(p.vec) {
+   
+   plop1=function(i, j) {(j-1)*m3b + i}
+   plop2=function(i, j) {(j-1)*m3a + i}
+   Plop1=outer(1:m3b,1:m4b,plop1); 
+   Plop2=outer(1:m3a, 1:m4a, plop2);
+   
+   D2AB=matrix(0,m3b*m4b,m3a*m4a); 
+   Kvals_D2AB=array(0, c(m3b, m4b, m3a, m4a))
+   
+   for(i in 1:m3a) {
+     for (j in 1:m4a) {
+       for (k in 1:m3b) {
+         kvals=pyx2(y3b[k], y4b[1:m4b], y3a[i], y4a[j], p.vec)
+         D2AB[Plop1[k, 1:m4b], Plop2[i,j]]=kvals
+         Kvals_D2AB[k, 1:m4b, i, j]=kvals
+       }}
+     cat(i, "\n");
+   }
+   D2AB=D2AB*h3b*h4b
+   return(list(D2AB = D2AB, Kvals_D2AB = Kvals_D2AB))
+ }
+ 
+ #Big Cypress
+ thing <- build_D2AB(p.vec_BC)
+ saveRDS(thing$D2AB, file = "./BC/D2AB_BC.rds")
+ saveRDS(thing$Kvals_D2AB, file ="./BC/Kvals_D2AB_BC.rds" )
+ #Cape Canaveral
+ thing <- build_D2AB(p.vec_CC)
+ saveRDS(thing$D2AB, file = "./CC/D2AB_CC.rds")
+ saveRDS(thing$Kvals_D2AB, file ="./CC/Kvals_D2AB_CC.rds" )
+ #Chekika
+ thing <- build_D2AB(p.vec_C)
+ saveRDS(thing$D2AB, file = "./C/D2AB_C.rds")
+ saveRDS(thing$Kvals_D2AB, file ="./C/Kvals_D2AB_C.rds" )
+ #Fort Pierce
+ thing <- build_D2AB(p.vec_FP)
+ saveRDS(thing$D2AB, file = "./FP/D2AB_FP.rds")
+ saveRDS(thing$Kvals_D2AB, file ="./FP/Kvals_D2AB_FP.rds" )
+ #Punta Gorda
+ thing <- build_D2AB(p.vec_PG)
+ saveRDS(thing$D2AB, file = "./PG/D2AB_PG.rds")
+ saveRDS(thing$Kvals_D2AB, file ="./PG/Kvals_D2AB_PG.rds" )
+ #Wild Turkey
+ thing <- build_D2AB(p.vec_WT)
+ saveRDS(thing$D2AB, file = "./WT/D2AB_WT.rds")
+ saveRDS(thing$Kvals_D2AB, file ="./WT/Kvals_D2AB_WT.rds" )
+ 
+ #Overall
+ thing <- build_D2AB(p.vec_overall)
+ saveRDS(thing$D2AB, file="./Overall/D2AB_overall.rds")
+ saveRDS(thing$Kvals_D2AB, file="./Overall/Kvals_D2AB_overall.rds")
+ 
+# Put D2 together #####
+ #Big Cypress
+ D2AA_BC <- readRDS("./BC/D2AA_BC.rds")
+ D2BA_BC <- readRDS("./BC/D2BA_BC.rds")
+ D2AB_BC <- readRDS("./BC/D2AB_BC.rds")
+ D2BB_BC <- readRDS("./BC/D2BB_BC.rds")
+ 
+ D2_BC <- rbind(cbind(D2AA_BC, D2BA_BC), cbind(D2AB_BC, D2BB_BC))   
+ rm(D2AA_BC, D2BA_BC, D2AB_BC, D2BB_BC)
+ save(D2_BC, file="./BC/D2_BC.RData")
+ 
+ D2AA_CC <- readRDS("./CC/D2AA_CC.rds")
+ D2BA_CC <- readRDS("./CC/D2BA_CC.rds")
+ D2AB_CC <- readRDS("./CC/D2AB_CC.rds")
+ D2BB_CC <- readRDS("./CC/D2BB_CC.rds")
+ 
+ D2_CC <- rbind(cbind(D2AA_CC, D2BA_CC), cbind(D2AB_CC, D2BB_CC))   
+ rm(D2AA_CC, D2BA_CC, D2AB_CC, D2BB_CC)
+ save(D2_CC, file="./CC/D2_CC.RData")
+ rm(D2_CC)
+ 
+ #Chekika
+ D2AA_C <- readRDS("./C/D2AA_C.rds")
+ D2BA_C <- readRDS("./C/D2BA_C.rds")
+ D2AB_C <- readRDS("./C/D2AB_C.rds")
+ D2BB_C <- readRDS("./C/D2BB_C.rds")
+ 
+ D2_C <- rbind(cbind(D2AA_C, D2BA_C), cbind(D2AB_C, D2BB_C))   
+ rm(D2AA_C, D2BA_C, D2AB_C, D2BB_C)
+ save(D2_C, file="./C/D2_C.RData")
+ rm(D2_C)
+ 
+ #Fort Pierce
+ D2AA_FP <- readRDS("./FP/D2AA_FP.rds")
+ D2BA_FP <- readRDS("./FP/D2BA_FP.rds")
+ D2AB_FP <- readRDS("./FP/D2AB_FP.rds")
+ D2BB_FP <- readRDS("./FP/D2BB_FP.rds")
+ 
+ D2_FP <- rbind(cbind(D2AA_FP, D2BA_FP), cbind(D2AB_FP, D2BB_FP))   
+ rm(D2AA_FP, D2BA_FP, D2AB_FP, D2BB_FP)
+ save(D2_FP, file="./FP/D2_FP.RData")
+ rm(D2_FP)
+ 
+ #Punta Gorda
+ D2AA_PG <- readRDS("./PG/D2AA_PG.rds")
+ D2BA_PG <- readRDS("./PG/D2BA_PG.rds")
+ D2AB_PG <- readRDS("./PG/D2AB_PG.rds")
+ D2BB_PG <- readRDS("./PG/D2BB_PG.rds")
+ 
+ D2_PG <- rbind(cbind(D2AA_PG, D2BA_PG), cbind(D2AB_PG, D2BB_PG))   
+ rm(D2AA_PG, D2BA_PG, D2AB_PG, D2BB_PG)
+ save(D2_PG, file="./PG/D2_PG.RData")
+ rm(D2_PG)
+#Wild Turkey
+ D2AA_WT <- readRDS("./WT/D2AA_WT.rds")
+ D2BA_WT <- readRDS("./WT/D2BA_WT.rds")
+ D2AB_WT <- readRDS("./WT/D2AB_WT.rds")
+ D2BB_WT <- readRDS("./WT/D2BB_WT.rds")
+ 
+ D2_WT <- rbind(cbind(D2AA_WT, D2BA_WT), cbind(D2AB_WT, D2BB_WT))   
+ rm(D2AA_WT, D2BA_WT, D2AB_WT, D2BB_WT)
+ save(D2_WT, file="./WT/D2_WT.RData")
+ rm(D2_WT)
+#Overall
+ D2AA_overall <- readRDS("./Overall/D2AA_overall.rds")
+ D2BA_overall <- readRDS("./Overall/D2BA_overall.rds")
+ D2AB_overall <- readRDS("./Overall/D2AB_overall.rds")
+ D2BB_overall <- readRDS("./Overall/D2BB_overall.rds")
+ 
+ D2_overall <- rbind(cbind(D2AA_overall, D2BA_overall), cbind(D2AB_overall, D2BB_overall))   
+ rm(D2AA_overall, D2BA_overall, D2AB_overall, D2BB_overall)
+ save(D2_overall, file="./Overall/D2_overall.RData")
+ rm(D2_overall)
+ 
+ 
+# Construct FA (Fertility): #####
+ build_FA = function(p.vec) {
+   plop1=function(i, j) {(j-1)*m1 + i}
+   plop2=function(i, j) {(j-1)*m3a + i}
+   Plop1=outer(1:m1,1:m2,plop1); 
+   Plop2=outer(1:m3a, 1:m4a, plop2);
+   
+   FA=matrix(0,m1*m2,m3a*m4a); 
+   Kvals_FA=array(0, c(m1, m2, m3a, m4a))
+   
+   for(i in 1:m3a) {
+     for (j in 1:m4a) {
+       for (k in 1:m1) {
+         kvals=fyx(y1[k], y2[1:m2], y3a[i], y4a[j], p.vec)
+         FA[Plop1[k, 1:m2], Plop2[i,j]]=kvals
+         Kvals_FA[k, 1:m2, i, j]=kvals
+       }}
+     cat(i, "\n");
+   }
+   FA=FA*h1*h2
+  return(list(FA = FA, Kvals_FA = Kvals_FA))
+ }
+ 
+ # Construct FB (Fertility): #####
+ build_FB = function(p.vec) {
+   plop1=function(i, j) {(j-1)*m1 + i}
+   plop2=function(i, j) {(j-1)*m3b + i}
+   Plop1=outer(1:m1,1:m2,plop1); 
+   Plop2=outer(1:m3b, 1:m4b, plop2);
+   
+   FB=matrix(0,m1*m2,m3b*m4b); 
+   Kvals_FB=array(0, c(m1, m2, m3b, m4b))
+   
+   for(i in 1:m3b) {
+     for (j in 1:m4b) {
+       for (k in 1:m1) {
+         kvals=fyx(y1[k], y2[1:m2], y3b[i], y4b[j], p.vec)
+         FB[Plop1[k, 1:m2], Plop2[i,j]]=kvals
+         Kvals_FB[k, 1:m2, i, j]=kvals
+       }}
+     cat(i, "\n");
+   }
+   FB=FB*h1*h2
+   return(list(FB = FB, Kvals_FB = Kvals_FB))
+ }
 
  #Big Cypress
- thing <- build_F(p.vec_BC)
- saveRDS(thing$F, file = "./BC/F_BC.rds")
- saveRDS(thing$Kvals_F, file ="./BC/Kvals_F_BC.rds" )
+ thing <- build_FA(p.vec_BC)
+ saveRDS(thing$FA, file = "./BC/FA_BC.rds")
+ saveRDS(thing$Kvals_FA, file ="./BC/Kvals_FA_BC.rds" )
+ thing <- build_FB(p.vec_BC)
+ saveRDS(thing$FB, file = "./BC/FB_BC.rds")
+ saveRDS(thing$Kvals_FB, file ="./BC/Kvals_FB_BC.rds" )
+ F_BC <- cbind(thing$FA, thing$FB)
+ save(F_BC, file="./BC/F_BC.RData")
+ rm (F_BC)
+ 
+ 
+ 
  #Cape Canaveral
- thing <- build_F(p.vec_CC)
- saveRDS(thing$F, file = "./CC/F_CC.rds")
- saveRDS(thing$Kvals_F, file ="./CC/Kvals_F_CC.rds" )
+ thing <- build_FA(p.vec_CC)
+ saveRDS(thing$FA, file = "./CC/FA_CC.rds")
+ saveRDS(thing$Kvals_FA, file ="./CC/Kvals_FA_CC.rds" )
+ thing <- build_FB(p.vec_CC)
+ saveRDS(thing$FB, file = "./CC/FB_CC.rds")
+ saveRDS(thing$Kvals_FB, file ="./CC/Kvals_FB_CC.rds" )
+ F_CC <- cbind(thing$FA, thing$FB)
+ save(F_CC, file="./CC/F_CC.RData")
+ rm (F_CC)
+ 
  #Chekika
- thing <- build_F(p.vec_C)
- saveRDS(thing$F, file = "./C/F_C.rds")
- saveRDS(thing$Kvals_F, file ="./C/Kvals_F_C.rds" )
+ thing <- build_FA(p.vec_C)
+ saveRDS(thing$FA, file = "./C/FA_C.rds")
+ saveRDS(thing$Kvals_FA, file ="./C/Kvals_FA_C.rds" )
+ thing <- build_FB(p.vec_C)
+ saveRDS(thing$FB, file = "./C/FB_C.rds")
+ saveRDS(thing$Kvals_FB, file ="./C/Kvals_FB_C.rds" )
+ F_C <- cbind(thing$FA, thing$FB)
+ save(F_C, file="./C/F_C.RData")
+ rm (F_C)
+ 
  #Fort Pierce
- thing <- build_F(p.vec_FP)
- saveRDS(thing$F, file = "./FP/F_FP.rds")
- saveRDS(thing$Kvals_F, file ="./FP/Kvals_F_FP.rds" )
+ thing <- build_FA(p.vec_FP)
+ saveRDS(thing$FA, file = "./FP/FA_FP.rds")
+ saveRDS(thing$Kvals_FA, file ="./FP/Kvals_FA_FP.rds" )
+ thing <- build_FB(p.vec_FP)
+ saveRDS(thing$FB, file = "./FP/FB_FP.rds")
+ saveRDS(thing$Kvals_FB, file ="./FP/Kvals_FB_FP.rds" )
+ F_FP <- cbind(thing$FA, thing$FB)
+ save(F_FP, file="./FP/F_FP.RData")
+ rm (F_FP)
+ 
  #Punta Gorda
- thing <- build_F(p.vec_PG)
- saveRDS(thing$F, file = "./PG/F_PG.rds")
- saveRDS(thing$Kvals_F, file ="./PG/Kvals_F_PG.rds" )
+ thing <- build_FA(p.vec_PG)
+ saveRDS(thing$FA, file = "./PG/FA_PG.rds")
+ saveRDS(thing$Kvals_FA, file ="./PG/Kvals_FA_PG.rds" )
+ thing <- build_FB(p.vec_PG)
+ saveRDS(thing$FB, file = "./PG/FB_PG.rds")
+ saveRDS(thing$Kvals_FB, file ="./PG/Kvals_FB_PG.rds" )
+ F_PG <- cbind(thing$FA, thing$FB)
+ save(F_PG, file="./PG/F_PG.RData")
+ rm (F_PG)
+ 
  #Wild Turkey
- thing <- build_F(p.vec_WT)
- saveRDS(thing$F, file = "./WT/F_WT.rds")
- saveRDS(thing$Kvals_F, file ="./WT/Kvals_F_WT.rds" )
+ thing <- build_FA(p.vec_WT)
+ saveRDS(thing$FA, file = "./WT/FA_WT.rds")
+ saveRDS(thing$Kvals_FA, file ="./WT/Kvals_FA_WT.rds" )
+ thing <- build_FB(p.vec_WT)
+ saveRDS(thing$FB, file = "./WT/FB_WT.rds")
+ saveRDS(thing$Kvals_FB, file ="./WT/Kvals_FB_WT.rds" )
+ F_WT <- cbind(thing$FA, thing$FB)
+ save(F_WT, file="./WT/F_WT.RData")
+ rm (F_WT)
+ 
  
  #Overall
- thing <- build_F(p.vec_overall)
- saveRDS(thing$F, file = "./Overall/F_overall.rds")
- saveRDS(thing$Kvals_F, file ="./Overall/Kvals_F_overall.rds" )
+ thing <- build_FA(p.vec_overall)
+ saveRDS(thing$FA, file = "./Overall/FA_overall.rds")
+ saveRDS(thing$Kvals_FA, file ="./Overall/Kvals_FA_overall.rds" )
+ thing <- build_FB(p.vec_overall)
+ saveRDS(thing$FB, file = "./Overall/FB_overall.rds")
+ saveRDS(thing$Kvals_FB, file ="./Overall/Kvals_FB_overall.rds" )
+ F_overall <- cbind(thing$FA, thing$FB)
+ save(F_overall, file="./Overall/F_overall.RData")
+ rm (F_overall)
  
-# Construct M (Maturation): #####
  
-build_G = function(p.vec) {
-  plop1=function(i, j) {(j-1)*m3 + i}
+# Construct MA (Maturation): #####
+ 
+build_GA = function(p.vec) {
+  plop1=function(i, j) {(j-1)*m3a + i}
   plop2=function(i, j) {(j-1)*m1 + i}
-  Plop1=outer(1:m3,1:m4,plop1); 
+  Plop1=outer(1:m3a,1:m4a,plop1); 
   Plop2=outer(1:m1, 1:m2, plop2);
-
-  G=matrix(0,m3*m4,m1*m2); 
-  Kvals_G=array(0, c(m3, m4, m1, m2))
-    
+  
+  GA=matrix(0,m3a*m4a,m1*m2); 
+  Kvals_GA=array(0, c(m3a, m4a, m1, m2))
+  
   for(i in 1:m1) {
-	  for (j in 1:m2) {
-		  for (k in 1:m3) {
-			  kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec)
-			  G[Plop1[k, 1:m4], Plop2[i,j]]=kvals
-			  Kvals_G[k, 1:m4, i, j]=kvals
-		  }}
-		  cat(i, "\n");
+    for (j in 1:m2) {
+      for (k in 1:m3a) {
+        kvals=gyx(y3a[k], y4a[1:m4a], y1[i], y2[j], p.vec)
+        GA[Plop1[k, 1:m4a], Plop2[i,j]]=kvals
+        Kvals_GA[k, 1:m4a, i, j]=kvals
+      }}
+    cat(i, "\n");
   }
-  G=G*h3*h4
-  return(list(G = G, Kvals_G = Kvals_G))
+  GA=GA*h3a*h4a
+  
+  return(list(GA = GA, Kvals_GA = Kvals_GA))
 }
+
+ build_GB = function(p.vec) {
+   plop1=function(i, j) {(j-1)*m3b + i}
+   plop2=function(i, j) {(j-1)*m1 + i}
+   Plop1=outer(1:m3b,1:m4b,plop1); 
+   Plop2=outer(1:m1, 1:m2, plop2);
+   
+   GB=matrix(0,m3b*m4b,m1*m2); 
+   Kvals_GB=array(0, c(m3b, m4b, m1, m2))
+   
+   for(i in 1:m1) {
+     for (j in 1:m2) {
+       for (k in 1:m3b) {
+         kvals=gyx(y3b[k], y4b[1:m4b], y1[i], y2[j], p.vec)
+         GB[Plop1[k, 1:m4b], Plop2[i,j]]=kvals
+         Kvals_GB[k, 1:m4b, i, j]=kvals
+       }}
+     cat(i, "\n");
+   }
+   GB=GB*h3b*h4b
+   
+   return(list(GB = GB, Kvals_GB = Kvals_GB))
+ }
  
  #Big Cypress
- thing <- build_G(p.vec_BC)
- saveRDS(thing$G, file = "./BC/G_BC.rds")
- saveRDS(thing$Kvals_G, file ="./BC/Kvals_G_BC.rds" )
+ thing <- build_GA(p.vec_BC)
+ saveRDS(thing$GA, file = "./BC/GA_BC.rds")
+ saveRDS(thing$Kvals_GA, file ="./BC/Kvals_GA_BC.rds" )
+ GA<-thing$GA
+
+ thing <- build_GB(p.vec_BC)
+ saveRDS(thing$GB, file="./BC/GB_BC.rds")
+ saveRDS(thing$Kvals_GB, file="./BC/Kvals_GB_BC.rds")
+ GB<-thing$GB
+ 
+ 
+ G_BC <- rbind(GA, GB)
+ save(G_BC, file="./BC/G_BC.RData")
+ rm(GA, GB, G_BC)
+ 
  #Cape Canaveral
- thing <- build_G(p.vec_CC)
- saveRDS(thing$G, file = "./CC/G_CC.rds")
- saveRDS(thing$Kvals_G, file ="./CC/Kvals_G_CC.rds" )
+ thing <- build_GA(p.vec_CC)
+ saveRDS(thing$GA, file = "./CC/GA_CC.rds")
+ saveRDS(thing$Kvals_GA, file ="./CC/Kvals_GA_CC.rds" )
+ GA_CC <- thing$GA
+ 
+ thing <- build_GB(p.vec_CC)
+ saveRDS(thing$GB, file="./CC/GB_CC.rds")
+ saveRDS(thing$Kvals_GB, file="./CC/Kvals_GB_CC.rds")
+ GB_CC <- thing$GB
+ G_CC <- rbind(GA_CC, GB_CC)
+ save(G_CC, file="./CC/G_CC.RData")
+ rm(GA_CC, GB_CC, G_CC)
+ 
  #Chekika
- thing <- build_G(p.vec_C)
- saveRDS(thing$G, file = "./C/G_C.rds")
- saveRDS(thing$Kvals_G, file ="./C/Kvals_G_C.rds" )
+ thing <- build_GA(p.vec_C)
+ saveRDS(thing$GA, file = "./C/GA_C.rds")
+ saveRDS(thing$Kvals_GA, file ="./C/Kvals_GA_C.rds" )
+ GA_C <- thing$GA
+ thing <- build_GB(p.vec_C)
+ saveRDS(thing$GB, file="./C/GB_C.rds")
+ saveRDS(thing$Kvals_GB, file="./C/Kvals_GB_C.rds")
+ GB_C <- thing$GB
+ G_C <- rbind(GA_C, GB_C)
+ save(G_C, file="./C/G_C.RData")
+ rm(GA_C, GB_C, G_C)
+ 
  #Fort Pierce
- thing <- build_G(p.vec_FP)
- saveRDS(thing$G, file = "./FP/G_FP.rds")
- saveRDS(thing$Kvals_G, file ="./FP/Kvals_G_FP.rds" )
+ thing <- build_GA(p.vec_FP)
+ saveRDS(thing$GA, file = "./FP/GA_FP.rds")
+ saveRDS(thing$Kvals_GA, file ="./FP/Kvals_GA_FP.rds" )
+ GA_FP <- thing$GA
+ 
+ thing <- build_GB(p.vec_FP)
+ saveRDS(thing$GB, file="./FP/GB_FP.rds")
+ saveRDS(thing$Kvals_GB, file="./FP/Kvals_GB_FP.rds")
+ GB_FP <- thing$GB
+ G_FP <- rbind(GA_FP, GB_FP)
+ save(G_FP, file="./FP/G_FP.RData")
+ rm(GA_FP, GB_FP, G_FP)
+ 
  #Punta Gorda
- thing <- build_G(p.vec_PG)
- saveRDS(thing$G, file = "./PG/G_PG.rds")
- saveRDS(thing$Kvals_G, file ="./PG/Kvals_G_PG.rds" )
+ thing <- build_GA(p.vec_PG)
+ saveRDS(thing$GA, file = "./PG/GA_PG.rds")
+ saveRDS(thing$Kvals_GA, file ="./PG/Kvals_GA_PG.rds" )
+ GA_PG <- thing$GA
+ 
+ thing <- build_GB(p.vec_PG)
+ saveRDS(thing$GB, file="./PG/GB_PG.rds")
+ saveRDS(thing$Kvals_GB, file="./PG/Kvals_GB_PG.rds")
+ GB_PG <- thing$GB
+ G_PG <- rbind(GA_PG, GB_PG)
+ save(G_PG, file="./PG/G_PG.RData")
+ rm(GA_PG, GB_PG, G_PG)
+ 
  #Wild Turkey
- thing <- build_G(p.vec_WT)
- saveRDS(thing$G, file = "./WT/G_WT.rds")
- saveRDS(thing$Kvals_G, file ="./WT/Kvals_G_WT.rds" )
+ thing <- build_GA(p.vec_WT)
+ saveRDS(thing$GA, file = "./WT/GA_WT.rds")
+ saveRDS(thing$Kvals_GA, file ="./WT/Kvals_GA_WT.rds" )
+ GA_WT <- thing$GA
+ 
+ thing <- build_GB(p.vec_WT)
+ saveRDS(thing$GB, file="./WT/GB_WT.rds")
+ saveRDS(thing$Kvals_GB, file="./WT/Kvals_GB_WT.rds")
+ GB_WT <- thing$GB
+ G_WT <- rbind(GA_WT, GB_WT)
+ save(G_WT, file="./WT/G_WT.RData")
+ rm(GA_WT, GB_WT, G_WT)
+ 
  #Overall
- thing <- build_G(p.vec_overall)
- saveRDS(thing$G, file = "./Overall/G_overall.rds")
- saveRDS(thing$Kvals_G, file ="./Overall/Kvals_G_overall.rds" )
+ thing <- build_GA(p.vec_overall)
+ saveRDS(thing$GA, file = "./Overall/GA_overall.rds")
+ saveRDS(thing$Kvals_GA, file ="./Overall/Kvals_GA_overall.rds" )
+ GA_overall <- thing$GA
+ 
+ thing <- build_GB(p.vec_overall)
+ saveRDS(thing$GB, file="./Overall/GB_overall.rds")
+ saveRDS(thing$Kvals_GB, file="./Overall/Kvals_GB_overall.rds")
+ GB_overall <-thing$GB
+ G_overall <- rbind(GA_overall, GB_overall)
+ save(G_overall, file="./Overall/G_overall.RData")
+ rm(GA_overall, GB_overall, G_overall)
 
 rm(thing)
 gc()
+
+
 # Assemble the matrices #####
 
 #Big Cypress
-D1_BC <-readRDS("./BC/D1_BC.rds")
-G_BC <- readRDS("./BC/G_BC.rds")
+D1_BC <- readRDS("./BC/D1_BC.rds")
+load("./BC/G_BC.RData")
 left_side<-rbind(D1_BC, G_BC)
 rm(D1_BC, G_BC)
-F_BC <- readRDS("./BC/F_BC.rds")
-D2_BC <- readRDS("./BC/D2_BC.rds")
+load("./BC/F_BC.RData")
+load("./BC/D2_BC.RData")
 right_side<-rbind(F_BC, D2_BC)
 rm(F_BC, D2_BC)
 A_BC<-cbind(left_side, right_side)
@@ -485,8 +908,8 @@ rm(left_side, right_side)
 
 find_lambda = function(A) {
 
-  A2=Matrix(A); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
-
+  A2=Matrix(A); nt=Matrix(1,m1*m2+m3a*m4a + m3b*m4b,1); nt1=nt; 
+  
   qmax=1000; lam=1; 
   while(qmax>tol) {
 	  nt1=A2%*%nt;
@@ -495,7 +918,8 @@ find_lambda = function(A) {
 	  nt@x=(nt1@x)/lam; #we're cheating here - don't tell Doug Bates.  
 	  cat(lam,qmax,"\n");
   } 
-nt=matrix(nt@x,m1*m2+m3*m4,1); 
+  
+nt=matrix(nt@x,m1*m2+m3a*m4a + m3b*m4b,1); 
 #stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
 stable.dist=nt
 lam.stable=lam;
@@ -505,7 +929,7 @@ qmax=sum(abs(lam*nt-A%*%nt));
 cat("Convergence: ",qmax," should be less than ",tol,"\n");
 
 #Find the reproductive value function by iteration
-vt=Matrix(1,1,m1*m2+m3*m4); vt1=vt; 
+vt=Matrix(1,1,m1*m2+m3a*m4a + m3b*m4b); vt1=vt; 
 
 qmax=1000; lam=1; 
 while(qmax>tol) {
@@ -515,7 +939,7 @@ while(qmax>tol) {
   vt@x=(vt1@x)/lam;   
   cat(lam,qmax,"\n");
 } 
-v=t(matrix(vt@x,1,m1*m2+m3*m4)); 
+v=t(matrix(vt@x,1,m1*m2+m3a*m4a + m3b*m4b)); 
 lam.stable.t=lam; 
 
 return(list(lam.stable = lam.stable, stable.dist = stable.dist, v=v))

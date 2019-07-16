@@ -50,23 +50,36 @@ temp <- c(10, 11, 50, 50, 200, 100, NA)
 
 results <- rbind(results, temp)
 
-results5<- data.frame("m1" = rep(NA, 12),
-                      "m2" = rep(NA, 12),
-                      "m3a" = rep(50, 12),
-                      "m4a" = rep(50, 12),
-                      "m3b" = rep(200, 12),
-                      "m4b" = rep(100, 12), 
-                      "lambda" = rep(NA, 12))
+temp <- c(10, 11, 350, 50, 50, 50, NA)
+#Test how big m1 and m2 need to be 
+results7<- data.frame("m1" = rep(10, 4),
+                      "m2" = rep(11, 4),
+                      "m3a" = rep(50, 4),
+                      "m4a" = rep(50, 4),
+                      "m3b" = rep(NA, 4),
+                      "m4b" = rep(50, 4), 
+                      "lambda" = rep(NA, 4))
 
-results5$m1 <- c(5, 15, 20, 25, 30, 35, 10, 10, 10, 10, 10, 10)
-results5$m2 <- c(11, 11, 11, 11, 11, 11, 5, 15, 20, 25, 30, 35)
+results7$m3b <- c(60, 70, 80, 90)
 
-results <- rbind(results, results5)
+results8<- data.frame("m1" = rep(10, 4),
+                      "m2" = rep(11, 4),
+                      "m3a" = rep(50, 4),
+                      "m4a" = rep(50, 4),
+                      "m3b" = rep(50, 4),
+                      "m4b" = rep(NA, 4), 
+                      "lambda" = rep(NA, 4))
+
+results8$m4b <- c(10, 20, 30, 40)
+#results5$m1 <- c(5, 15, 20, 25, 30, 35, 10, 10, 10, 10, 10, 10)
+#results5$m2 <- c(11, 11, 11, 11, 11, 11, 5, 15, 20, 25, 30, 35)
+
+results <- rbind(results, results7)
 load("./Overall/p.vec_overall.RData")
 p.vec <- p.vec_overall
 
 
-for(ii in 27:nrow(results)) {
+for(ii in 50:nrow(results)) {
 
 # Set matrix size (to show up errors) and convergence tolerance. 
 # Make m1 and m2 smaller to make this run faster.  
