@@ -1566,15 +1566,31 @@ decompose_F = function (mat) {
   mat_FA<-mat[1:m1*m2, 1:(m3a*m4a)]
   mat_FB<-mat[1:m1*m2, ((m3a*m4a)+1):(m3a*m4a + m3b* 4b)]
 
-  return(list(mat_D2AA = mat_D2AA,
-              mat_D2BA = mat_D2BA,
-              mat_D2AB = mat_D2AB,
-              mat_D2BB = mat_D2BB))
+  return(list(mat_D2FA = mat_D2FA,
+              mat_D2FB = mat_D2FB)
 }
 
 
 
 elas_F_BC <- readRDS("./BC/elas_F_BC.rds")
+
+thing <- decompose_FA(elas_F_BC)
+Kvals_elas_D2AA_CC <- toKvals_D2AA(thing$mat_D2AA)
+Kvals_elas_D2AB_CC <- toKvals_D2AB(thing$mat_D2AB)
+Kvals_elas_D2BA_CC <- toKvals_D2BA(thing$mat_D2BA)
+Kvals_elas_D2BB_CC <- toKvals_D2BB(thing$mat_D2BB)
+
+save(Kvals_elas_D2AA_CC, file="./CC/Kvals_elas_D2AA_CC.RData")
+save(Kvals_elas_D2AB_CC, file="./CC/Kvals_elas_D2AB_CC.RData")
+save(Kvals_elas_D2BA_CC, file="./CC/Kvals_elas_D2BA_CC.RData")
+save(Kvals_elas_D2BB_CC, file="./CC/Kvals_elas_D2BB_CC.RData")
+rm(Kvals_elas_D2AA_CC, Kvals_elas_D2AB_CC, Kvals_elas_D2BA_CC, 
+   Kvals_elas_D2BB_CC)
+rm(elas_D2_CC, thing)
+gc()
+
+elas_D2_CC <- readRDS("./CC/elas_D2_CC.rds")
+
 elas_F_CC <- readRDS("./CC/elas_F_CC.rds")
 elas_F_C  <- readRDS("./C/elas_F_C.rds")
 elas_F_FP <- readRDS("./FP/elas_F_FP.rds")
