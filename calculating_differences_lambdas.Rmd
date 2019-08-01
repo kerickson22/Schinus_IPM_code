@@ -17,18 +17,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
-Load data, set the number of reshufflings to run and initialize a vector to store the values of $\lambda$. 
-```{r loading data}
+Load data, set the number of reshufflings to run and initialize a vector to store the values of $\lambda$. (Code not shown)
+```{r loading data, eval=FALSE, include=FALSE}
 n.samp <- 100 #for now, to test
 demog<-read.csv("demography_15_clean.csv", head=T)
 lam.boot <- array(NA, dim=c(n.samp, 6))
 ```
 
 ##### Calculate $\lambda$ for each of the six sites using reshuffled data 
-5 runs took 51.15 minutes.
-100 runs took 60215.47seconds. 
-
-```{r calculate lambda, eval = F}
+3 runs took 17331.39s 
+10 runs took 58506.22s
+Each run takes 5833.662s (~1 hour and 38 minutes)
+```{r calculate lambda, eval = F, include=FALSE}
 start_time <- proc.time()
 for (boots in 1:n.samp) {
 temp <- demog
@@ -765,7 +765,8 @@ save(lam.boot, file = "lam.boot.RData")
 Store them in a dataframe called 'differences': 
 
 ```{r initialize dataframe}
-load("lam.boot.RData")
+lam.boot <- readRDS("lam.boot_13.rds")
+lam.boot
 colnames(lam.boot) <- c("BC", "CC", "C", "FP", "PG", "WT")
 differences <- data.frame(BC_CC = rep(NA, nrow(lam.boot)),
                           BC_C  = rep(NA, nrow(lam.boot)),
@@ -914,21 +915,21 @@ f<-ecdf(differences[,9])
 1-f(CC_WT_obs)
 
 #Chekika - Fort Pierce 
-hist(differences[,10], main="|C - FP|", xlab="Difference")
+hist(differences[,10], main="|C - FP|", xlab="Difference", xlim=c(0, 0.15))
 abline(v=C_FP_obs, col="red")
 #1% of the resampled differences are more extreme than the observed difference 
 f<-ecdf(differences[,10])
 1-f(C_FP_obs)
 
 #Chekika - Punta Gorda 
-hist(differences[,11], main = "|C - PG|", xlab="Difference")
+hist(differences[,11], main = "|C - PG|", xlab="Difference", xlim=c(0,0.15))
 abline(v=C_PG_obs, col="red")
 #<1% of the resampled differences are more extreme than the observed difference
 f<-ecdf(differences[,11])
 1-f(C_PG_obs)
 
 #Chekika - Wild Turkey
-hist(differences[,12], main = "|C - WT|", xlab="Difference")
+hist(differences[,12], main = "|C - WT|", xlab="Difference", xlim=c(0,0.16))
 abline(v=C_WT_obs, col="red")
 #4% of the resampled differences are more extreme than the observed difference 
 f<-ecdf(differences[,12])

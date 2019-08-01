@@ -197,6 +197,17 @@ df$FP_s <- invlogit(b0 + b1*df$Var1 + b2*df$Var2)
 
 z1<-outer(x1seq_seedlings, x2seq_seedlings, function(a,b) (invlogit(b0 + b1*a + b2*b)))
 
+#Punta Gorda
+b0 <- p.vec_PG[1]
+b1 <- p.vec_PG[2]
+b2 <- p.vec_PG[3]
+df$PG_s <- invlogit(b0 + b1*df$Var1 + b2*df$Var2)
+
+#Wild Turkey
+b0 <- p.vec_WT[1]
+b1 <- p.vec_WT[2]
+b2 <- p.vec_WT[3]
+df$WT_s <- invlogit(b0 + b1*df$Var1 + b2*df$Var2)
 par(cex.axis = 1, cex.lab = 1.2, cex = 1.2, cex.sub = 2, 
     cex.main = 1.2, lwd = 1.5, bg = "transparent")
 image.plot(x1seq_seedlings, x2seq_seedlings, z1, xlab = "", ylab="",
@@ -1615,6 +1626,44 @@ grid.arrange(plot_BCs2_pred, plot_BCs2_meas,
 dev.off()
 
 
+
+
+#*-- New Separate #####
+
+
+postscript("./Figures/D2_survival_predicted.eps", width=width.cm/2.54, 
+           height=(2*height.cm)/2.54, pointsize=pointsize, 
+           encoding = "TeXtext.enc")
+lay <- rbind(c(1, 1, 2, 2, 5, 5),
+             c(1, 1, 2, 2, 5, 5),
+             c(3, 3, 4, 4, 5, 5),
+             c(3, 3, 4, 4, 5, 5))
+        
+grid.arrange(plot_BCs2_pred, 
+             plot_Cs2_pred, 
+             plot_FPs2_pred, 
+             plot_WTs2_pred, 
+             legend1, 
+             layout_matrix=lay, widths=c(1, 1, 1, 1, 1, 0.7))
+dev.off()
+
+postscript("./Figures/D2_survival_measured.eps", width=width.cm/2.54, 
+           height=(2*height.cm)/2.54, pointsize=pointsize, 
+           encoding = "TeXtext.enc")
+lay <- rbind(c(1, 1, 2, 2, 5, 5),
+             c(1, 1, 2, 2, 5, 5),
+             c(3, 3, 4, 4, 5, 5),
+             c(3, 3, 4, 4, 5, 5))
+
+grid.arrange(plot_BCs2_meas, 
+             plot_Cs2_meas, 
+             plot_FPs2_meas, 
+             plot_WTs2_meas, 
+             legend2, 
+             layout_matrix=lay, widths=c(1, 1, 1, 1, 1, 0.7))
+dev.off()
+#####
+
  ggplot() + xlim(1.6, 100) + ylim(15, 18) + 
   geom_tile(data = df3, aes(x=Var1, y = Var2, fill= overall_s2)) + 
   scale_fill_gradientn(colors=my.palette, limits=c(0.6,1)) + 
@@ -3020,13 +3069,36 @@ par(mar = c(3, 3, 2, 1), # Margins
     xpd=F,
     mai=c(0.5,0.5,0.5,0.5),
     mfrow=c(1, 1))
-barplot(c(lam.stable_BC, lam.stable_CC, lam.stable_C, lam.stable_FP,
+barCenters <- plot(c(lam.stable_BC, lam.stable_CC, lam.stable_C, lam.stable_FP,
           lam.stable_PG, lam.stable_WT), 
         col=cols,
-        ylab=expression(paste(lambda)), 
-        names.arg=c("BC", "CC", "C", "FP",
-                    "PG", "WT"),
-         xpd=F)
+        cex=2,
+        ylab=expression(paste(lambda)),
+        axes= F,
+        xlab= "Site",
+        pch=19,
+         xpd=F, 
+        ylim =c(0.98, 1.26))
+axis(side=1, labels = c("BC", "CC", "C", "FP",
+                        "PG", "WT"), at = 1:6 )
+axis(side=2)
+
+segments(1, 1.062, 1, 1.206) #Big Cypress
+arrows(1, 1.062, 1, 1.206, angle = 90, 
+       code = 3, length = 0.05)
+segments(2, 1.055, 2, 1.142) #Cape Canaveral
+arrows(2, 1.055, 2, 1.142, angle = 90, 
+       code = 3, length = 0.05)
+segments(3, 0.986, 3, 1.05) #Chekika
+arrows(3, 0.986, 3, 1.05, angle = 90, 
+       code = 3, length = 0.05)
+segments(4, 1.079, 4, 1.221) #Fort Pierce
+arrows(4, 1.079, 4, 1.221, angle = 90, code = 3, length = 0.05)
+segments(5, 0.995, 5, 1.140) #Punta Gorda
+arrows(5, 0.995, 5, 1.140, angle=90, code = 3, length = 0.05)
+segments(6, 1.062, 6, 1.251) #Wild Turkey
+arrows(6, 1.062, 6, 1.251, angle = 90, code =3, length = 0.05)
+
 dev.off()
 
 load("./BC/BC_pool.RData")
@@ -3035,10 +3107,12 @@ load("./C/C_pool.RData")
 load("./FP/FP_pool.RData")
 load("./PG/PG_pool.RData")
 load("./WT/WT_pool.RData")
+load("./BC/BC_avg.RData")
 
 #Figure 9: Barplot of contribution of kernel components to differences in lambda #####
+#(a) Average 
 setEPS(horizontal=F, onefile=F, paper="special")
-postscript("./Figures/barplot_contributions.eps", width=width.cm_onepanel/2.54, 
+postscript("./Figures/barplot_contributions_average.eps", width=width.cm_onepanel/2.54, 
            height=3*height.cm/2.54, pointsize=pointsize)
 #png(file="./Figures/barplot_contributions.png")
  #x11(width = width.cm_onepanel/2.54, height = 3*width.cm_onepanel/2.54, 
@@ -3052,49 +3126,158 @@ par(mar = c(3, 3, 2, 1), # Margins
     oma=c(0.1, 0, 0.1, 0),
     mfrow=c(3, 2))
 
-barplot(BC_pool, col=cols[1], ylim=c(-0.13, 0.16),
-        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), axes=T, cex.names=0.6, cex.axis=1)
+BC <- c(BC_avg[1], sum(BC_avg[2:3]), sum(BC_avg[4:5]), sum(BC_avg[6:9]))
+CC <- c(CC_avg[1], sum(CC_avg[2:3]), sum(CC_avg[4:5]), sum(CC_avg[6:9]))
+C  <- c(C_avg[1],  sum(C_avg[2:3]),  sum(C_avg[4:5]),  sum(C_avg[6:9]))
+FP <- c(FP_avg[1], sum(FP_avg[2:3]), sum(FP_avg[4:5]), sum(FP_avg[6:9]))
+PG <- c(PG_avg[1], sum(PG_avg[2:3]), sum(PG_avg[4:5]), sum(PG_avg[6:9]))
+WT <- c(WT_avg[1], sum(WT_avg[2:3]), sum(WT_avg[4:5]), sum(WT_avg[6:9]))
+
+
+barplot(BC, col=cols[1], ylim=c(-0.05, 0.06),
+        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), 
+        axes=T, cex.names=0.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["BC"],"-", lambda["overall"])))
+              bquote(paste(lambda["BC"],"-",bar(lambda))))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
-barplot(CC_pool, col=cols[2], ylim=c(-0.13, 0.16), 
-        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=0.6, cex.axis=1)
+barplot(CC, col=cols[2], ylim=c(-0.05, 0.06),
+        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), 
+        axes=T, cex.names=0.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["CC"],"-", lambda["overall"])))
+              bquote(paste(lambda["CC"],"-",bar(lambda))))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
-barplot(C_pool, col=cols[3], ylim=c(-0.13, 0.16), 
-        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=.6, cex.axis=1)
+barplot(C, col=cols[3], ylim=c(-0.05, 0.06),
+        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), 
+        axes=T, cex.names=0.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["C"],"-", lambda["overall"])))
+              bquote(paste(lambda["C"],"-",bar(lambda))))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
-barplot(FP_pool, col=cols[4], ylim=c(-0.13, 0.16), 
-        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=.6, cex.axis=1)
+barplot(FP, col=cols[4], ylim=c(-0.05, 0.06),
+        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), 
+        axes=T, cex.names=0.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["FP"],"-", lambda["overall"])))
+              bquote(paste(lambda["FP"],"-",bar(lambda))))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
-barplot(PG_pool, col=cols[5], ylim=c(-0.13, 0.16), 
-        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=.6, cex.axis=1)
+barplot(BC, col=cols[5], ylim=c(-0.05, 0.06),
+        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), 
+        axes=T, cex.names=0.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["PG"],"-", lambda["overall"])))
+              bquote(paste(lambda["PG"],"-",bar(lambda))))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
-barplot(WT_pool, col=cols[6], ylim=c(-0.13, 0.16), 
-        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), cex.names=.6, cex.axis=1)
+barplot(WT, col=cols[6], ylim=c(-0.05, 0.06),
+        names.arg=c("Seedling", "Maturation", "Fertility", "Adult"), 
+        axes=T, cex.names=0.6, cex.axis=1)
 Lines <- list(bquote(paste( "Contribution to" )),
-              bquote(paste(lambda["WT"],"-", lambda["overall"])))
+              bquote(paste(lambda["WT"],"-",bar(lambda))))
 mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
 abline(h=0)
 
 dev.off()
+
+#(b) Pooled figure 
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/barplot_contributions_pool.eps", width=width.cm_onepanel/2.54, 
+           height=height.cm/2.54, pointsize=pointsize)
+#png(file="./Figures/barplot_contributions.png")
+#x11(width = width.cm_onepanel/2.54, height = width.cm_onepanel/2.54, 
+#   pointsize = pointsize)
+
+par(mar = c(3, 0.1, 1, 0.1), # Margins
+    mgp = c(0, 0, 0), # Distance of axis tickmark labels (second value)
+    tcl = 0.3, # Length of axis tickmarks
+    xpd=F,
+    #mai=c(0.2,.5,0.2,0.1),
+    oma=c(1, 5, 1, 0),
+    mfrow=c(1, 6))
+
+BC <- c(BC_pool[1], sum(BC_pool[2:3]), sum(BC_pool[4:5]), sum(BC_pool[6:9]))
+CC <- c(CC_pool[1], sum(CC_pool[2:3]), sum(CC_pool[4:5]), sum(CC_pool[6:9]))
+C  <- c(C_pool[1],  sum(C_pool[2:3]),  sum(C_pool[4:5]),  sum(C_pool[6:9]))
+FP <- c(FP_pool[1], sum(FP_pool[2:3]), sum(FP_pool[4:5]), sum(FP_pool[6:9]))
+PG <- c(PG_pool[1], sum(PG_pool[2:3]), sum(PG_pool[4:5]), sum(PG_pool[6:9]))
+WT <- c(WT_pool[1], sum(WT_pool[2:3]), sum(WT_pool[4:5]), sum(WT_pool[6:9]))
+
+
+#1) WT
+xx <- barplot(WT, col=cols[6], ylim=c(-0.05, 0.09), 
+        axes=F, cex.names=0.6, cex.axis=1)
+axis(side=2)
+Lines <- list(bquote(paste( "Contribution to" )),
+              bquote(paste(lambda["site"],"-",lambda["pool"])))
+mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
+text(x=xx[1], y = WT[1], label = "D1", pos=1, cex = 1)
+text(x=xx[2], y = WT[2], label = "M",  pos=3, cex = 1)
+text(x=xx[3], y = WT[3], label = "F",  pos=1, cex = 1)
+text(x=xx[4], y = WT[4], label = "D2", pos=3, cex = 1)
+mtext(side=1, "WT")
+abline(h=0)
+
+#2) FP
+xx<- barplot(FP, col=cols[4], ylim=c(-0.05, 0.09), 
+        axes=F, cex.names=0.6, cex.axis=1, horiz = F)
+text(x=xx[1], y = FP[1], label = "D1", pos=3, cex=1)
+text(x=xx[2], y = FP[2], label = "M",  pos=3, cex=1)
+text(x=xx[3], y = FP[3], label = "F",  pos=1, cex=1)
+text(x=xx[4], y = FP[4], label = "D2", pos=1, cex = 1)
+mtext(side=1, "FP")
+abline(h=0)
+
+#3) BC
+barplot(BC, col=cols[3], ylim=c(-0.05, 0.09),
+        axes=F, cex.names=0.6, cex.axis=1, horiz = F)
+mtext(side=1, "BC")
+text(x=xx[1], y = BC[1], label = "D1", pos=1, cex=1)
+text(x=xx[2], y = BC[2], label = "M",  pos=3, cex=1)
+text(x=xx[3], y = BC[3], label = "F",  pos=3, cex=1)
+text(x=xx[4], y = BC[4], label = "D2", pos=1, cex = 1)
+abline(h=0)
+
+#4)CC
+xx<-barplot(CC, col=cols[2], ylim=c(-0.05, 0.09), 
+        axes=F, cex.names=0.6, cex.axis=1, horiz = F)
+#axis(side=2)
+#Lines <- list(bquote(paste( "Contribution to" )),
+             # bquote(paste(lambda["site"],"-",lambda["pool"])))
+#mtext(do.call(expression, Lines),side=2,line=c(3, 1.5), cex=1)
+mtext(side=1, "CC")
+text(x=xx[1], y = CC[1], label = "D1", pos=3, cex=1)
+text(x=xx[2], y = CC[2], label = "M",  pos=3, cex=1)
+text(x=xx[3], y = CC[3], label = "F",  pos=1, cex=1)
+text(x=xx[4], y = CC[4], label = "D2", pos=1, cex = 1)
+abline(h=0)
+
+#5) PG
+barplot(PG, col=cols[5], ylim=c(-0.05, 0.09),
+        axes=F, cex.names=0.6, cex.axis=1, horiz=F)
+mtext(side=1, "PG")
+text(x=xx[1], y = PG[1], label = "D1", pos=3, cex=1)
+text(x=xx[2], y = PG[2], label = "M",  pos=3, cex=1)
+text(x=xx[3], y = PG[3], label = "F",  pos=1, cex=1)
+text(x=xx[4], y = PG[4], label = "D2", pos=1, cex = 1)
+abline(h=0)
+
+#)6 C
+barplot(C, col= cols[3], ylim=c(-0.05, 0.09), 
+        axes=F, cex.names=0.6, cex.axis=1, horiz=F)
+mtext(side=1, "C")
+text(x=xx[1], y = C[1], label = "D1", pos=1, cex=1)
+text(x=xx[2], y = C[2], label = "M",  pos=1, cex=1)
+text(x=xx[3], y = C[3], label = "F",  pos=1, cex=1)
+text(x=xx[4], y = C[4], label = "D2", pos=1, cex = 1)
+abline(h=0)
+
+dev.off()
+
 
 #Figure A1: SSD and RV ######
 
@@ -3254,8 +3437,10 @@ par(mar = c(3, 3, 2, 1), # Margins
     mai=c(0.4,0.3,0.2,0.1),
     mfrow=c(2, 2))
 
-load("./BC/y_diam.RData")
-load("./BC/y_height.RData")
+y_diam <- c(y1, y3)
+y_height <- c(y2, y4)
+
+
 load("./BC/ss_diam_BC.RData")
 load("./CC/ss_diam_CC.RData")
 load("./C/ss_diam_C.RData")
@@ -3290,7 +3475,7 @@ load("./Overall/rv_height_overall.RData")
 
 y_diam <- c(y1,y3)
 
-plot(y_diam, ss_diam_overall,xlab="Diameter (mm)",ylab="frequency",
+plot(y_diam, ss_diam_BC,xlab="Diameter (mm)",ylab="frequency",
      type="l", cex=1, cex.axis=1, cex.lab=1, lty=5, lwd=1, ylim=c(0, 0.24), col=cols[1]); 
 lines(y_diam, ss_diam_CC, lwd=1, lty=3, col=cols[2])
 lines(y_diam, ss_diam_C, lwd=1, lty=1, col=cols[3])
@@ -3340,84 +3525,273 @@ dev.off()
 postscript("./Figures/ss.eps", width=width.cm/2.54, 
            height=(2*height.cm)/2.54, pointsize=pointsize, 
            encoding = "TeXtext.enc")
-ss_diam1 <- sum(ss_diam_overall[1:2]) #0-0.24
-ss_diam2 <- sum(ss_diam_overall[3:4]) #0.4-0.56
-ss_diam3 <- sum(ss_diam_overall[5:6]) #0.72 - 0.88
-ss_diam4 <- sum(ss_diam_overall[7:8]) #1.04 - 1.2
-ss_diam5 <- sum(ss_diam_overall[9:10]) #1.36- 1.52
-ss_diam6 <- sum(ss_diam_overall[11:110])
+ss_diamBC <-c( sum(ss_diam_BC[1:2]), #0-0.32
+              sum(ss_diam_BC[3:4]),  #0.32 - 0.64
+              sum(ss_diam_BC[5:6]),  #0.64 - 0.96
+              sum(ss_diam_BC[7:8]),  #0.96 - 1.28
+              sum(ss_diam_BC[9:10]), #1.28- 1.6 (y1[10] + h1/2)
+              sum(ss_diam_BC[11:380])) #D2 1.6 - 700
+ss_diamCC <-c( sum(ss_diam_CC[1:2]), 
+               sum(ss_diam_CC[3:4]), 
+               sum(ss_diam_CC[5:6]), 
+               sum(ss_diam_CC[7:8]), 
+               sum(ss_diam_CC[9:10]), 
+               sum(ss_diam_CC[11:380]))
+ss_diamC <-c( sum(ss_diam_C[1:2]), 
+               sum(ss_diam_C[3:4]), 
+               sum(ss_diam_C[5:6]), 
+               sum(ss_diam_C[7:8]), 
+               sum(ss_diam_C[9:10]), 
+               sum(ss_diam_C[11:380]))
 
-ss_height1 <- sum(ss_height_overall[1:2])
-ss_height2 <- sum(ss_height_overall[3:4])
-ss_height3 <- sum(ss_height_overall[5:6])
-ss_height4 <- sum(ss_height_overall[7:8])
-ss_height5 <- sum(ss_height_overall[9:11])
-ss_height6 <- sum(ss_height_overall[12:112])
+ss_diamFP <-c( sum(ss_diam_FP[1:2]), 
+               sum(ss_diam_FP[3:4]), 
+               sum(ss_diam_FP[5:6]), 
+               sum(ss_diam_FP[7:8]), 
+               sum(ss_diam_FP[9:10]), 
+               sum(ss_diam_FP[11:380]))
 
-par(mfrow=c(2,1))
-par(mar = c(2, 4, 2, 0))
-names <- c("D1:\n (0, 0.4)", "D1:\n [0.4, 0.72)", "D1:\n [0.72, 1.04)",
-           "D1:\n [1.04, 1.36)", "D1:\n [1.36, 1.6)", "D2")
-barplot(c(ss_diam1, ss_diam2, ss_diam3, ss_diam4, ss_diam5, ss_diam6),
-        names.arg=names, ylab="Frequency", cex.names=0.8)
-abline(v=6, lty=3)
-mtext(side=3, "(a) Diameter", adj=0)
+ss_diamPG <-c( sum(ss_diam_PG[1:2]), 
+               sum(ss_diam_PG[3:4]), 
+               sum(ss_diam_PG[5:6]), 
+               sum(ss_diam_PG[7:8]), 
+               sum(ss_diam_PG[9:10]), 
+               sum(ss_diam_PG[11:380]))
 
-par(mar = c(2, 4, 2, 0))
-names <- c("D1:\n (0, 3.64)", "D1:\n [3.64, 0.6.55)", "D1:\n [6.55, 9.45)",
-           "D1:\n [9.45, 12.36)", "D1:\n [12.36, 16)", "D2")
-barplot(c(ss_height1, ss_height2, ss_height3, ss_height4, ss_height5,
-          ss_height6),
-        names.arg=names, ylab="Frequency", cex.names=0.8)
-abline(v=6, lty=3)
-mtext(side=3, "(b) Height", adj=0)
+ss_diamWT <-c( sum(ss_diam_WT[1:2]), 
+               sum(ss_diam_WT[3:4]), 
+               sum(ss_diam_WT[5:6]), 
+               sum(ss_diam_WT[7:8]), 
+               sum(ss_diam_WT[9:10]), 
+               sum(ss_diam_WT[11:380]))
+
+
+ss_heightBC  <- c(sum(ss_height_BC[1:2]), #(0, 2.91) #y2[2] + h2/2
+                 sum(ss_height_BC[3:4]), #(2.91, 5.82)
+                 sum(ss_height_BC[5:6]), #(5.82, 8.73)
+                 sum(ss_height_BC[7:8]), #(8.73, 11.64)
+                 sum(ss_height_BC[9:11]),#(11.64, 16)
+                 sum(ss_height_BC[12:161])) #(16-800) y4b[100] + h4b/2
+
+ss_heightCC  <- c(sum(ss_height_CC[1:2]),
+                   sum(ss_height_CC[3:4]),
+                   sum(ss_height_CC[5:6]),
+                   sum(ss_height_CC[7:8]),
+                   sum(ss_height_CC[9:11]),
+                   sum(ss_height_CC[12:161]))
+
+ss_heightC  <- c(sum(ss_height_C[1:2]),
+                   sum(ss_height_C[3:4]),
+                   sum(ss_height_C[5:6]),
+                   sum(ss_height_C[7:8]),
+                   sum(ss_height_C[9:11]),
+                   sum(ss_height_C[12:161]))
+
+ss_heightFP  <- c(sum(ss_height_FP[1:2]),
+                   sum(ss_height_FP[3:4]),
+                   sum(ss_height_FP[5:6]),
+                   sum(ss_height_FP[7:8]),
+                   sum(ss_height_FP[9:11]),
+                   sum(ss_height_FP[12:161]))
+
+ss_heightPG  <- c(sum(ss_height_PG[1:2]),
+                   sum(ss_height_PG[3:4]),
+                   sum(ss_height_PG[5:6]),
+                   sum(ss_height_PG[7:8]),
+                   sum(ss_height_PG[9:11]),
+                   sum(ss_height_PG[12:161]))
+
+ss_heightWT  <- c(sum(ss_height_WT[1:2]),
+                   sum(ss_height_WT[3:4]),
+                   sum(ss_height_WT[5:6]),
+                   sum(ss_height_WT[7:8]),
+                   sum(ss_height_WT[9:11]),
+                   sum(ss_height_WT[12:161]))
+  
+site = c(rep("BC",6), rep("CC",6), rep("C", 6), rep("FP", 6), rep("PG", 6),
+         rep("WT", 6))        
+size = rep(c("0 - 0.32", "0.32 - 0.64", "0.64 - 0.96", 
+             "0.96-1.28", "1.28 - 1.6", "1.6 - 700"), 6)
+size2 = rep(c("0 - 2.91", "2.91 - 5.82", "5.82 - 8.73", 
+              "8.73 - 11.64", "11.64 - 16", "16 - 800"), 6)
+
+value = c(ss_diamBC, ss_diamCC, ss_diamC, ss_diamFP, ss_diamPG,
+          ss_diamWT)
+value2 = c(ss_heightBC, ss_heightCC, ss_heightC, ss_heightFP, 
+           ss_heightPG,ss_heightWT)
+
+data = data.frame(site, size, value, size2, value2)
+
+levels(data$size2) <- c("0 - 2.91", "2.91 - 5.82", "5.82 - 8.73", 
+                        "8.73 - 11.64", "11.64 - 16", "16 - 800")
+
+
+# Stacked
+p1 <- ggplot(data, aes(fill=size, y=value, x=site)) + 
+  geom_bar( stat="identity") +
+  scale_fill_brewer(palette = "YlGnBu") +
+  labs(fill = "Diameter (mm) ") + 
+  labs(x = "Site") + 
+  labs(y = "Stable Stage Distribution") +
+  ggtitle("(a)") + theme(plot.title = element_text(hjust=0))
+
+
+
+p2 <- ggplot(data, aes(fill=size2, y=value2, x=site)) + 
+  geom_bar( stat="identity") +
+  scale_fill_brewer(palette = "YlGnBu") +
+  labs(fill = "Height (cm) ") + 
+  labs(x = "Site") + 
+  labs(y = "Stable Stage Distribution") +
+  ggtitle("(b)")
+
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/ssd.eps", width=width.cm/2.54, 
+           height=2*height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+grid.arrange(p1, p2, ncol=1)
 dev.off()
+
+
+
 
 #*-- Reproductive Value #####
 
 postscript("./Figures/rv.eps", width=width.cm/2.54, 
            height=(2*height.cm)/2.54, pointsize=pointsize, 
            encoding = "TeXtext.enc")
-rv_diam1 <- sum(rv_diam_overall[1:10]) #0-0.24
-rv_diam2 <- sum(rv_diam_overall[11:70]) #5-417
-rv_diam3 <- sum(rv_diam_overall[71:90]) #424-557
-rv_diam4 <- sum(rv_diam_overall[91:100]) #564-627
-rv_diam5 <- sum(rv_diam_overall[101:105]) #634-662
-rv_diam6 <- sum(rv_diam_overall[106:108]) #669-683
-rv_diam7 <- sum(rv_diam_overall[109:110]) #690-696
+rv_diamBC <- c(sum(rv_diam_BC[1:10]),  #0-1.6
+              sum(rv_diam_BC[11:245]),  #1.6 - 141.10
+              sum(rv_diam_BC[246:288]), # 141.10 - 278.33 
+              sum(rv_diam_BC[289: 319]),  # 278.33 - 420.42
+              sum(rv_diam_BC[320:350]),  # 420.42 - 562.5
+              sum(rv_diam_BC[351:380]))  # 562.5 - 700
+
+rv_diamCC <- c(sum(rv_diam_CC[1:10]),  #0-1.6
+               sum(rv_diam_CC[11:245]),  #1.6 - 141.10
+               sum(rv_diam_CC[246:288]), # 141.10 - 278.33 
+               sum(rv_diam_CC[289: 319]),  # 278.33 - 420.42
+               sum(rv_diam_CC[320:350]),  # 420.42 - 562.5
+               sum(rv_diam_CC[351:380]))  # 562.5 - 700     
+
+rv_diamC <- c(sum(rv_diam_C[1:10]),  #0-1.6
+               sum(rv_diam_C[11:245]),  #1.6 - 141.10
+               sum(rv_diam_C[246:288]), # 141.10 - 278.33 
+               sum(rv_diam_C[289: 319]),  # 278.33 - 420.42
+               sum(rv_diam_C[320:350]),  # 420.42 - 562.5
+               sum(rv_diam_C[351:380]))  # 562.5 - 700
+
+rv_diamFP <- c(sum(rv_diam_FP[1:10]),  #0-1.6
+               sum(rv_diam_FP[11:245]),  #1.6 - 141.10
+               sum(rv_diam_FP[246:288]), # 141.10 - 278.33 
+               sum(rv_diam_FP[289: 319]),  # 278.33 - 420.42
+               sum(rv_diam_FP[320:350]),  # 420.42 - 562.5
+               sum(rv_diam_FP[351:380]))  # 562.5 - 700
+
+rv_diamPG <- c(sum(rv_diam_PG[1:10]),  #0-1.6
+               sum(rv_diam_PG[11:245]),  #1.6 - 141.10
+               sum(rv_diam_PG[246:288]), # 141.10 - 278.33 
+               sum(rv_diam_PG[289: 319]),  # 278.33 - 420.42
+               sum(rv_diam_PG[320:350]),  # 420.42 - 562.5
+               sum(rv_diam_PG[351:380]))  # 562.5 - 700
+
+rv_diamWT <- c(sum(rv_diam_WT[1:10]),  #0-1.6
+               sum(rv_diam_WT[11:245]),  #1.6 - 141.10
+               sum(rv_diam_WT[246:288]), # 141.10 - 278.33 
+               sum(rv_diam_WT[289: 319]),  # 278.33 - 420.42
+               sum(rv_diam_WT[320:350]),  # 420.42 - 562.5
+               sum(rv_diam_WT[351:380]))  # 562.5 - 700
 
 
 
-rv_height1 <- sum(rv_height_overall[1:11])
-rv_height2 <- sum(rv_height_overall[12:71]) #19- 478 y4[60] #width = 459
-rv_height3 <- sum(rv_height_overall[72:91]) #485-633.11  #width = 148
-rv_height4 <- sum(rv_height_overall[92:101]) #641- 711 #width = 70
-rv_height5 <- sum(rv_height_overall[102:106]) #718 - 750 #width= 32
-rv_height6 <- sum(rv_height_overall[107:109]) #749 - 765 # width=16
-rv_height7 <- sum(rv_height_overall[110:112]) #781 -796 #width= 15
 
-par(mfrow=c(2,1))
-par(mar = c(2, 4, 2, 0))
-names <- c("D1", "D2:\n (5-424)", "D2:\n [424, 564)", 
-           "D2:\n [564, 634)", "D2:\n [634, 669)", "D2:\n [669, 690)",
-           "D2:\n [690, 696]")
-barplot(c(rv_diam1, rv_diam2, rv_diam3, rv_diam4, rv_diam5, rv_diam6,
-          rv_diam7), rep(5,7),
-        names.arg=names, ylab="Frequency", cex.names=0.8)
-abline(v=6, lty=3)
-mtext(side=3, "(a) Diameter", adj=0)
+rv_heightBC <- c(sum(rv_height_BC[1:11]),  #0-16
+               sum(rv_height_BC[12:39]),  #16 - 175
+               sum(rv_height_BC[40:67]), # 175 - 330 
+               sum(rv_height_BC[68:98]),  # 330 - 485
+               sum(rv_height_BC[99:130]),  # 485 - 645
+               sum(rv_height_BC[131:161]))  #645-800
 
-par(mar = c(2, 4, 2, 0))
-names <- c("D1","D2:\n (16-485)", "D2:\n [485, 641)", 
-           "D2:\n [641, 718)", "D2:\n [718, 750)", "D2:\n [750, 781)",
-           "D2:\n [781, 800]")
-barplot(c(rv_height1, rv_height2, rv_height3, rv_height4, rv_height5, 
-          rv_height6, rv_height7), rep(5,7),
-        names.arg=names, ylab="Frequency", cex.names=0.8)
-abline(v=6, lty=3)
-mtext(side=3, "(b) Height", adj=0)
+rv_heightCC <- c(sum(rv_height_CC[1:11]),  #0-16
+                 sum(rv_height_CC[12:39]),  #16 - 175
+                 sum(rv_height_CC[40:67]), # 175 - 330 
+                 sum(rv_height_CC[68:98]),  # 330 - 485
+                 sum(rv_height_CC[99:130]),  # 485 - 645
+                 sum(rv_height_CC[131:161]))  #645-800
+
+rv_heightC <- c(sum(rv_height_C[1:11]),  #0-16
+                 sum(rv_height_C[12:39]),  #16 - 175
+                 sum(rv_height_C[40:67]), # 175 - 330 
+                 sum(rv_height_C[68:98]),  # 330 - 485
+                 sum(rv_height_C[99:130]),  # 485 - 645
+                 sum(rv_height_C[131:161]))  #645-800
+
+rv_heightFP <- c(sum(rv_height_FP[1:11]),  #0-16
+                 sum(rv_height_FP[12:39]),  #16 - 175
+                 sum(rv_height_FP[40:67]), # 175 - 330 
+                 sum(rv_height_FP[68:98]),  # 330 - 485
+                 sum(rv_height_FP[99:130]),  # 485 - 645
+                 sum(rv_height_FP[131:161]))  #645-800
+
+rv_heightPG <- c(sum(rv_height_PG[1:11]),  #0-16
+                 sum(rv_height_PG[12:39]),  #16 - 175
+                 sum(rv_height_PG[40:67]), # 175 - 330 
+                 sum(rv_height_PG[68:98]),  # 330 - 485
+                 sum(rv_height_PG[99:130]),  # 485 - 645
+                 sum(rv_height_PG[131:161]))  #645-800
+
+rv_heightWT <- c(sum(rv_height_WT[1:11]),  #0-16
+                 sum(rv_height_WT[12:39]),  #16 - 175
+                 sum(rv_height_WT[40:67]), # 175 - 330 
+                 sum(rv_height_WT[68:98]),  # 330 - 485
+                 sum(rv_height_WT[99:130]),  # 485 - 645
+                 sum(rv_height_WT[131:161]))  #645-800
+
+site = c(rep("BC",6), rep("CC",6), rep("C", 6), rep("FP", 6), rep("PG", 6),
+         rep("WT", 6))        
+size = rep(c("0 - 1.6", "1.6-141", "141-278", 
+             "278 - 420", "420 - 563", "563 - 700"), 6)
+size2 = rep(c("0 - 16", "16 - 175", "175 - 330", 
+              "330 - 485 ", "485 - 645", "645 - 800"), 6)
+
+value = c(rv_diamBC, rv_diamCC, rv_diamC, rv_diamFP, rv_diamPG,
+          rv_diamWT)
+value2 = c(rv_heightBC, rv_heightCC, rv_heightC, rv_heightFP, 
+           rv_heightPG,rv_heightWT)
+
+data = data.frame(site, size, value, size2, value2)
+
+
+
+
+# Stacked
+p1 <- ggplot(data, aes(fill=size, y=value, x=site)) + 
+  geom_bar( stat="identity") +
+  scale_fill_brewer(palette = "RdYlBu", direction= -1) +
+  labs(fill = "Diameter (mm) ") + 
+  labs(x = "Site") + 
+  labs(y = "Reproductive Value") +
+  ggtitle("(a)") + theme(plot.title = element_text(hjust=0))
+
+p2 <- ggplot(data, aes(fill=size2, y=value2, x=site)) + 
+  geom_bar( stat="identity") +
+  scale_fill_brewer(palette = "RdYlBu", direction= -1) +
+  labs(fill = "Height (cm) ") + 
+  labs(x = "Site") + 
+  labs(y = "Reproductive Value") +
+  ggtitle("(b)") + theme(plot.title = element_text(hjust=0))
+
+
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/rv.eps", width=width.cm/2.54, 
+           height=2*height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+grid.arrange(p1, p2, ncol=1)
 dev.off()
 
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/ssd.eps", width=width.cm/2.54, 
+           height=2*height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+grid.arrange(p1, p2, ncol=1)
+dev.off()
 #Figure A2: Marginal elasticity by diameter ######
 #setwd("/Users/curculion/Dropbox/matrix/outputs/sites/Eastern")
 # load("total.elas_D1_E.RData")
@@ -3431,6 +3805,8 @@ load("./C/total.elas.RData")
 load("./FP/total.elas.RData")
 load("./PG/total.elas.RData")
 load("./WT/total.elas.RData")
+
+
 
 
 #setwd("/Users/curculion/Dropbox/March 2016 Documents/Documents/Grad/dissertation/Pratt_demographic_data/MSFigures")
@@ -3448,9 +3824,9 @@ par(mar = c(3, 3, 2, 1), # Margins
     mfrow=c(4, 2))
 
 x1_seedlings <- seq(0, 1.6, length.out=10)
-x1_adults <- seq(1.6, 800, length.out=100)
+x1_adults <- seq(1.6, 800, length.out=370)
 x2_seedlings <- seq(0, 16, length.out=11)
-x2_adults <- seq(16, 800, length.out=101)
+x2_adults <- seq(16, 800, length.out=150)
 
 
 plot(x1_seedlings, rowSums(total.elas_D1_BC), ylim=c(0, 0.03), xlim=c(0, 1.6), xlab="", 
@@ -3466,38 +3842,44 @@ mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
 
-plot(x1_adults, rowSums(total.elas_F_BC), ylim=c(0, 0.03), xlim=c(1.6, 800), xlab="", 
+plot(x1_adults, c(rowSums(total.elas_FA_BC), rowSums(total.elas_FB_BC)), ylim=c(0, 0.03), xlim=c(1.6, 800), xlab="", 
      ylab= "", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
 text(65, 0.029, "Fertility", cex=1.5)
-lines(x1_adults, rowSums(total.elas_F_CC), type='l', lwd=1, lty=1, col=cols[2])
-lines(x1_adults, rowSums(total.elas_F_C), type='l', lwd=1, lty=3, col=cols[3])
-lines(x1_adults, rowSums(total.elas_F_FP), type='l', lwd=1, lty=4, col=cols[4])
-lines(x1_adults, rowSums(total.elas_F_PG), type='l', lwd=1, lty=6, col=cols[5])
-lines(x1_adults, rowSums(total.elas_F_WT), type='l', lwd=1, lty=7, col=cols[6])
+lines(x1_adults, c(rowSums(total.elas_FA_CC), rowSums(total.elas_FB_CC)), type='l', lwd=1, lty=1, col=cols[2])
+lines(x1_adults, c(rowSums(total.elas_FA_C), rowSums(total.elas_FB_C)), type='l', lwd=1, lty=3, col=cols[3])
+lines(x1_adults, c(rowSums(total.elas_FA_FP), rowSums(total.elas_FB_FP)), type='l', lwd=1, lty=4, col=cols[4])
+lines(x1_adults, c(rowSums(total.elas_FA_PG), rowSums(total.elas_FB_PG)), type='l', lwd=1, lty=6, col=cols[5])
+lines(x1_adults, c(rowSums(total.elas_FA_WT), rowSums(total.elas_FB_WT)), type='l', lwd=1, lty=7, col=cols[6])
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
 
-plot(x1_seedlings, rowSums(total.elas_G_BC), ylim= c(0, 0.03), xlim=c(0, 1.6), xlab="",
+plot(x1_seedlings, rowSums(total.elas_GA_BC,total.elas_GB_BC), ylim= c(0, 0.03), xlim=c(0, 1.6), xlab="",
      ylab="", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
 text(0.2, 0.039, "Maturation", cex=1.5)
-lines(x1_seedlings, rowSums(total.elas_G_CC), type='l', lty=1, col=cols[2])
-lines(x1_seedlings, rowSums(total.elas_G_C), type='l', lty=3, col=cols[3])
-lines(x1_seedlings, rowSums(total.elas_G_FP), type='l', lty=4, col=cols[4])
-lines(x1_seedlings, rowSums(total.elas_G_PG), type='l', lty=6, col=cols[5])
-lines(x1_seedlings, rowSums(total.elas_G_WT), type='l', lty=7, col=cols[6])
+lines(x1_seedlings, rowSums(total.elas_GA_CC, total.elas_GB_CC), type='l', lty=1, col=cols[2])
+lines(x1_seedlings, rowSums(total.elas_GA_C, total.elas_GB_C), type='l', lty=3, col=cols[3])
+lines(x1_seedlings, rowSums(total.elas_GA_FP, total.elas_GB_FP), type='l', lty=4, col=cols[4])
+lines(x1_seedlings, rowSums(total.elas_GA_PG, total.elas_GB_PG), type='l', lty=6, col=cols[5])
+lines(x1_seedlings, rowSums(total.elas_GA_WT, total.elas_GB_WT), type='l', lty=7, col=cols[6])
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
 
-plot(x1_adults, rowSums(total.elas_D2_BC), ylim= c(0, 0.03), xlim=c(1.6, 800), xlab=" ",
+plot(x1_adults, c(rowSums(total.elas_D2AA_BC, total.elas_D2AB_BC), 
+                  rowSums(total.elas_D2BA_BC, total.elas_D2BB_BC)), ylim= c(0, 0.03), xlim=c(1.6, 800), xlab=" ",
      ylab="", main="",  type='l',  lwd=1, lty=5, cex.axis=1.5, col=cols[1])
 text(65, 0.029, "Adult", cex=1.5)
-lines(x1_adults, rowSums(total.elas_D2_CC), type='l', lwd=1, lty=1, col=cols[2])
-lines(x1_adults, rowSums(total.elas_D2_C), type='l', lwd=1, lty=3, col=cols[3])
-lines(x1_adults, rowSums(total.elas_D2_FP), type='l', lwd=1, lty=4, col=cols[4])
-lines(x1_adults, rowSums(total.elas_D2_PG), type='l', lwd=1, lty=6, col=cols[5])
-lines(x1_adults, rowSums(total.elas_D2_WT), type='l', lwd=1, lty=7, col=cols[6])
+lines(x1_adults, c(rowSums(total.elas_D2AA_CC, total.elas_D2AB_CC), 
+                   rowSums(total.elas_D2BA_CC, total.elas_D2BB_CC)), type='l', lwd=1, lty=1, col=cols[2])
+lines(x1_adults, c(rowSums(total.elas_D2AA_C, total.elas_D2AB_C), 
+                   rowSums(total.elas_D2BA_C, total.elas_D2BB_C)), type='l', lwd=1, lty=3, col=cols[3])
+lines(x1_adults, c(rowSums(total.elas_D2AA_FP, total.elas_D2AB_FP), 
+                   rowSums(total.elas_D2BA_FP, total.elas_D2BB_FP)), type='l', lwd=1, lty=4, col=cols[4])
+lines(x1_adults, c(rowSums(total.elas_D2AA_PG, total.elas_D2AB_PG), 
+                   rowSums(total.elas_D2BA_PG, total.elas_D2BB_PG)), type='l', lwd=1, lty=6, col=cols[5])
+lines(x1_adults, c(rowSums(total.elas_D2AA_WT, total.elas_D2AB_WT), 
+                   rowSums(total.elas_D2BA_WT, total.elas_D2BB_WT)), type='l', lwd=1, lty=7, col=cols[6])
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
@@ -3516,36 +3898,47 @@ mtext(side=3, "(b) Marginal elasticity over height", line=1, cex=1.2, adj=0)
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 
-plot(x2_adults, colSums(total.elas_F_BC), ylim=c(0, 0.03), xlim=c(16,800),  xlab=" ",
+plot(x2_adults, c(colSums(total.elas_FA_BC), colSums(total.elas_FB_BC)), ylim=c(0, 0.03), xlim=c(16,800),  xlab=" ",
      ylab= "", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
 text(65, 0.029, "Fertility", cex=1.5)
-lines(x2_adults, colSums(total.elas_F_CC), type='l', lwd=1, lty=1, col=cols[2])
-lines(x2_adults, colSums(total.elas_F_C), type='l', lwd=1, lty=3, col=cols[3])
-lines(x2_adults, colSums(total.elas_F_FP), type='l', lwd=1, lty=4, col=cols[4])
-lines(x2_adults, colSums(total.elas_F_PG), type='l', lwd=1, lty=6, col=cols[5])
-lines(x2_adults, colSums(total.elas_F_WT), type='l', lwd=1, lty=7, col=cols[6])
+lines(x2_adults, c(colSums(total.elas_FA_CC), colSums(total.elas_FB_CC)), type='l', lwd=1, lty=1, col=cols[2])
+lines(x2_adults, c(colSums(total.elas_FA_C), colSums(total.elas_FB_C)), type='l', lwd=1, lty=3, col=cols[3])
+lines(x2_adults, c(colSums(total.elas_FA_FP), colSums(total.elas_FB_FP)), type='l', lwd=1, lty=4, col=cols[4])
+lines(x2_adults, c(colSums(total.elas_FA_PG), colSums(total.elas_FB_PG)), type='l', lwd=1, lty=6, col=cols[5])
+lines(x2_adults, c(colSums(total.elas_FA_WT), colSums(total.elas_FB_WT)), type='l', lwd=1, lty=7, col=cols[6])
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 
 
-plot(x2_seedlings, colSums(total.elas_G_BC), ylim= c(0, 0.03), xlim=c(0, 16), xlab="",
+plot(x2_seedlings, colSums(total.elas_GA_BC, total.elas_GB_BC ), ylim= c(0, 0.03), xlim=c(0, 16), xlab="",
      ylab="", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
-lines(x2_seedlings, colSums(total.elas_G_CC), type='l', lwd=1, lty=1, col=cols[2])
-lines(x2_seedlings, colSums(total.elas_G_C), type='l', lwd=1, lty=3, col=cols[3])
-lines(x2_seedlings, colSums(total.elas_G_FP), type='l', lwd=1, lty=4, col=cols[4])
-lines(x2_seedlings, colSums(total.elas_G_PG), type='l', lwd=1, lty=6, col=cols[5])
-lines(x2_seedlings, colSums(total.elas_G_WT), type='l', lwd=1, lty=7, col=cols[6])
+lines(x2_seedlings, colSums(total.elas_GA_CC, total.elas_GB_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x2_seedlings, colSums(total.elas_GA_C, total.elas_GB_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x2_seedlings, colSums(total.elas_GA_FP, total.elas_GB_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x2_seedlings, colSums(total.elas_GA_PG, total.elas_GB_PG), type='l', lwd=1, lty=6, col=cols[5])
+lines(x2_seedlings, colSums(total.elas_GA_WT, total.elas_GB_WT), type='l', lwd=1, lty=7, col=cols[6])
 text(2, 0.029, "Maturation", cex=1.5)
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 
-plot(x2_adults, colSums(total.elas_D2_BC), ylim= c(0, 0.03), xlim=c(16, 800),  xlab=" ", 
-     ylab="", main="",  type='l',  lwd=1, lty=5, cex.axis=1.5, col=cols[1])
-lines(x2_adults, colSums(total.elas_D2_CC), type='l', lwd=1, lty=1, col=cols[2])
-lines(x2_adults, colSums(total.elas_D2_C), type='l', lwd=1, lty=3, col=cols[3])
-lines(x2_adults, colSums(total.elas_D2_FP), type='l', lwd=1, lty=4, col=cols[4])
-lines(x2_adults, colSums(total.elas_D2_PG), type='l', lwd=1, lty=6, col=cols[5])
-lines(x2_adults, colSums(total.elas_D2_WT), type='l', lwd=1, lty=7, col=cols[6])
+plot(x2_adults, c(colSums(total.elas_D2AA_BC, total.elas_D2AB_BC), 
+                  colSums(total.elas_D2BA_BC, total.elas_D2BB_BC)),
+    ylim= c(0, 0.03), xlim=c(16, 800),  xlab=" ", ylab="", main="", 
+    type='l',  lwd=1, lty=5, cex.axis=1.5, col=cols[1])
+lines(x2_adults, c(colSums(total.elas_D2AA_CC, total.elas_D2AB_CC), 
+                   colSums(total.elas_D2BA_CC, total.elas_D2BB_CC)), 
+      type='l', lwd=1, lty=1, col=cols[2])
+lines(x2_adults, c(colSums(total.elas_D2AA_C, total.elas_D2AB_C), 
+                   colSums(total.elas_D2BA_C, total.elas_D2BB_C)), 
+      type='l', lwd=1, lty=3, col=cols[3])
+lines(x2_adults, c(colSums(total.elas_D2AA_FP, total.elas_D2AB_FP), 
+                   colSums(total.elas_D2BA_FP, total.elas_D2BB_FP)),
+      type='l', lwd=1, lty=4, col=cols[4])
+lines(x2_adults, c(colSums(total.elas_D2AA_PG, total.elas_D2AB_PG), 
+                   colSums(total.elas_D2BA_PG, total.elas_D2BB_PG)),
+      type='l', lwd=1, lty=6, col=cols[5])
+lines(x2_adults, c(colSums(total.elas_D2AA_WT, total.elas_D2AB_WT), 
+                   colSums(total.elas_D2BA_WT, total.elas_D2BB_WT)), type='l', lwd=1, lty=7, col=cols[6])
 text(75, 0.029, "Adult", cex=1.5)
 legend(250, 0.03, lty=c(3, 1, 5, 4, 6, 7), col=cols, lwd=1,
        c("BC", "CC", "C", "FP", "PG", "WT"),
@@ -3554,14 +3947,645 @@ mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 dev.off() #x11(width = width.cm/2.54, height = 1.5*width.cm/(2.54), 
   #   pointsize = pointsize)
+#*-- Group NEW #####
+
+#Big Cypress
+D1_elas_diamBC <- rowSums(total.elas_D1_BC)
+G_elas_diamBC  <- rowSums(total.elas_GA_BC,total.elas_GB_BC)
+F_elas_diamBC  <-c(rowSums(total.elas_FA_BC), rowSums(total.elas_FB_BC))
+D2_elas_diamBC <-c(rowSums(total.elas_D2AA_BC, total.elas_D2AB_BC), 
+                   rowSums(total.elas_D2BA_BC, total.elas_D2BB_BC))
+
+D1_elas_heightBC <- colSums(total.elas_D1_BC)
+G_elas_heightBC  <- colSums(total.elas_GA_BC, total.elas_GB_BC)
+F_elas_heightBC  <-c(colSums(total.elas_FA_BC), colSums(total.elas_FB_BC))
+D2_elas_heightBC <-c(colSums(total.elas_D2AA_BC, total.elas_D2AB_BC),
+                     colSums(total.elas_D2BA_BC, total.elas_D2BB_BC))
+
+D1_diamBC<- c( sum(D1_elas_diamBC[1:2]),
+               sum(D1_elas_diamBC[3:4]),
+               sum(D1_elas_diamBC[5:6]),
+               sum(D1_elas_diamBC[7:8]),
+               sum(D1_elas_diamBC[9:10]),
+               rep(0, 5))
+D1_heightBC <- c(sum(D1_elas_heightBC[1:2]),
+                 sum(D1_elas_heightBC[3:4]),
+                 sum(D1_elas_heightBC[5:6]),
+                 sum(D1_elas_heightBC[7:8]),
+                 sum(D1_elas_heightBC[9:11]),
+                 rep(0,5))
+
+G_diamBC <- c(sum(G_elas_diamBC[1:2]),
+              sum(G_elas_diamBC[3:4]),
+              sum(G_elas_diamBC[5:6]),
+              sum(G_elas_diamBC[7:8]),
+              sum(G_elas_diamBC[9:11]),
+              rep(0,5))
+G_heightBC <- c(sum(G_elas_heightBC[1:2]),
+                sum(G_elas_heightBC[3:4]),
+                sum(G_elas_heightBC[5:6]),
+                sum(G_elas_heightBC[7:8]),
+                sum(G_elas_heightBC[9:11]),
+                rep(0,5))
+
+F_diamBC <- c(rep(0,5),
+              sum(F_elas_diamBC[1:235]),
+              sum(F_elas_diamBC[236:278]),
+              sum(F_elas_diamBC[279:309]),
+              sum(F_elas_diamBC[310:340]),
+              sum(F_elas_diamBC[341:370]))
+F_heightBC <- c(rep(0,5),
+                sum(F_elas_heightBC[1:28]),
+                sum(F_elas_heightBC[29:56]),
+                sum(F_elas_heightBC[57:87]),
+                sum(F_elas_heightBC[88:119]),
+                sum(F_elas_heightBC[120:150]))
+
+D2_diamBC <- c(rep(0,5),
+               sum(D2_elas_diamBC[1:235]),
+               sum(D2_elas_diamBC[236:278]),
+               sum(D2_elas_diamBC[279:309]),
+               sum(D2_elas_diamBC[310:340]),
+               sum(D2_elas_diamBC[341:370]))
+D2_heightBC <- c(rep(0,5),
+                 sum(D2_elas_heightBC[1:28]),
+                 sum(D2_elas_heightBC[29:56]),
+                 sum(D2_elas_heightBC[57:87]),
+                 sum(D2_elas_heightBC[88:119]),
+                 sum(D2_elas_heightBC[120:150]))
+
+#Cape Canaveral
+D1_elas_diamCC <- rowSums(total.elas_D1_CC)
+G_elas_diamCC  <- rowSums(total.elas_GA_CC,total.elas_GB_CC)
+F_elas_diamCC  <-c(rowSums(total.elas_FA_CC), rowSums(total.elas_FB_CC))
+D2_elas_diamCC <-c(rowSums(total.elas_D2AA_CC, total.elas_D2AB_CC), 
+                   rowSums(total.elas_D2BA_CC, total.elas_D2BB_CC))
+
+D1_elas_heightCC <- colSums(total.elas_D1_CC)
+G_elas_heightCC  <- colSums(total.elas_GA_CC, total.elas_GB_CC)
+F_elas_heightCC  <-c(colSums(total.elas_FA_CC), colSums(total.elas_FB_CC))
+D2_elas_heightCC <-c(colSums(total.elas_D2AA_CC, total.elas_D2AB_CC),
+                     colSums(total.elas_D2BA_CC, total.elas_D2BB_CC))
+
+D1_diamCC<- c( sum(D1_elas_diamCC[1:2]),
+               sum(D1_elas_diamCC[3:4]),
+               sum(D1_elas_diamCC[5:6]),
+               sum(D1_elas_diamCC[7:8]),
+               sum(D1_elas_diamCC[9:10]),
+               rep(0, 5))
+D1_heightCC <- c(sum(D1_elas_heightCC[1:2]),
+                 sum(D1_elas_heightCC[3:4]),
+                 sum(D1_elas_heightCC[5:6]),
+                 sum(D1_elas_heightCC[7:8]),
+                 sum(D1_elas_heightCC[9:11]),
+                 rep(0,5))
+
+G_diamCC <- c(sum(G_elas_diamCC[1:2]),
+              sum(G_elas_diamCC[3:4]),
+              sum(G_elas_diamCC[5:6]),
+              sum(G_elas_diamCC[7:8]),
+              sum(G_elas_diamCC[9:11]),
+              rep(0,5))
+G_heightCC <- c(sum(G_elas_heightCC[1:2]),
+                sum(G_elas_heightCC[3:4]),
+                sum(G_elas_heightCC[5:6]),
+                sum(G_elas_heightCC[7:8]),
+                sum(G_elas_heightCC[9:11]),
+                rep(0,5))
+
+F_diamCC <- c(rep(0,5),
+              sum(F_elas_diamCC[1:235]),
+              sum(F_elas_diamCC[236:278]),
+              sum(F_elas_diamCC[279:309]),
+              sum(F_elas_diamCC[310:340]),
+              sum(F_elas_diamCC[341:370]))
+F_heightCC <- c(rep(0,5),
+                sum(F_elas_heightCC[1:28]),
+                sum(F_elas_heightCC[29:56]),
+                sum(F_elas_heightCC[57:87]),
+                sum(F_elas_heightCC[88:119]),
+                sum(F_elas_heightCC[120:150]))
+
+D2_diamCC <- c(rep(0,5),
+               sum(D2_elas_diamCC[1:235]),
+               sum(D2_elas_diamCC[236:278]),
+               sum(D2_elas_diamCC[279:309]),
+               sum(D2_elas_diamCC[310:340]),
+               sum(D2_elas_diamCC[341:370]))
+D2_heightCC <- c(rep(0,5),
+                 sum(D2_elas_heightCC[1:28]),
+                 sum(D2_elas_heightCC[29:56]),
+                 sum(D2_elas_heightCC[57:87]),
+                 sum(D2_elas_heightCC[88:119]),
+                 sum(D2_elas_heightCC[120:150]))
+
+#Chekika
+D1_elas_diamC <- rowSums(total.elas_D1_C)
+G_elas_diamC  <- rowSums(total.elas_GA_C,total.elas_GB_C)
+F_elas_diamC  <-c(rowSums(total.elas_FA_C), rowSums(total.elas_FB_C))
+D2_elas_diamC <-c(rowSums(total.elas_D2AA_C, total.elas_D2AB_C), 
+                   rowSums(total.elas_D2BA_C, total.elas_D2BB_C))
+
+D1_elas_heightC <- colSums(total.elas_D1_C)
+G_elas_heightC  <- colSums(total.elas_GA_C, total.elas_GB_C)
+F_elas_heightC  <-c(colSums(total.elas_FA_C), colSums(total.elas_FB_C))
+D2_elas_heightC <-c(colSums(total.elas_D2AA_C, total.elas_D2AB_C),
+                     colSums(total.elas_D2BA_C, total.elas_D2BB_C))
+
+D1_diamC<- c( sum(D1_elas_diamC[1:2]),
+               sum(D1_elas_diamC[3:4]),
+               sum(D1_elas_diamC[5:6]),
+               sum(D1_elas_diamC[7:8]),
+               sum(D1_elas_diamC[9:10]),
+               rep(0, 5))
+D1_heightC <- c(sum(D1_elas_heightC[1:2]),
+                 sum(D1_elas_heightC[3:4]),
+                 sum(D1_elas_heightC[5:6]),
+                 sum(D1_elas_heightC[7:8]),
+                 sum(D1_elas_heightC[9:11]),
+                 rep(0,5))
+
+G_diamC <- c(sum(G_elas_diamC[1:2]),
+              sum(G_elas_diamC[3:4]),
+              sum(G_elas_diamC[5:6]),
+              sum(G_elas_diamC[7:8]),
+              sum(G_elas_diamC[9:11]),
+              rep(0,5))
+G_heightC <- c(sum(G_elas_heightC[1:2]),
+                sum(G_elas_heightC[3:4]),
+                sum(G_elas_heightC[5:6]),
+                sum(G_elas_heightC[7:8]),
+                sum(G_elas_heightC[9:11]),
+                rep(0,5))
+
+F_diamC <- c(rep(0,5),
+              sum(F_elas_diamC[1:235]),
+              sum(F_elas_diamC[236:278]),
+              sum(F_elas_diamC[279:309]),
+              sum(F_elas_diamC[310:340]),
+              sum(F_elas_diamC[341:370]))
+F_heightC <- c(rep(0,5),
+                sum(F_elas_heightC[1:28]),
+                sum(F_elas_heightC[29:56]),
+                sum(F_elas_heightC[57:87]),
+                sum(F_elas_heightC[88:119]),
+                sum(F_elas_heightC[120:150]))
+
+D2_diamC <- c(rep(0,5),
+               sum(D2_elas_diamC[1:235]),
+               sum(D2_elas_diamC[236:278]),
+               sum(D2_elas_diamC[279:309]),
+               sum(D2_elas_diamC[310:340]),
+               sum(D2_elas_diamC[341:370]))
+D2_heightC <- c(rep(0,5),
+                 sum(D2_elas_heightC[1:28]),
+                 sum(D2_elas_heightC[29:56]),
+                 sum(D2_elas_heightC[57:87]),
+                 sum(D2_elas_heightC[88:119]),
+                 sum(D2_elas_heightC[120:150]))
+
+#Fort Pierce
+D1_elas_diamFP <- rowSums(total.elas_D1_FP)
+G_elas_diamFP  <- rowSums(total.elas_GA_FP,total.elas_GB_FP)
+F_elas_diamFP  <-c(rowSums(total.elas_FA_FP), rowSums(total.elas_FB_FP))
+D2_elas_diamFP <-c(rowSums(total.elas_D2AA_FP, total.elas_D2AB_FP), 
+                   rowSums(total.elas_D2BA_FP, total.elas_D2BB_FP))
+
+D1_elas_heightFP <- colSums(total.elas_D1_FP)
+G_elas_heightFP  <- colSums(total.elas_GA_FP, total.elas_GB_FP)
+F_elas_heightFP  <-c(colSums(total.elas_FA_FP), colSums(total.elas_FB_FP))
+D2_elas_heightFP <-c(colSums(total.elas_D2AA_FP, total.elas_D2AB_FP),
+                     colSums(total.elas_D2BA_FP, total.elas_D2BB_FP))
+
+D1_diamFP<- c( sum(D1_elas_diamFP[1:2]),
+               sum(D1_elas_diamFP[3:4]),
+               sum(D1_elas_diamFP[5:6]),
+               sum(D1_elas_diamFP[7:8]),
+               sum(D1_elas_diamFP[9:10]),
+               rep(0, 5))
+D1_heightFP <- c(sum(D1_elas_heightFP[1:2]),
+                 sum(D1_elas_heightFP[3:4]),
+                 sum(D1_elas_heightFP[5:6]),
+                 sum(D1_elas_heightFP[7:8]),
+                 sum(D1_elas_heightFP[9:11]),
+                 rep(0,5))
+
+G_diamFP <- c(sum(G_elas_diamFP[1:2]),
+              sum(G_elas_diamFP[3:4]),
+              sum(G_elas_diamFP[5:6]),
+              sum(G_elas_diamFP[7:8]),
+              sum(G_elas_diamFP[9:11]),
+              rep(0,5))
+G_heightFP <- c(sum(G_elas_heightFP[1:2]),
+                sum(G_elas_heightFP[3:4]),
+                sum(G_elas_heightFP[5:6]),
+                sum(G_elas_heightFP[7:8]),
+                sum(G_elas_heightFP[9:11]),
+                rep(0,5))
+
+F_diamFP <- c(rep(0,5),
+              sum(F_elas_diamFP[1:235]),
+              sum(F_elas_diamFP[236:278]),
+              sum(F_elas_diamFP[279:309]),
+              sum(F_elas_diamFP[310:340]),
+              sum(F_elas_diamFP[341:370]))
+F_heightFP <- c(rep(0,5),
+                sum(F_elas_heightFP[1:28]),
+                sum(F_elas_heightFP[29:56]),
+                sum(F_elas_heightFP[57:87]),
+                sum(F_elas_heightFP[88:119]),
+                sum(F_elas_heightFP[120:150]))
+
+D2_diamFP <- c(rep(0,5),
+               sum(D2_elas_diamFP[1:235]),
+               sum(D2_elas_diamFP[236:278]),
+               sum(D2_elas_diamFP[279:309]),
+               sum(D2_elas_diamFP[310:340]),
+               sum(D2_elas_diamFP[341:370]))
+D2_heightFP <- c(rep(0,5),
+                 sum(D2_elas_heightFP[1:28]),
+                 sum(D2_elas_heightFP[29:56]),
+                 sum(D2_elas_heightFP[57:87]),
+                 sum(D2_elas_heightFP[88:119]),
+                 sum(D2_elas_heightFP[120:150]))
+
+#Punta Gorda
+D1_elas_diamPG <- rowSums(total.elas_D1_PG)
+G_elas_diamPG  <- rowSums(total.elas_GA_PG,total.elas_GB_PG)
+F_elas_diamPG  <-c(rowSums(total.elas_FA_PG), rowSums(total.elas_FB_PG))
+D2_elas_diamPG <-c(rowSums(total.elas_D2AA_PG, total.elas_D2AB_PG), 
+                   rowSums(total.elas_D2BA_PG, total.elas_D2BB_PG))
+
+D1_elas_heightPG <- colSums(total.elas_D1_PG)
+G_elas_heightPG  <- colSums(total.elas_GA_PG, total.elas_GB_PG)
+F_elas_heightPG  <-c(colSums(total.elas_FA_PG), colSums(total.elas_FB_PG))
+D2_elas_heightPG <-c(colSums(total.elas_D2AA_PG, total.elas_D2AB_PG),
+                     colSums(total.elas_D2BA_PG, total.elas_D2BB_PG))
+
+D1_diamPG<- c( sum(D1_elas_diamPG[1:2]),
+               sum(D1_elas_diamPG[3:4]),
+               sum(D1_elas_diamPG[5:6]),
+               sum(D1_elas_diamPG[7:8]),
+               sum(D1_elas_diamPG[9:10]),
+               rep(0, 5))
+D1_heightPG <- c(sum(D1_elas_heightPG[1:2]),
+                 sum(D1_elas_heightPG[3:4]),
+                 sum(D1_elas_heightPG[5:6]),
+                 sum(D1_elas_heightPG[7:8]),
+                 sum(D1_elas_heightPG[9:11]),
+                 rep(0,5))
+
+G_diamPG <- c(sum(G_elas_diamPG[1:2]),
+              sum(G_elas_diamPG[3:4]),
+              sum(G_elas_diamPG[5:6]),
+              sum(G_elas_diamPG[7:8]),
+              sum(G_elas_diamPG[9:11]),
+              rep(0,5))
+G_heightPG <- c(sum(G_elas_heightPG[1:2]),
+                sum(G_elas_heightPG[3:4]),
+                sum(G_elas_heightPG[5:6]),
+                sum(G_elas_heightPG[7:8]),
+                sum(G_elas_heightPG[9:11]),
+                rep(0,5))
+
+F_diamPG <- c(rep(0,5),
+              sum(F_elas_diamPG[1:235]),
+              sum(F_elas_diamPG[236:278]),
+              sum(F_elas_diamPG[279:309]),
+              sum(F_elas_diamPG[310:340]),
+              sum(F_elas_diamPG[341:370]))
+F_heightPG <- c(rep(0,5),
+                sum(F_elas_heightPG[1:28]),
+                sum(F_elas_heightPG[29:56]),
+                sum(F_elas_heightPG[57:87]),
+                sum(F_elas_heightPG[88:119]),
+                sum(F_elas_heightPG[120:150]))
+
+D2_diamPG <- c(rep(0,5),
+               sum(D2_elas_diamPG[1:235]),
+               sum(D2_elas_diamPG[236:278]),
+               sum(D2_elas_diamPG[279:309]),
+               sum(D2_elas_diamPG[310:340]),
+               sum(D2_elas_diamPG[341:370]))
+D2_heightPG <- c(rep(0,5),
+                 sum(D2_elas_heightPG[1:28]),
+                 sum(D2_elas_heightPG[29:56]),
+                 sum(D2_elas_heightPG[57:87]),
+                 sum(D2_elas_heightPG[88:119]),
+                 sum(D2_elas_heightPG[120:150]))
+
+#Wild Turkey
+D1_elas_diamWT <- rowSums(total.elas_D1_WT)
+G_elas_diamWT  <- rowSums(total.elas_GA_WT,total.elas_GB_WT)
+F_elas_diamWT  <-c(rowSums(total.elas_FA_WT), rowSums(total.elas_FB_WT))
+D2_elas_diamWT <-c(rowSums(total.elas_D2AA_WT, total.elas_D2AB_WT), 
+                   rowSums(total.elas_D2BA_WT, total.elas_D2BB_WT))
+
+D1_elas_heightWT <- colSums(total.elas_D1_WT)
+G_elas_heightWT  <- colSums(total.elas_GA_WT, total.elas_GB_WT)
+F_elas_heightWT  <-c(colSums(total.elas_FA_WT), colSums(total.elas_FB_WT))
+D2_elas_heightWT <-c(colSums(total.elas_D2AA_WT, total.elas_D2AB_WT),
+                     colSums(total.elas_D2BA_WT, total.elas_D2BB_WT))
+
+D1_diamWT<- c( sum(D1_elas_diamWT[1:2]),
+               sum(D1_elas_diamWT[3:4]),
+               sum(D1_elas_diamWT[5:6]),
+               sum(D1_elas_diamWT[7:8]),
+               sum(D1_elas_diamWT[9:10]),
+               rep(0, 5))
+D1_heightWT <- c(sum(D1_elas_heightWT[1:2]),
+                 sum(D1_elas_heightWT[3:4]),
+                 sum(D1_elas_heightWT[5:6]),
+                 sum(D1_elas_heightWT[7:8]),
+                 sum(D1_elas_heightWT[9:11]),
+                 rep(0,5))
+
+G_diamWT <- c(sum(G_elas_diamWT[1:2]),
+              sum(G_elas_diamWT[3:4]),
+              sum(G_elas_diamWT[5:6]),
+              sum(G_elas_diamWT[7:8]),
+              sum(G_elas_diamWT[9:11]),
+              rep(0,5))
+G_heightWT <- c(sum(G_elas_heightWT[1:2]),
+                sum(G_elas_heightWT[3:4]),
+                sum(G_elas_heightWT[5:6]),
+                sum(G_elas_heightWT[7:8]),
+                sum(G_elas_heightWT[9:11]),
+                rep(0,5))
+
+F_diamWT <- c(rep(0,5),
+              sum(F_elas_diamWT[1:235]),
+              sum(F_elas_diamWT[236:278]),
+              sum(F_elas_diamWT[279:309]),
+              sum(F_elas_diamWT[310:340]),
+              sum(F_elas_diamWT[341:370]))
+F_heightWT <- c(rep(0,5),
+                sum(F_elas_heightWT[1:28]),
+                sum(F_elas_heightWT[29:56]),
+                sum(F_elas_heightWT[57:87]),
+                sum(F_elas_heightWT[88:119]),
+                sum(F_elas_heightWT[120:150]))
+
+D2_diamWT <- c(rep(0,5),
+               sum(D2_elas_diamWT[1:235]),
+               sum(D2_elas_diamWT[236:278]),
+               sum(D2_elas_diamWT[279:309]),
+               sum(D2_elas_diamWT[310:340]),
+               sum(D2_elas_diamWT[341:370]))
+D2_heightWT <- c(rep(0,5),
+                 sum(D2_elas_heightWT[1:28]),
+                 sum(D2_elas_heightWT[29:56]),
+                 sum(D2_elas_heightWT[57:87]),
+                 sum(D2_elas_heightWT[88:119]),
+                 sum(D2_elas_heightWT[120:150]))
+
+site = c(rep("BC",10) , rep("CC",10), rep("C", 10), rep("FP", 10), 
+         rep("PG", 10),rep("WT", 10))        
+size = rep(c("0 - 0.32", "0.32 - 0.64", "0.64 - 0.96", 
+             "0.96-1.28", "1.28 - 1.6", "1.6 - 141", "141 - 278", 
+             "278 - 420", "420 - 563", "563 - 700"), 6)
+size2 = rep(c("0 - 2.91", "2.91 - 5.82", "5.82 - 8.73", 
+              "8.73 - 11.64", "11.64 - 16", "16 - 175", 
+              "175 - 330", "330 - 485", "485 - 645", "645 - 800"), 6)
+
+value = c(D1_diamBC, D1_diamCC, D1_diamC, D1_diamFP, D1_diamPG, D1_diamWT)
+value2 = c(D1_heightBC, D1_heightCC, D1_heightC, D1_heightFP, D1_heightPG, 
+           D1_heightWT)
+
+data = data.frame(site, size, value, size2, value2)
+
+levels(data$size2) <- c("0 - 2.91", "2.91 - 5.82", "5.82 - 8.73", 
+                        "8.73 - 11.64", "11.64 - 16", "16 - 175", 
+                        "175 - 330", "330 - 485", "485 - 645", "645 - 800")
+
+
+my.palette <- c(viridis(6)[1:5], magma(10)[10:6])
+# Stacked
+p1 <- ggplot(data, aes(fill=size, y=value, x=site)) + 
+  geom_bar( stat="identity") +
+  scale_fill_manual(values = my.palette )
+  scale_fill_brewer(palette = "YlGnBu", "Set2") +
+  labs(fill = "Diameter (mm) ") + 
+  labs(x = "Site") + 
+  labs(y = "Stable Stage Distribution") +
+  ggtitle("(a)") + theme(plot.title = element_text(hjust=0))
+
+
+
+
+
+
+
+
+
+
+
 
 #*-- Group ##### 
 load("./Overall/total.elas.RData")
+
+
 #Marginal Elasticity by Diameter
-D1_elas_diam <- sum(rowSums(total.elas_D1_overall))
-G_elas_diam <- sum(rowSums(total.elas_G_overall))
-F_elas_diam <- sum(rowSums(total.elas_F_overall))
-temp <- rowSums(total.elas_D2_overall)
+#Big Cypress
+D1_elas_diamBC<- sum(rowSums(total.elas_D1_BC))
+G_elas_diamBC <- sum(rowSums(total.elas_GA_BC),
+                     rowSums(total.elas_GB_BC))
+F_elas_diamBC <- sum(rowSums(total.elas_FA_BC), 
+                      rowSums(total.elas_FB_BC))
+D2_elas_diamBC <- sum(rowSums(total.elas_D2AA_BC),
+                       rowSums(total.elas_D2AB_BC),
+                       rowSums(total.elas_D2BA_BC),
+                       rowSums(total.elas_D2BB_BC))
+elas_diamBC <- c(D1_elas_diamBC, G_elas_diamBC, F_elas_diamBC,
+                 D2_elas_diamBC)
+
+D1_elas_heightBC<- sum(colSums(total.elas_D1_BC))
+G_elas_heightBC <- sum(colSums(total.elas_GA_BC),
+                       colSums(total.elas_GB_BC))
+F_elas_heightBC <- sum(colSums(total.elas_FA_BC), 
+                       colSums(total.elas_FB_BC))
+D2_elas_heightBC <- sum(colSums(total.elas_D2AA_BC),
+                        colSums(total.elas_D2AB_BC),
+                        colSums(total.elas_D2BA_BC),
+                        colSums(total.elas_D2BB_BC))
+elas_heightBC <- c(D1_elas_heightBC, G_elas_heightBC, F_elas_heightBC,
+                 D2_elas_heightBC)
+
+#Cape Canaveral
+D1_elas_diamCC<- sum(rowSums(total.elas_D1_CC))
+G_elas_diamCC <- sum(rowSums(total.elas_GA_CC),
+                     rowSums(total.elas_GB_CC))
+F_elas_diamCC <- sum(rowSums(total.elas_FA_CC), 
+                     rowSums(total.elas_FB_CC))
+D2_elas_diamCC <- sum(rowSums(total.elas_D2AA_CC),
+                      rowSums(total.elas_D2AB_CC),
+                      rowSums(total.elas_D2BA_CC),
+                      rowSums(total.elas_D2BB_CC))
+elas_diamCC <- c(D1_elas_diamCC, G_elas_diamCC, F_elas_diamCC,
+                 D2_elas_diamCC)
+
+D1_elas_heightCC<- sum(colSums(total.elas_D1_CC))
+G_elas_heightCC <- sum(colSums(total.elas_GA_CC),
+                       colSums(total.elas_GB_CC))
+F_elas_heightCC <- sum(colSums(total.elas_FA_CC), 
+                       colSums(total.elas_FB_CC))
+D2_elas_heightCC <- sum(colSums(total.elas_D2AA_CC),
+                        colSums(total.elas_D2AB_CC),
+                        colSums(total.elas_D2BA_CC),
+                        colSums(total.elas_D2BB_CC))
+elas_heightCC <- c(D1_elas_heightCC, G_elas_heightCC, F_elas_heightCC,
+                   D2_elas_heightCC)
+
+#Chekika
+D1_elas_diamC<- sum(rowSums(total.elas_D1_C))
+G_elas_diamC <- sum(rowSums(total.elas_GA_C),
+                     rowSums(total.elas_GB_C))
+F_elas_diamC <- sum(rowSums(total.elas_FA_C), 
+                     rowSums(total.elas_FB_C))
+D2_elas_diamC <- sum(rowSums(total.elas_D2AA_C),
+                      rowSums(total.elas_D2AB_C),
+                      rowSums(total.elas_D2BA_C),
+                      rowSums(total.elas_D2BB_C))
+elas_diamC <- c(D1_elas_diamC, G_elas_diamC, F_elas_diamC,
+                 D2_elas_diamC)
+
+D1_elas_heightC<- sum(colSums(total.elas_D1_C))
+G_elas_heightC <- sum(colSums(total.elas_GA_C),
+                       colSums(total.elas_GB_C))
+F_elas_heightC <- sum(colSums(total.elas_FA_C), 
+                       colSums(total.elas_FB_C))
+D2_elas_heightC <- sum(colSums(total.elas_D2AA_C),
+                        colSums(total.elas_D2AB_C),
+                        colSums(total.elas_D2BA_C),
+                        colSums(total.elas_D2BB_C))
+elas_heightC <- c(D1_elas_heightC, G_elas_heightC, F_elas_heightC,
+                   D2_elas_heightC)
+
+#Fort Pierce
+D1_elas_diamFP<- sum(rowSums(total.elas_D1_FP))
+G_elas_diamFP <- sum(rowSums(total.elas_GA_FP),
+                     rowSums(total.elas_GB_FP))
+F_elas_diamFP <- sum(rowSums(total.elas_FA_FP), 
+                     rowSums(total.elas_FB_FP))
+D2_elas_diamFP <- sum(rowSums(total.elas_D2AA_FP),
+                      rowSums(total.elas_D2AB_FP),
+                      rowSums(total.elas_D2BA_FP),
+                      rowSums(total.elas_D2BB_FP))
+elas_diamFP <- c(D1_elas_diamFP, G_elas_diamFP, F_elas_diamFP,
+                 D2_elas_diamFP)
+
+D1_elas_heightFP<- sum(colSums(total.elas_D1_FP))
+G_elas_heightFP <- sum(colSums(total.elas_GA_FP),
+                       colSums(total.elas_GB_FP))
+F_elas_heightFP <- sum(colSums(total.elas_FA_FP), 
+                       colSums(total.elas_FB_FP))
+D2_elas_heightFP <- sum(colSums(total.elas_D2AA_FP),
+                        colSums(total.elas_D2AB_FP),
+                        colSums(total.elas_D2BA_FP),
+                        colSums(total.elas_D2BB_FP))
+elas_heightFP <- c(D1_elas_heightFP, G_elas_heightFP, F_elas_heightFP,
+                   D2_elas_heightFP)
+
+#Punta Gorda
+D1_elas_diamPG<- sum(rowSums(total.elas_D1_PG))
+G_elas_diamPG <- sum(rowSums(total.elas_GA_PG),
+                     rowSums(total.elas_GB_PG))
+F_elas_diamPG <- sum(rowSums(total.elas_FA_PG), 
+                     rowSums(total.elas_FB_PG))
+D2_elas_diamPG <- sum(rowSums(total.elas_D2AA_PG),
+                      rowSums(total.elas_D2AB_PG),
+                      rowSums(total.elas_D2BA_PG),
+                      rowSums(total.elas_D2BB_PG))
+elas_diamPG <- c(D1_elas_diamPG, G_elas_diamPG, F_elas_diamPG,
+                 D2_elas_diamPG)
+
+D1_elas_heightPG<- sum(colSums(total.elas_D1_PG))
+G_elas_heightPG <- sum(colSums(total.elas_GA_PG),
+                       colSums(total.elas_GB_PG))
+F_elas_heightPG <- sum(colSums(total.elas_FA_PG), 
+                       colSums(total.elas_FB_PG))
+D2_elas_heightPG <- sum(colSums(total.elas_D2AA_PG),
+                        colSums(total.elas_D2AB_PG),
+                        colSums(total.elas_D2BA_PG),
+                        colSums(total.elas_D2BB_PG))
+elas_heightPG <- c(D1_elas_heightPG, G_elas_heightPG, F_elas_heightPG,
+                   D2_elas_heightPG)
+
+#Wild Turkey
+D1_elas_diamWT<- sum(rowSums(total.elas_D1_WT))
+G_elas_diamWT <- sum(rowSums(total.elas_GA_WT),
+                     rowSums(total.elas_GB_WT))
+F_elas_diamWT <- sum(rowSums(total.elas_FA_WT), 
+                     rowSums(total.elas_FB_WT))
+D2_elas_diamWT <- sum(rowSums(total.elas_D2AA_WT),
+                      rowSums(total.elas_D2AB_WT),
+                      rowSums(total.elas_D2BA_WT),
+                      rowSums(total.elas_D2BB_WT))
+elas_diamWT <- c(D1_elas_diamWT, G_elas_diamWT, F_elas_diamWT,
+                 D2_elas_diamWT)
+
+D1_elas_heightWT<- sum(colSums(total.elas_D1_WT))
+G_elas_heightWT <- sum(colSums(total.elas_GA_WT),
+                       colSums(total.elas_GB_WT))
+F_elas_heightWT <- sum(colSums(total.elas_FA_WT), 
+                       colSums(total.elas_FB_WT))
+D2_elas_heightWT <- sum(colSums(total.elas_D2AA_WT),
+                        colSums(total.elas_D2AB_WT),
+                        colSums(total.elas_D2BA_WT),
+                        colSums(total.elas_D2BB_WT))
+elas_heightWT <- c(D1_elas_heightWT, G_elas_heightWT, F_elas_heightWT,
+                   D2_elas_heightWT)
+
+site = c(rep("BC",4), rep("CC",4), rep("C", 4), rep("FP", 4), rep("PG", 4),
+         rep("WT", 4))  
+
+domain = rep(c("Seedling", "Maturation", "Fertility", "Adult"), 6)
+levels(domain) <- c("Seedling", "Maturation", "Fertility", "Adult")
+
+value = c(elas_diamBC, elas_diamCC, elas_diamC, elas_diamFP, elas_diamPG,
+          elas_diamWT)
+value2 = c(elas_heightBC, elas_heightCC, elas_heightC, elas_heightFP, 
+           elas_heightPG, elas_heightWT)
+
+data = data.frame(site, domain, value, value2)
+
+
+
+# Stacked
+p1 <- ggplot(data, aes(fill=domain, y=value, x=site)) + 
+  geom_bar( stat="identity") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(fill = "") + 
+  labs(x = "Site") + 
+  labs(y = "Marginal Elasticity - Diameter") +
+  ggtitle("(a)") + theme(plot.title = element_text(hjust=0))
+
+p2 <- ggplot(data, aes(fill=domain, y=value2, x=site)) + 
+  geom_bar( stat="identity") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(fill = "") + 
+  labs(x = "Site") + 
+  labs(y = "Marginal Elasticity - Height") +
+  ggtitle("(b)") + theme(plot.title = element_text(hjust=0))
+
+
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/marginal_elasticity.eps", width=width.cm/2.54, 
+           height=2*height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
+grid.arrange(p1, p2, ncol=1)
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
 D2_elas_diam1 <- sum(temp[1:60]) #5-417
 D2_elas_diam2 <- sum(temp[61:80]) #424-557
 D2_elas_diam3 <- sum(temp[81:90]) #564-627
@@ -3613,12 +4637,12 @@ dev.off()
 
 
 ###FIGURE B1: Contribution of matrix elements to differences in lambda by diameter #####
-load("./BC/total.contrib_BC_pool.RData")
-load("./CC/total.contrib_CC_pool.RData")
-load("./C/total.contrib_C_pool.RData")
-load("./FP/total.contrib_FP_pool.RData")
-load("./PG/total.contrib_PG_pool.RData")
-load("./WT/total.contrib_WT_pool.RData")
+load("./BC/total.contrib_BC_avg.RData")
+load("./CC/total.contrib_CC_avg.RData")
+load("./C/total.contrib_C_avg.RData")
+load("./FP/total.contrib_FP_avg.RData")
+load("./PG/total.contrib_PG_avg.RData")
+load("./WT/total.contrib_WT_avg.RData")
 
 setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/marginal_contributions.eps", width=width.cm/2.54, 
@@ -3634,28 +4658,28 @@ par(mar = c(3, 3, 2, 1), # Margins
     mfrow=c(4, 2))
 
 
-plot(x1_seedlings, rowSums(total.contrib_D1_BC_pool), ylim=c(-0.003, 0.01),
+plot(x1_seedlings, rowSums(total.contrib_D1_BC_avg), ylim=c(-0.003, 0.01),
      xlim=c(0, 1.6), xlab="", ylab="", main="",  type='l', lwd=1, 
      lty=1, cex.axis=1.5, col=cols[1])
 text(0.2, 0.01, "Seedling", cex=1.5)
-lines(x1_seedlings, rowSums(total.contrib_D1_CC_pool), type='l', lwd=1, lty=2, col=cols[2])
-lines(x1_seedlings, rowSums(total.contrib_D1_C_pool), type='l', lwd=1, lty=3, col=cols[3])
-lines(x1_seedlings, rowSums(total.contrib_D1_FP_pool), type='l', lwd=1, lty=4, col=cols[4])
-lines(x1_seedlings, rowSums(total.contrib_D1_PG_pool), type='l', lwd=1, lty=5, col=cols[5])
-lines(x1_seedlings, rowSums(total.contrib_D1_WT_pool), type='l', lwd=1, lty=6, col=cols[6])
+lines(x1_seedlings, rowSums(total.contrib_D1_CC_avg), type='l', lwd=1, lty=2, col=cols[2])
+lines(x1_seedlings, rowSums(total.contrib_D1_C_avg), type='l', lwd=1, lty=3, col=cols[3])
+lines(x1_seedlings, rowSums(total.contrib_D1_FP_avg), type='l', lwd=1, lty=4, col=cols[4])
+lines(x1_seedlings, rowSums(total.contrib_D1_PG_avg), type='l', lwd=1, lty=5, col=cols[5])
+lines(x1_seedlings, rowSums(total.contrib_D1_WT_avg), type='l', lwd=1, lty=6, col=cols[6])
 mtext(side=3, "(a) Contributions by diameter", line=1, cex=1.2, adj=0)
 mtext(side=2, "Contribution", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
 
-plot(x1_adults, rowSums(total.contrib_F_BC_pool), ylim=c(-0.003, 0.01), xlim=c(1.6, 800), xlab="", 
+plot(x1_adults, rowSums(total.contrib_FA_BC_avg), ylim=c(-0.003, 0.01), xlim=c(1.6, 800), xlab="", 
      ylab= "", main="", type='l', lwd=1, lty=1, cex.axis=1.5, col=cols[1])
 text(65, 0.01, "Fertility", cex=1.5)
-lines(x1_adults, rowSums(total.contrib_F_CC_pool), type='l', lwd=1, lty=2, col=cols[2])
-lines(x1_adults, rowSums(total.contrib_F_C_pool), type='l', lwd=1, lty=3, col=cols[3])
-lines(x1_adults, rowSums(total.contrib_F_FP_pool), type='l', lwd=1, lty=4, col=cols[4])
-lines(x1_adults, rowSums(total.contrib_F_PG_pool), type='l', lwd=1, lty=5, col=cols[5])
-lines(x1_adults, rowSums(total.contrib_F_WT_pool), type='l', lwd=1, lty=6, col=cols[6])
+lines(x1_adults, rowSums(total.contrib_FA_CC_avg), type='l', lwd=1, lty=2, col=cols[2])
+lines(x1_adults, rowSums(total.contrib_FA_C_avg), type='l', lwd=1, lty=3, col=cols[3])
+lines(x1_adults, rowSums(total.contrib_FA_FP_avg), type='l', lwd=1, lty=4, col=cols[4])
+lines(x1_adults, rowSums(total.contrib_FA_PG_avg), type='l', lwd=1, lty=5, col=cols[5])
+lines(x1_adults, rowSums(total.contrib_FA_WT_avg), type='l', lwd=1, lty=6, col=cols[6])
 mtext(side=2, "Contribution", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
@@ -3805,4 +4829,94 @@ mtext(side=1, "Height (cm)", line=2,cex=1)
 dev.off()
 
 
-##### Original versions of 
+##### Randomization #####
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/randomization.eps", width=width.cm/2.54, 
+           height=2*width.cm/(2.54), pointsize=pointsize,  encoding = "TeXtext.enc")
+#x11(width = width.cm/2.54, height = 2*width.cm/(2.54), 
+#pointsize = pointsize)
+#png(file="./Figures/variability.png")
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, .5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=F,
+    mai=c(0.3,0.4,0.35,0.1),
+    mfrow=c(5, 5))
+
+hist(differences[,1], main = "|BC - CC|", xlab="Difference", 
+     xlim=c(0, 0.2), breaks=12)
+abline(v=BC_CC_obs, col="red")
+
+hist(differences[,2], main = "|BC - C|", xlab="Difference",
+     breaks=12, xlim=c(0, 0.2))
+abline(v=BC_C_obs, col="red")
+
+hist(differences[,3], main = "|BC - FP|", xlab="Difference",
+     breaks=12, xlim=c(0,0.2))
+abline(v=BC_FP_obs, col="red")
+
+hist(differences[,4], main= "|BC - PG|", xlab="Difference",
+     breaks=12, xlim=c(0,0.2))
+abline(v=BC_PG_obs, col="red")
+
+hist(differences[,5], main="|BC - WT|", xlab="Difference",
+     breaks=12, xlim=c(0,0.2))
+abline(v=BC_WT_obs, col="red")
+
+plot(0,type='n',axes=FALSE,ann=FALSE)
+
+hist(differences[,6], main="|CC - C|", xlab="Difference",
+     breaks=12, xlim=c(0,0.2))
+abline(v=CC_C_obs, col="red")
+
+hist(differences[,7], main ="|CC - FP|", xlab="Difference",
+     breaks=12, xlim=c(0,0.2))
+abline(v=CC_FP_obs, col="red")
+
+hist(differences[,8], main = "|CC - PG|", xlab="Difference",
+     breaks=12, xlim=c(0,0.2))
+abline(v=CC_PG_obs, col="red")
+
+hist(differences[,9], main = "|CC - WT|", xlab="Difference",
+     breaks=12, xlim=c(0,0.2))
+abline(v=CC_WT_obs, col="red")
+
+plot(0,type='n',axes=FALSE,ann=FALSE)
+plot(0,type='n',axes=FALSE,ann=FALSE)
+
+hist(differences[,10], main="|C - FP|", xlab="Difference", 
+     breaks=12, xlim=c(0,0.2))
+abline(v=C_FP_obs, col="red")
+
+hist(differences[,11], main = "|C - PG|", xlab="Difference",
+     breaks=12, xlim=c(0,0.2))
+abline(v=C_PG_obs, col="red")
+
+hist(differences[,12], main = "|C - WT|", xlab="Difference", 
+     breaks=12, xlim=c(0,0.2))
+abline(v=C_WT_obs, col="red")
+
+plot(0,type='n',axes=FALSE,ann=FALSE)
+plot(0,type='n',axes=FALSE,ann=FALSE)
+plot(0,type='n',axes=FALSE,ann=FALSE)
+
+hist(differences[,13], main = "|FP - PG|", xlab="Difference",
+     breaks=12, xlim=c(0,0.2))
+abline(v=FP_PG_obs, col="red")
+
+hist(differences[,14], main = "|FP - WT|", xlab="Difference",
+     breaks=12, xlim=c(0,0.2))
+abline(v=FP_WT_obs, col="red")
+
+plot(0,type='n',axes=FALSE,ann=FALSE)
+plot(0,type='n',axes=FALSE,ann=FALSE)
+plot(0,type='n',axes=FALSE,ann=FALSE)
+plot(0,type='n',axes=FALSE,ann=FALSE)
+hist(differences[,15], main = "|PG - WT|", xlab="Difference",
+     breaks=12, xlim=c(0,0.2))
+abline(v=PG_WT_obs, col="red")
+dev.off()
+
+
+
+
