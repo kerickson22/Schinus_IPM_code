@@ -965,7 +965,7 @@ thing <- find_lambda(A_BC)
 saveRDS(thing$lam.stable, file = "./BC/lam.stable_BC.rds")
 saveRDS(thing$stable.dist, file = "./BC/stable.dist_BC.rds")
 saveRDS(thing$v, file = "./BC/v_BC.rds")
-rm(A_BC)
+rm(A_BC, thing)
 
 #Cape Canaveral
 load("./CC/A_CC.RData")
@@ -1070,7 +1070,7 @@ load("./CC/A_CC.RData")
 lam.stable_CC <- readRDS("./CC/lam.stable_CC.rds")
 thing <- elasticity(v_CC, stable.dist_CC, A_CC, lam.stable_CC)
 rm(v_CC, stable.dist_CC, A_CC, lam.stable_CC)
-saveRDS(thing$sens, file="./CC/sens_CC.rds")
+#saveRDS(thing$sens, file="./CC/sens_CC.rds")
 saveRDS(thing$elas, file="./CC/elas_CC.rds")
 rm(thing)
 gc()
@@ -1118,7 +1118,7 @@ load("./WT/A_WT.RData")
 lam.stable_WT <- readRDS("./WT/lam.stable_WT.rds")
 thing <- elasticity(v_WT, stable.dist_WT, A_WT, lam.stable_WT)
 rm(v_WT, stable.dist_WT, A_WT, lam.stable_WT)
-saveRDS(thing$sens, file="./WT/sens_WT.rds")
+#saveRDS(thing$sens, file="./WT/sens_WT.rds")
 saveRDS(thing$elas, file="./WT/elas_WT.rds")
 rm(thing)
 gc()
@@ -1139,108 +1139,110 @@ gc()
 
 decompose = function (mat) {
   #Break the elasticity matrix back into its component parts: 
-  mat_D1<-mat[1:(m1*m2), 1:(m1*m2)]
-  mat_G<-mat[((m1*m2)+1):(m1*m2+m3a*m4a + m3b*m4b), 1:(m1*m2)]
-  mat_F <- mat[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3a*m4a + m3b*m4b)]
-  mat_D2<-mat[((m1*m2)+1):(m1*m2+m3a*m4a + m3b*m4b), ((m1*m2)+1):(m1*m2 + m3a*m4a + m3b*m4b)]
-  return(list(mat_D1 = mat_D1, mat_G = mat_G, mat_F = mat_F, mat_D2 = mat_D2))
+  mat_D1 <- mat[1:(m1*m2), 1:(m1*m2)]
+  mat_FA <- mat[1:(m1*m2), ((m1*m2)+1):(m1*m2 + m3a*m4a)]
+  mat_FB <- mat[1:(m1*m2), 
+                ((m1*m2 + m3a*m4a)+1):(m1*m2 +m3a*m4a + m3b*m4b)]
+  mat_GA <- mat[((m1*m2)+1): (m1*m2 + m3a*m4a), 1:(m1*m2)]
+  mat_GB <- mat[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a + m3b*m4b),
+                1:(m1*m2)]
+  mat_D2AA <- mat[((m1*m2)+1):(m1*m2 + m3a*m4a), 
+                  ((m1*m2)+1):(m1*m2 + m3a*m4a)]
+  mat_D2BA <- mat[((m1*m2)+1):(m1*m2 + m3a*m4a), 
+                  ((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a + m3b*m4b)]
+  mat_D2AB <- mat[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a+m3b*m4b),
+                  ((m1*m2)+1):(m1*m2 + m3a*m4a)]
+  mat_D2BB <- mat[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a + m3b*m4b),
+                  ((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a + m3b*m4b)]
+  return(list(mat_D1 = mat_D1, mat_GA = mat_GA, mat_GB = mat_GB,
+              mat_FA = mat_FA, mat_FB = mat_FB,  mat_D2AA = mat_D2AA,
+              mat_D2AB = mat_D2AB, mat_D2BA = mat_D2BA, 
+              mat_D2BB = mat_D2BB))
 }
-
 #Big Cypress
 elas_BC <- readRDS("./BC/elas_BC.rds")
 thing <- decompose(elas_BC)
 saveRDS(thing$mat_D1, file="./BC/elas_D1_BC.rds")
-saveRDS(thing$mat_G, file="./BC/elas_G_BC.rds")
-saveRDS(thing$mat_F, file="./BC/elas_F_BC.rds")
-saveRDS(thing$mat_D2, file="./BC/elas_D2_BC.rds")
-rm(elas_BC)
-sens_BC <- readRDS("./BC/sens_BC.rds")
-thing <- decompose(sens_BC)
-saveRDS(thing$mat_D1, file="./BC/sens_D1_BC.rds")
-saveRDS(thing$mat_G, file="./BC/sens_G_BC.rds")
-saveRDS(thing$mat_F, file="./BC/sens_F_BC.rds")
-saveRDS(thing$mat_D2, file="./BC/sens_D2_BC.rds")
-rm(sens_BC)
+saveRDS(thing$mat_GA, file="./BC/elas_GA_BC.rds")
+saveRDS(thing$mat_GB, file="./BC/elas_GB_BC.rds")
+saveRDS(thing$mat_FA, file="./BC/elas_FA_BC.rds")
+saveRDS(thing$mat_FB, file="./BC/elas_FB_BC.rds")
+saveRDS(thing$mat_D2AA, file="./BC/elas_D2AA_BC.rds")
+saveRDS(thing$mat_D2AB, file="./BC/elas_D2AB_BC.rds")
+saveRDS(thing$mat_D2BA, file="./BC/elas_D2BA_BC.rds")
+saveRDS(thing$mat_D2BB, file="./BC/elas_D2BB_BC.rds")
+rm(elas_BC, thing)
 
 #Cape Canaveral
 elas_CC <- readRDS("./CC/elas_CC.rds")
 thing <- decompose(elas_CC)
 saveRDS(thing$mat_D1, file="./CC/elas_D1_CC.rds")
-saveRDS(thing$mat_G, file="./CC/elas_G_CC.rds")
-saveRDS(thing$mat_F, file="./CC/elas_F_CC.rds")
-saveRDS(thing$mat_D2, file="./CC/elas_D2_CC.rds")
+saveRDS(thing$mat_GA, file="./CC/elas_GA_CC.rds")
+saveRDS(thing$mat_GB, file="./CC/elas_GB_CC.rds")
+saveRDS(thing$mat_FA, file="./CC/elas_FA_CC.rds")
+saveRDS(thing$mat_FB, file="./CC/elas_FB_CC.rds")
+saveRDS(thing$mat_D2AA, file="./CC/elas_D2AA_CC.rds")
+saveRDS(thing$mat_D2AB, file="./CC/elas_D2AB_CC.rds")
+saveRDS(thing$mat_D2BA, file="./CC/elas_D2BA_CC.rds")
+saveRDS(thing$mat_D2BB, file="./CC/elas_D2BB_CC.rds")
 rm(elas_CC, thing)
-sens_CC <- readRDS("./CC/sens_CC.rds")
-thing <- decompose(sens_CC)
-saveRDS(thing$mat_D1, file="./CC/sens_D1_CC.rds")
-saveRDS(thing$mat_G, file="./CC/sens_G_CC.rds")
-saveRDS(thing$mat_F, file="./CC/sens_F_CC.rds")
-saveRDS(thing$mat_D2, file="./CC/sens_D2_CC.rds")
-rm(sens_CC, thing)
 
 #Chekika
 elas_C <- readRDS("./C/elas_C.rds")
 thing <- decompose(elas_C)
 saveRDS(thing$mat_D1, file="./C/elas_D1_C.rds")
-saveRDS(thing$mat_G, file="./C/elas_G_C.rds")
-saveRDS(thing$mat_F, file="./C/elas_F_C.rds")
-saveRDS(thing$mat_D2, file="./C/elas_D2_C.rds")
+saveRDS(thing$mat_GA, file="./C/elas_GA_C.rds")
+saveRDS(thing$mat_GB, file="./C/elas_GB_C.rds")
+saveRDS(thing$mat_FA, file="./C/elas_FA_C.rds")
+saveRDS(thing$mat_FB, file="./C/elas_FB_C.rds")
+saveRDS(thing$mat_D2AA, file="./C/elas_D2AA_C.rds")
+saveRDS(thing$mat_D2AB, file="./C/elas_D2AB_C.rds")
+saveRDS(thing$mat_D2BA, file="./C/elas_D2BA_C.rds")
+saveRDS(thing$mat_D2BB, file="./C/elas_D2BB_C.rds")
 rm(elas_C, thing)
-sens_C <- readRDS("./C/sens_C.rds")
-thing <- decompose(sens_C)
-saveRDS(thing$mat_D1, file="./C/sens_D1_C.rds")
-saveRDS(thing$mat_G, file="./C/sens_G_C.rds")
-saveRDS(thing$mat_F, file="./C/sens_F_C.rds")
-saveRDS(thing$mat_D2, file="./C/sens_D2_C.rds")
-rm(sens_C, thing)
 
 #Fort Pierce
 elas_FP <- readRDS("./FP/elas_FP.rds")
 thing <- decompose(elas_FP)
 saveRDS(thing$mat_D1, file="./FP/elas_D1_FP.rds")
-saveRDS(thing$mat_G, file="./FP/elas_G_FP.rds")
-saveRDS(thing$mat_F, file="./FP/elas_F_FP.rds")
-saveRDS(thing$mat_D2, file="./FP/elas_D2_FP.rds")
+saveRDS(thing$mat_GA, file="./FP/elas_GA_FP.rds")
+saveRDS(thing$mat_GB, file="./FP/elas_GB_FP.rds")
+saveRDS(thing$mat_FA, file="./FP/elas_FA_FP.rds")
+saveRDS(thing$mat_FB, file="./FP/elas_FB_FP.rds")
+saveRDS(thing$mat_D2AA, file="./FP/elas_D2AA_FP.rds")
+saveRDS(thing$mat_D2AB, file="./FP/elas_D2AB_FP.rds")
+saveRDS(thing$mat_D2BA, file="./FP/elas_D2BA_FP.rds")
+saveRDS(thing$mat_D2BB, file="./FP/elas_D2BB_FP.rds")
 rm(elas_FP, thing)
-sens_FP <- readRDS("./FP/sens_FP.rds")
-thing <- decompose(sens_FP)
-saveRDS(thing$mat_D1, file="./FP/sens_D1_FP.rds")
-saveRDS(thing$mat_G, file="./FP/sens_G_FP.rds")
-saveRDS(thing$mat_F, file="./FP/sens_F_FP.rds")
-saveRDS(thing$mat_D2, file="./FP/sens_D2_FP.rds")
-rm(sens_FP, thing)
 
 #Punta Gorda
 elas_PG <- readRDS("./PG/elas_PG.rds")
 thing <- decompose(elas_PG)
 saveRDS(thing$mat_D1, file="./PG/elas_D1_PG.rds")
-saveRDS(thing$mat_G, file="./PG/elas_G_PG.rds")
-saveRDS(thing$mat_F, file="./PG/elas_F_PG.rds")
-saveRDS(thing$mat_D2, file="./PG/elas_D2_PG.rds")
+saveRDS(thing$mat_GA, file="./PG/elas_GA_PG.rds")
+saveRDS(thing$mat_GB, file="./PG/elas_GB_PG.rds")
+saveRDS(thing$mat_FA, file="./PG/elas_FA_PG.rds")
+saveRDS(thing$mat_FB, file="./PG/elas_FB_PG.rds")
+saveRDS(thing$mat_D2AA, file="./PG/elas_D2AA_PG.rds")
+saveRDS(thing$mat_D2AB, file="./PG/elas_D2AB_PG.rds")
+saveRDS(thing$mat_D2BA, file="./PG/elas_D2BA_PG.rds")
+saveRDS(thing$mat_D2BB, file="./PG/elas_D2BB_PG.rds")
 rm(elas_PG, thing)
-sens_PG <- readRDS("./PG/sens_PG.rds")
-thing <- decompose(sens_PG)
-saveRDS(thing$mat_D1, file="./PG/sens_D1_PG.rds")
-saveRDS(thing$mat_G, file="./PG/sens_G_PG.rds")
-saveRDS(thing$mat_F, file="./PG/sens_F_PG.rds")
-saveRDS(thing$mat_D2, file="./PG/sens_D2_PG.rds")
-rm(sens_PG, thing)
 
 #Wild Turkey
 elas_WT <- readRDS("./WT/elas_WT.rds")
 thing <- decompose(elas_WT)
 saveRDS(thing$mat_D1, file="./WT/elas_D1_WT.rds")
-saveRDS(thing$mat_G, file="./WT/elas_G_WT.rds")
-saveRDS(thing$mat_F, file="./WT/elas_F_WT.rds")
-saveRDS(thing$mat_D2, file="./WT/elas_D2_WT.rds")
+saveRDS(thing$mat_GA, file="./WT/elas_GA_WT.rds")
+saveRDS(thing$mat_GB, file="./WT/elas_GB_WT.rds")
+saveRDS(thing$mat_FA, file="./WT/elas_FA_WT.rds")
+saveRDS(thing$mat_FB, file="./WT/elas_FB_WT.rds")
+saveRDS(thing$mat_D2AA, file="./WT/elas_D2AA_WT.rds")
+saveRDS(thing$mat_D2AB, file="./WT/elas_D2AB_WT.rds")
+saveRDS(thing$mat_D2BA, file="./WT/elas_D2BA_WT.rds")
+saveRDS(thing$mat_D2BB, file="./WT/elas_D2BB_WT.rds")
 rm(elas_WT, thing)
-sens_WT <- readRDS("./WT/sens_WT.rds")
-thing <- decompose(sens_WT)
-saveRDS(thing$mat_D1, file="./WT/sens_D1_WT.rds")
-saveRDS(thing$mat_G, file="./WT/sens_G_WT.rds")
-saveRDS(thing$mat_F, file="./WT/sens_F_WT.rds")
-saveRDS(thing$mat_D2, file="./WT/sens_D2_WT.rds")
-rm(sens_WT, thing)
+
 
 #Overall
 elas_overall <- readRDS("./Overall/elas_overall.rds")
@@ -1311,7 +1313,6 @@ rm(elas_D1_BC, elas_D1_CC, elas_D1_C, elas_D1_FP, elas_D1_PG, elas_D1_WT, elas_D
 
 ###Construct D2 (Large Domain):
 
-
 toKvals_D2AA = function(elas_D2AA) {
   plop=function(i,j) {(j-1)*m3a+i} # for putting values in proper place in A 
   Plop=outer(1:m3a,1:m4a,plop); 
@@ -1355,7 +1356,7 @@ toKvals_D2BA = function(elas_D2BA) {
   plop2=function(i, j) {(j-1)*m3b + i}
   Plop1=outer(1:m3a,1:m4a,plop1); 
   Plop2=outer(1:m3b, 1:m4b, plop2);
-
+  
   
   Kvals_elas_D2BA=array(0, c(m3a, m4a, m3b, m4b))
   
@@ -1389,136 +1390,117 @@ toKvals_D2AB = function(elas_D2AB) {
   return(Kvals_elas_D2AB)
 }
 
-
-
-
-#START HERE: Double check this through 
-decompose_D2 = function (mat) {
-  #Break the elasticity matrix back into its component parts: 
-  mat_D2AA<-mat[1:(m3a*m4a), 1:(m3a*m4a)]
-  mat_D2BA<-mat[1:(m3a*m4a), ((m3a*m4a)+1):(m3a*m4a + m3b*m4b)]
-  mat_D2AB<-mat[((m3a*m4a)+1):(m3a*m4a + m3b*m4b), 1:(m3a*m4a)]
-  mat_D2BB<-mat[((m3a*m4a)+1):(m3a*m4a + m3b*m4b), ((m3a*m4a)+1):(m3a*m4a +m3b*m4b)]
-  return(list(mat_D2AA = mat_D2AA,
-              mat_D2BA = mat_D2BA,
-              mat_D2AB = mat_D2AB,
-              mat_D2BB = mat_D2BB))
-}
-
-
-
-elas_D2_BC <- readRDS("./BC/elas_D2_BC.rds")
-thing <- decompose_D2(elas_D2_BC)
-Kvals_elas_D2AA_BC <- toKvals_D2AA(thing$mat_D2AA)
-Kvals_elas_D2AB_BC <- toKvals_D2AB(thing$mat_D2AB)
-Kvals_elas_D2BA_BC <- toKvals_D2BA(thing$mat_D2BA)
-Kvals_elas_D2BB_BC <- toKvals_D2BB(thing$mat_D2BB)
-
+#Big Cypress
+elas_D2AA_BC <- readRDS("./BC/elas_D2AA_BC.rds")
+Kvals_elas_D2AA_BC <- toKvals_D2AA(elas_D2AA_BC)
 save(Kvals_elas_D2AA_BC, file="./BC/Kvals_elas_D2AA_BC.RData")
+rm(elas_D2AA_BC, Kvals_elas_D2AA_BC)
+elas_D2AB_BC <- readRDS("./BC/elas_D2AB_BC.rds")
+Kvals_elas_D2AB_BC <- toKvals_D2AB(elas_D2AB_BC)
 save(Kvals_elas_D2AB_BC, file="./BC/Kvals_elas_D2AB_BC.RData")
+rm(elas_D2AB_BC, Kvals_elas_D2AB_BC)
+elas_D2BA_BC <- readRDS("./BC/elas_D2BA_BC.rds")
+Kvals_elas_D2BA_BC <- toKvals_D2BA(elas_D2BA_BC)
 save(Kvals_elas_D2BA_BC, file="./BC/Kvals_elas_D2BA_BC.RData")
+rm(elas_D2BA_BC, Kvals_elas_D2BA_BC)
+elas_D2BB_BC <- readRDS("./BC/elas_D2BB_BC.rds")
+Kvals_elas_D2BB_BC <- toKvals_D2BB(elas_D2BB_BC)
 save(Kvals_elas_D2BB_BC, file="./BC/Kvals_elas_D2BB_BC.RData")
-rm(Kvals_elas_D2AA_BC, Kvals_elas_D2AB_BC, Kvals_elas_D2BA_BC, 
-   Kvals_elas_D2BB_BC)
-rm(thing)
-gc()
+rm(elas_D2BB_BC, Kvals_elas_D2BB_BC)
 
-elas_D2_CC <- readRDS("./CC/elas_D2_CC.rds")
-thing <- decompose_D2(elas_D2_CC)
-Kvals_elas_D2AA_CC <- toKvals_D2AA(thing$mat_D2AA)
-Kvals_elas_D2AB_CC <- toKvals_D2AB(thing$mat_D2AB)
-Kvals_elas_D2BA_CC <- toKvals_D2BA(thing$mat_D2BA)
-Kvals_elas_D2BB_CC <- toKvals_D2BB(thing$mat_D2BB)
-
+#Cape Canaveral
+elas_D2AA_CC <- readRDS("./CC/elas_D2AA_CC.rds")
+Kvals_elas_D2AA_CC <- toKvals_D2AA(elas_D2AA_CC)
 save(Kvals_elas_D2AA_CC, file="./CC/Kvals_elas_D2AA_CC.RData")
+rm(elas_D2AA_CC, Kvals_elas_D2AA_CC)
+elas_D2AB_CC <- readRDS("./CC/elas_D2AB_CC.rds")
+Kvals_elas_D2AB_CC <- toKvals_D2AB(elas_D2AB_CC)
 save(Kvals_elas_D2AB_CC, file="./CC/Kvals_elas_D2AB_CC.RData")
+rm(elas_D2AB_CC, Kvals_elas_D2AB_CC)
+elas_D2BA_CC <- readRDS("./CC/elas_D2BA_CC.rds")
+Kvals_elas_D2BA_CC <- toKvals_D2BA(elas_D2BA_CC)
 save(Kvals_elas_D2BA_CC, file="./CC/Kvals_elas_D2BA_CC.RData")
+rm(elas_D2BA_CC, Kvals_elas_D2BA_CC)
+elas_D2BB_CC <- readRDS("./CC/elas_D2BB_CC.rds")
+Kvals_elas_D2BB_CC <- toKvals_D2BB(elas_D2BB_CC)
 save(Kvals_elas_D2BB_CC, file="./CC/Kvals_elas_D2BB_CC.RData")
-rm(Kvals_elas_D2AA_CC, Kvals_elas_D2AB_CC, Kvals_elas_D2BA_CC, 
-   Kvals_elas_D2BB_CC)
-rm(elas_D2_CC, thing)
-gc()
+rm(elas_D2BB_CC, Kvals_elas_D2BB_CC)
 
-elas_D2_C  <- readRDS("./C/elas_D2_C.rds")
-thing <- decompose_D2(elas_D2_C)
-Kvals_elas_D2AA_C <- toKvals_D2AA(thing$mat_D2AA)
-Kvals_elas_D2AB_C <- toKvals_D2AB(thing$mat_D2AB)
-Kvals_elas_D2BA_C <- toKvals_D2BA(thing$mat_D2BA)
-Kvals_elas_D2BB_C <- toKvals_D2BB(thing$mat_D2BB)
-
+#Chekika
+elas_D2AA_C <- readRDS("./C/elas_D2AA_C.rds")
+Kvals_elas_D2AA_C <- toKvals_D2AA(elas_D2AA_C)
 save(Kvals_elas_D2AA_C, file="./C/Kvals_elas_D2AA_C.RData")
+rm(elas_D2AA_C, Kvals_elas_D2AA_C)
+elas_D2AB_C <- readRDS("./C/elas_D2AB_C.rds")
+Kvals_elas_D2AB_C <- toKvals_D2AB(elas_D2AB_C)
 save(Kvals_elas_D2AB_C, file="./C/Kvals_elas_D2AB_C.RData")
+rm(elas_D2AB_C, Kvals_elas_D2AB_C)
+elas_D2BA_C <- readRDS("./C/elas_D2BA_C.rds")
+Kvals_elas_D2BA_C <- toKvals_D2BA(elas_D2BA_C)
 save(Kvals_elas_D2BA_C, file="./C/Kvals_elas_D2BA_C.RData")
+rm(elas_D2BA_C, Kvals_elas_D2BA_C)
+elas_D2BB_C <- readRDS("./C/elas_D2BB_C.rds")
+Kvals_elas_D2BB_C <- toKvals_D2BB(elas_D2BB_C)
 save(Kvals_elas_D2BB_C, file="./C/Kvals_elas_D2BB_C.RData")
-rm(Kvals_elas_D2AA_C, Kvals_elas_D2AB_C, Kvals_elas_D2BA_C, 
-   Kvals_elas_D2BB_C)
-rm(elas_D2_C, thing)
-gc()
+rm(elas_D2BB_C, Kvals_elas_D2BB_C)
 
-elas_D2_FP <- readRDS("./FP/elas_D2_FP.rds")
-thing <- decompose_D2(elas_D2_FP)
-Kvals_elas_D2AA_FP <- toKvals_D2AA(thing$mat_D2AA)
-Kvals_elas_D2AB_FP <- toKvals_D2AB(thing$mat_D2AB)
-Kvals_elas_D2BA_FP <- toKvals_D2BA(thing$mat_D2BA)
-Kvals_elas_D2BB_FP <- toKvals_D2BB(thing$mat_D2BB)
-
+#Fort Pierce
+elas_D2AA_FP <- readRDS("./FP/elas_D2AA_FP.rds")
+Kvals_elas_D2AA_FP <- toKvals_D2AA(elas_D2AA_FP)
 save(Kvals_elas_D2AA_FP, file="./FP/Kvals_elas_D2AA_FP.RData")
+rm(elas_D2AA_FP, Kvals_elas_D2AA_FP)
+elas_D2AB_FP <- readRDS("./FP/elas_D2AB_FP.rds")
+Kvals_elas_D2AB_FP <- toKvals_D2AB(elas_D2AB_FP)
 save(Kvals_elas_D2AB_FP, file="./FP/Kvals_elas_D2AB_FP.RData")
+rm(elas_D2AB_FP, Kvals_elas_D2AB_FP)
+elas_D2BA_FP <- readRDS("./FP/elas_D2BA_FP.rds")
+Kvals_elas_D2BA_FP <- toKvals_D2BA(elas_D2BA_FP)
 save(Kvals_elas_D2BA_FP, file="./FP/Kvals_elas_D2BA_FP.RData")
+rm(elas_D2BA_FP, Kvals_elas_D2BA_FP)
+elas_D2BB_FP <- readRDS("./FP/elas_D2BB_FP.rds")
+Kvals_elas_D2BB_FP <- toKvals_D2BB(elas_D2BB_FP)
 save(Kvals_elas_D2BB_FP, file="./FP/Kvals_elas_D2BB_FP.RData")
-rm(Kvals_elas_D2AA_FP, Kvals_elas_D2AB_FP, Kvals_elas_D2BA_FP, 
-   Kvals_elas_D2BB_FP)
-rm(elas_D2_FP, thing)
-gc()
+rm(elas_D2BB_FP, Kvals_elas_D2BB_FP)
 
-
-elas_D2_PG <- readRDS("./PG/elas_D2_PG.rds")
-thing <- decompose_D2(elas_D2_PG)
-Kvals_elas_D2AA_PG <- toKvals_D2AA(thing$mat_D2AA)
-Kvals_elas_D2AB_PG <- toKvals_D2AB(thing$mat_D2AB)
-Kvals_elas_D2BA_PG <- toKvals_D2BA(thing$mat_D2BA)
-Kvals_elas_D2BB_PG <- toKvals_D2BB(thing$mat_D2BB)
-
+#Punta Gorda
+elas_D2AA_PG <- readRDS("./PG/elas_D2AA_PG.rds")
+Kvals_elas_D2AA_PG <- toKvals_D2AA(elas_D2AA_PG)
 save(Kvals_elas_D2AA_PG, file="./PG/Kvals_elas_D2AA_PG.RData")
+rm(elas_D2AA_PG, Kvals_elas_D2AA_PG)
+elas_D2AB_PG <- readRDS("./PG/elas_D2AB_PG.rds")
+Kvals_elas_D2AB_PG <- toKvals_D2AB(elas_D2AB_PG)
 save(Kvals_elas_D2AB_PG, file="./PG/Kvals_elas_D2AB_PG.RData")
+rm(elas_D2AB_PG, Kvals_elas_D2AB_PG)
+elas_D2BA_PG <- readRDS("./PG/elas_D2BA_PG.rds")
+Kvals_elas_D2BA_PG <- toKvals_D2BA(elas_D2BA_PG)
 save(Kvals_elas_D2BA_PG, file="./PG/Kvals_elas_D2BA_PG.RData")
+rm(elas_D2BA_PG, Kvals_elas_D2BA_PG)
+elas_D2BB_PG <- readRDS("./PG/elas_D2BB_PG.rds")
+Kvals_elas_D2BB_PG <- toKvals_D2BB(elas_D2BB_PG)
 save(Kvals_elas_D2BB_PG, file="./PG/Kvals_elas_D2BB_PG.RData")
-rm(Kvals_elas_D2AA_PG, Kvals_elas_D2AB_PG, Kvals_elas_D2BA_PG, 
-   Kvals_elas_D2BB_PG)
-rm(elas_D2_PG, thing)
-gc()
+rm(elas_D2BB_PG, Kvals_elas_D2BB_PG)
 
-elas_D2_WT <- readRDS("./WT/elas_D2_WT.rds")
-thing <- decompose_D2(elas_D2_WT)
-Kvals_elas_D2AA_WT <- toKvals_D2AA(thing$mat_D2AA)
-Kvals_elas_D2AB_WT <- toKvals_D2AB(thing$mat_D2AB)
-Kvals_elas_D2BA_WT <- toKvals_D2BA(thing$mat_D2BA)
-Kvals_elas_D2BB_WT <- toKvals_D2BB(thing$mat_D2BB)
-
+#Wild Turkey
+elas_D2AA_WT <- readRDS("./WT/elas_D2AA_WT.rds")
+Kvals_elas_D2AA_WT <- toKvals_D2AA(elas_D2AA_WT)
 save(Kvals_elas_D2AA_WT, file="./WT/Kvals_elas_D2AA_WT.RData")
+rm(elas_D2AA_WT, Kvals_elas_D2AA_WT)
+elas_D2AB_WT <- readRDS("./WT/elas_D2AB_WT.rds")
+Kvals_elas_D2AB_WT <- toKvals_D2AB(elas_D2AB_WT)
 save(Kvals_elas_D2AB_WT, file="./WT/Kvals_elas_D2AB_WT.RData")
+rm(elas_D2AB_WT, Kvals_elas_D2AB_WT)
+elas_D2BA_WT <- readRDS("./WT/elas_D2BA_WT.rds")
+Kvals_elas_D2BA_WT <- toKvals_D2BA(elas_D2BA_WT)
 save(Kvals_elas_D2BA_WT, file="./WT/Kvals_elas_D2BA_WT.RData")
+rm(elas_D2BA_WT, Kvals_elas_D2BA_WT)
+elas_D2BB_WT <- readRDS("./WT/elas_D2BB_WT.rds")
+Kvals_elas_D2BB_WT <- toKvals_D2BB(elas_D2BB_WT)
 save(Kvals_elas_D2BB_WT, file="./WT/Kvals_elas_D2BB_WT.RData")
-rm(Kvals_elas_D2AA_WT, Kvals_elas_D2AB_WT, Kvals_elas_D2BA_WT, 
-   Kvals_elas_D2BB_WT)
-rm(elas_D2_WT, thing)
-gc()
+rm(elas_D2BB_WT, Kvals_elas_D2BB_WT)
 
-elas_D2_overall <- readRDS("./Overall/elas_D2_overall.rds")
-thing <- decompose_D2(elas_D2_overall)
-Kvals_elas_D2AA_overall <- toKvals_D2AA(thing$mat_D2AA)
-Kvals_elas_D2AB_overall <- toKvals_D2AB(thing$mat_D2AB)
-Kvals_elas_D2BA_overall <- toKvals_D2BA(thing$mat_D2BA)
-Kvals_elas_D2BB_overall <- toKvals_D2BB(thing$mat_D2BB)
 
-save(Kvals_elas_D2AA_overall, file="./Overall/Kvals_elas_D2AA_overall.RData")
-save(Kvals_elas_D2AB_overall, file="./Overall/Kvals_elas_D2AB_overall.RData")
-save(Kvals_elas_D2BA_overall, file="./Overall/Kvals_elas_D2BA_overall.RData")
-save(Kvals_elas_D2BB_overall, file="./Overall/Kvals_elas_D2BB_overall.RData")
-rm(Kvals_elas_D2AA_overall, Kvals_elas_D2AB_overall, Kvals_elas_D2BA_overall, 
-   Kvals_elas_D2BB_overall)
-rm(elas_D2_overall, thing)
-gc()
+
+
 
 ###Construct F (Fecundity):
 
@@ -1541,6 +1523,10 @@ toKvals_FA = function(elas_FA) {
   return(Kvals_elas_FA)
 }
 
+
+
+
+
 toKvals_FB = function(elas_FB) {
   plop1=function(i, j) {(j-1)*m1 + i}
   plop2=function(i, j) {(j-1)*m3b + i}
@@ -1560,215 +1546,354 @@ toKvals_FB = function(elas_FB) {
   return(Kvals_elas_FB)
 }
 
-#START HERE: Double check this through 
-decompose_F = function (mat) {
-  #Break the elasticity matrix back into its component parts: 
-  mat_FA<-mat[1:m1*m2, 1:(m3a*m4a)]
-  mat_FB<-mat[1:m1*m2, ((m3a*m4a)+1):(m3a*m4a + m3b* 4b)]
-
-  return(list(mat_D2FA = mat_D2FA,
-              mat_D2FB = mat_D2FB)
-}
 
 
 
-elas_F_BC <- readRDS("./BC/elas_F_BC.rds")
+#Big Cypress
+elas_FA_BC <- readRDS("./BC/elas_FA_BC.rds")
+Kvals_elas_FA_BC <- toKvals_FA(elas_FA_BC)
+saveRDS(Kvals_elas_FA_BC, file="./BC/Kvals_elas_FA_BC.rds")
+rm(elas_FA_BC, Kvals_elas_FA_BC)
+elas_FB_BC <- readRDS("./BC/elas_FB_BC.rds")
+Kvals_elas_FB_BC <- toKvals_FB(elas_FB_BC)
+saveRDS(Kvals_elas_FB_BC, file="./BC/Kvals_elas_FB_BC.rds")
+rm(elas_FB_BC, Kvals_elas_FB_BC)
 
-thing <- decompose_FA(elas_F_BC)
-Kvals_elas_D2AA_CC <- toKvals_D2AA(thing$mat_D2AA)
-Kvals_elas_D2AB_CC <- toKvals_D2AB(thing$mat_D2AB)
-Kvals_elas_D2BA_CC <- toKvals_D2BA(thing$mat_D2BA)
-Kvals_elas_D2BB_CC <- toKvals_D2BB(thing$mat_D2BB)
+#Cape Canaveral
+elas_FA_CC <- readRDS("./CC/elas_FA_CC.rds")
+Kvals_elas_FA_CC <- toKvals_FA(elas_FA_CC)
+saveRDS(Kvals_elas_FA_CC, file="./CC/Kvals_elas_FA_CC.rds")
+rm(elas_FA_CC, Kvals_elas_FA_CC)
+elas_FB_CC <- readRDS("./CC/elas_FB_CC.rds")
+Kvals_elas_FB_CC <- toKvals_FB(elas_FB_CC)
+saveRDS(Kvals_elas_FB_CC, file="./CC/Kvals_elas_FB_CC.rds")
+rm(elas_FB_CC, Kvals_elas_FB_CC)
 
-save(Kvals_elas_D2AA_CC, file="./CC/Kvals_elas_D2AA_CC.RData")
-save(Kvals_elas_D2AB_CC, file="./CC/Kvals_elas_D2AB_CC.RData")
-save(Kvals_elas_D2BA_CC, file="./CC/Kvals_elas_D2BA_CC.RData")
-save(Kvals_elas_D2BB_CC, file="./CC/Kvals_elas_D2BB_CC.RData")
-rm(Kvals_elas_D2AA_CC, Kvals_elas_D2AB_CC, Kvals_elas_D2BA_CC, 
-   Kvals_elas_D2BB_CC)
-rm(elas_D2_CC, thing)
-gc()
+#Chekika
+elas_FA_C <- readRDS("./C/elas_FA_C.rds")
+Kvals_elas_FA_C <- toKvals_FA(elas_FA_C)
+saveRDS(Kvals_elas_FA_C, file="./C/Kvals_elas_FA_C.rds")
+rm(elas_FA_C, Kvals_elas_FA_C)
+elas_FB_C <- readRDS("./C/elas_FB_C.rds")
+Kvals_elas_FB_C <- toKvals_FB(elas_FB_C)
+saveRDS(Kvals_elas_FB_C, file="./C/Kvals_elas_FB_C.rds")
+rm(elas_FB_C, Kvals_elas_FB_C)
 
-elas_D2_CC <- readRDS("./CC/elas_D2_CC.rds")
+#Fort Pierce
+elas_FA_FP <- readRDS("./FP/elas_FA_FP.rds")
+Kvals_elas_FA_FP <- toKvals_FA(elas_FA_FP)
+saveRDS(Kvals_elas_FA_FP, file="./FP/Kvals_elas_FA_FP.rds")
+rm(elas_FA_FP, Kvals_elas_FA_FP)
+elas_FB_FP <- readRDS("./FP/elas_FB_FP.rds")
+Kvals_elas_FB_FP <- toKvals_FB(elas_FB_FP)
+saveRDS(Kvals_elas_FB_FP, file="./FP/Kvals_elas_FB_FP.rds")
+rm(elas_FB_FP, Kvals_elas_FB_FP)
 
-elas_F_CC <- readRDS("./CC/elas_F_CC.rds")
-elas_F_C  <- readRDS("./C/elas_F_C.rds")
-elas_F_FP <- readRDS("./FP/elas_F_FP.rds")
-elas_F_PG <- readRDS("./PG/elas_F_PG.rds")
-elas_F_WT <- readRDS("./WT/elas_F_WT.rds")
-elas_F_overall <- readRDS("./Overall/elas_F_overall.rds")
+#Punta Gorda
+elas_FA_PG <- readRDS("./PG/elas_FA_PG.rds")
+Kvals_elas_FA_PG <- toKvals_FA(elas_FA_PG)
+saveRDS(Kvals_elas_FA_PG, file="./PG/Kvals_elas_FA_PG.rds")
+rm(elas_FA_PG, Kvals_elas_FA_PG)
+elas_FB_PG <- readRDS("./PG/elas_FB_PG.rds")
+Kvals_elas_FB_PG <- toKvals_FB(elas_FB_PG)
+saveRDS(Kvals_elas_FB_PG, file="./PG/Kvals_elas_FB_PG.rds")
+rm(elas_FB_PG, Kvals_elas_FB_PG)
 
-
-Kvals_elas_F_BC <- toKvals_F(elas_F_BC)
-save(Kvals_elas_F_BC, file="./BC/Kvals_elas_F_BC.RData")
-
-Kvals_elas_F_CC <- toKvals_F(elas_F_CC)
-save(Kvals_elas_F_CC, file="./CC/Kvals_elas_F_CC.RData")
-Kvals_elas_F_C <- toKvals_F(elas_F_C)
-save(Kvals_elas_F_C, file="./C/Kvals_elas_F_C.RData")
-Kvals_elas_F_FP <- toKvals_F(elas_F_FP)
-save(Kvals_elas_F_FP, file="./FP/Kvals_elas_F_FP.RData")
-Kvals_elas_F_PG <- toKvals_F(elas_F_PG)
-save(Kvals_elas_F_PG, file="./PG/Kvals_elas_F_PG.RData")
-Kvals_elas_F_WT <- toKvals_F(elas_F_WT)
-save(Kvals_elas_F_WT, file="./WT/Kvals_elas_F_WT.RData")
-
-Kvals_elas_F_overall <- toKvals_F(elas_F_overall)
-save(Kvals_elas_F_overall, file="./Overall/Kvals_elas_F_overall.RData")
-
-rm(elas_F_BC, elas_F_CC, elas_F_C, elas_F_FP, elas_F_PG, elas_F_WT, elas_F_overall)
-rm(Kvals_elas_F_BC, Kvals_elas_F_CC, Kvals_elas_F_C, Kvals_elas_F_FP,
-   Kvals_elas_F_PG, Kvals_elas_F_WT, Kvals_elas_F_overall)
-
+#Wild Turkey
+elas_FA_WT <- readRDS("./WT/elas_FA_WT.rds")
+Kvals_elas_FA_WT <- toKvals_FA(elas_FA_WT)
+saveRDS(Kvals_elas_FA_WT, file="./WT/Kvals_elas_FA_WT.rds")
+rm(elas_FA_WT, Kvals_elas_FA_WT)
+elas_FB_WT <- readRDS("./WT/elas_FB_WT.rds")
+Kvals_elas_FB_WT <- toKvals_FB(elas_FB_WT)
+saveRDS(Kvals_elas_FB_WT, file="./WT/Kvals_elas_FB_WT.rds")
+rm(elas_FB_WT, Kvals_elas_FB_WT)
 
 
 
 ###Construct G (Graduation):
 
-toKvals_G = function(elas_G) {
-  plop1=function(i, j) {(j-1)*m3 + i}
+
+toKvals_GA = function(elas_GA) {
+  plop1=function(i, j) {(j-1)*m3a + i}
   plop2=function(i, j) {(j-1)*m1 + i}
-  Plop1=outer(1:m3,1:m4,plop1); 
+  Plop1=outer(1:m3a,1:m4a,plop1); 
   Plop2=outer(1:m1, 1:m2, plop2);
   
-  Kvals_elas_G=array(0, c(m3, m4, m1, m2))
+  Kvals_elas_GA=array(0, c(m3a, m4a, m1, m2))
   
   for(i in 1:m1) {
     for (j in 1:m2) {
-      for (k in 1:m3) {
-        kvals=elas_G[Plop1[k, 1:m4], Plop2[i,j]]
-        Kvals_elas_G[k, 1:m4, i, j]=kvals
+      for (k in 1:m3a) {
+        kvals=elas_GA[Plop1[k, 1:m4a], Plop2[i,j]]
+        Kvals_elas_GA[k, 1:m4a, i, j]=kvals
       }}
     cat(i, "\n");
   }
-  return(Kvals_elas_G)
+  return(Kvals_elas_GA)
 }
 
-elas_G_BC <- readRDS("./BC/elas_G_BC.rds")
-elas_G_CC <- readRDS("./CC/elas_G_CC.rds")
-elas_G_C  <- readRDS("./C/elas_G_C.rds")
-elas_G_FP <- readRDS("./FP/elas_G_FP.rds")
-elas_G_PG <- readRDS("./PG/elas_G_PG.rds")
-elas_G_WT <- readRDS("./WT/elas_G_WT.rds")
-elas_G_overall <- readRDS("./Overall/elas_G_overall.rds")
+toKvals_GB = function(elas_GB) {
+  plop1=function(i, j) {(j-1)*m3b + i}
+  plop2=function(i, j) {(j-1)*m1 + i}
+  Plop1=outer(1:m3b,1:m4b,plop1); 
+  Plop2=outer(1:m1, 1:m2, plop2);
+  
+  Kvals_elas_GB=array(0, c(m3b, m4b, m1, m2))
+  
+  for(i in 1:m1) {
+    for (j in 1:m2) {
+      for (k in 1:m3b) {
+        kvals=elas_GB[Plop1[k, 1:m4b], Plop2[i,j]]
+        Kvals_elas_GB[k, 1:m4b, i, j]=kvals
+      }}
+    cat(i, "\n");
+  }
+  return(Kvals_elas_GB)
+}
 
-Kvals_elas_G_BC <- toKvals_G(elas_G_BC)
-save(Kvals_elas_G_BC, file="./BC/Kvals_elas_G_BC.RData")
-Kvals_elas_G_CC <- toKvals_G(elas_G_CC)
-save(Kvals_elas_G_CC, file="./CC/Kvals_elas_G_CC.RData")
-Kvals_elas_G_C <- toKvals_G(elas_G_C)
-save(Kvals_elas_G_C, file="./C/Kvals_elas_G_C.RData")
-Kvals_elas_G_FP <- toKvals_G(elas_G_FP)
-save(Kvals_elas_G_FP, file="./FP/Kvals_elas_G_FP.RData")
-Kvals_elas_G_PG <- toKvals_G(elas_G_PG)
-save(Kvals_elas_G_PG, file="./PG/Kvals_elas_G_PG.RData")
-Kvals_elas_G_WT <- toKvals_G(elas_G_WT)
-save(Kvals_elas_G_WT, file="./WT/Kvals_elas_G_WT.RData")
-Kvals_elas_G_overall <- toKvals_overall(elas_G_overall)
-save(Kvals_elas_G_overall, file="./Overall/Kvals_elas_G_overall.RData")
+#Big Cypress
+elas_GA_BC <- readRDS("./BC/elas_GA_BC.rds")
+Kvals_elas_GA_BC <- toKvals_GA(elas_GA_BC)
+saveRDS(Kvals_elas_GA_BC, file="./BC/Kvals_elas_GA_BC.rds")
+rm(elas_GA_BC, Kvals_elas_GA_BC)
 
-rm(elas_G_BC, elas_G_CC, elas_G_C, elas_G_FP, elas_G_PG, elas_G_WT, elas_G_overall)
-rm(Kvals_elas_G_BC, Kvals_elas_G_CC, Kvals_elas_G_C, Kvals_elas_G_FP,
-   Kvals_elas_G_PG, Kvals_elas_G_WT, Kvals_elas_G_overall)
+elas_GB_BC <- readRDS("./BC/elas_GB_BC.rds")
+Kvals_elas_GB_BC <- toKvals_GB(elas_GB_BC)
+saveRDS(Kvals_elas_GB_BC, file="./BC/Kvals_elas_GB_BC.rds")
+rm(elas_GB_BC, Kvals_elas_GB_BC)
 
+#Cape Canaveral
+elas_GA_CC <- readRDS("./CC/elas_GA_CC.rds")
+Kvals_elas_GA_CC <- toKvals_GA(elas_GA_CC)
+saveRDS(Kvals_elas_GA_CC, file="./CC/Kvals_elas_GA_CC.rds")
+rm(elas_GA_CC, Kvals_elas_GA_CC)
+
+elas_GB_CC <- readRDS("./CC/elas_GB_CC.rds")
+Kvals_elas_GB_CC <- toKvals_GB(elas_GB_CC)
+saveRDS(Kvals_elas_GB_CC, file="./CC/Kvals_elas_GB_CC.rds")
+rm(elas_GB_CC, Kvals_elas_GB_CC)
+
+#Chekika
+elas_GA_C <- readRDS("./C/elas_GA_C.rds")
+Kvals_elas_GA_C <- toKvals_GA(elas_GA_C)
+saveRDS(Kvals_elas_GA_C, file="./C/Kvals_elas_GA_C.rds")
+rm(elas_GA_C, Kvals_elas_GA_C)
+
+elas_GB_C <- readRDS("./C/elas_GB_C.rds")
+Kvals_elas_GB_C <- toKvals_GB(elas_GB_C)
+saveRDS(Kvals_elas_GB_C, file="./C/Kvals_elas_GB_C.rds")
+rm(elas_GB_C, Kvals_elas_GB_C)
+
+#Fort Pierce
+elas_GA_FP <- readRDS("./FP/elas_GA_FP.rds")
+Kvals_elas_GA_FP <- toKvals_GA(elas_GA_FP)
+saveRDS(Kvals_elas_GA_FP, file="./FP/Kvals_elas_GA_FP.rds")
+rm(elas_GA_FP, Kvals_elas_GA_FP)
+
+elas_GB_FP <- readRDS("./FP/elas_GB_FP.rds")
+Kvals_elas_GB_FP <- toKvals_GB(elas_GB_FP)
+saveRDS(Kvals_elas_GB_FP, file="./FP/Kvals_elas_GB_FP.rds")
+rm(elas_GB_FP, Kvals_elas_GB_FP)
+
+#Punta Gorda
+elas_GA_PG <- readRDS("./PG/elas_GA_PG.rds")
+Kvals_elas_GA_PG <- toKvals_GA(elas_GA_PG)
+saveRDS(Kvals_elas_GA_PG, file="./PG/Kvals_elas_GA_PG.rds")
+rm(elas_GA_PG, Kvals_elas_GA_PG)
+
+elas_GB_PG <- readRDS("./PG/elas_GB_PG.rds")
+Kvals_elas_GB_PG <- toKvals_GB(elas_GB_PG)
+saveRDS(Kvals_elas_GB_PG, file="./PG/Kvals_elas_GB_PG.rds")
+rm(elas_GB_PG, Kvals_elas_GB_PG)
+
+#Wild Turkey
+elas_GA_WT <- readRDS("./WT/elas_GA_WT.rds")
+Kvals_elas_GA_WT <- toKvals_GA(elas_GA_WT)
+saveRDS(Kvals_elas_GA_WT, file="./WT/Kvals_elas_GA_WT.rds")
+rm(elas_GA_WT, Kvals_elas_GA_WT)
+
+elas_GB_WT <- readRDS("./WT/elas_GB_WT.rds")
+Kvals_elas_GB_WT <- toKvals_GB(elas_GB_WT)
+saveRDS(Kvals_elas_GB_WT, file="./WT/Kvals_elas_GB_WT.rds")
+rm(elas_GB_WT, Kvals_elas_GB_WT)
 
 
 # Create Total Elasticity Pieces #####
 load("./BC/Kvals_elas_D1_BC.RData")
-load("./BC/Kvals_elas_D2_BC.RData")
-load("./BC/Kvals_elas_F_BC.RData")
-load("./BC/Kvals_elas_G_BC.RData")
+load("./BC/Kvals_elas_D2AA_BC.RData")
+load("./BC/Kvals_elas_D2AB_BC.RData")
+load("./BC/Kvals_elas_D2BA_BC.RData")
+load("./BC/Kvals_elas_D2BB_BC.RData")
+Kvals_elas_FA_BC <- readRDS("./BC/Kvals_elas_FA_BC.rds")
+Kvals_elas_FB_BC <- readRDS("./BC/Kvals_elas_FB_BC.rds")
+Kvals_elas_GA_BC <- readRDS("./BC/Kvals_elas_GA_BC.rds")
+Kvals_elas_GB_BC <- readRDS("./BC/Kvals_elas_GB_BC.rds")
+
 
 # Big Cypress
 total.elas_D1_BC<-apply(Kvals_elas_D1_BC, c(3,4), sum);
-total.elas_D2_BC<-apply(Kvals_elas_D2_BC, c(3,4), sum);
-total.elas_F_BC<-apply(Kvals_elas_F_BC, c(3,4), sum);
-total.elas_G_BC<-apply(Kvals_elas_G_BC, c(3,4), sum);
-save(total.elas_D1_BC, total.elas_D2_BC, total.elas_F_BC, total.elas_G_BC, 
+total.elas_D2AA_BC<-apply(Kvals_elas_D2AA_BC, c(3,4), sum);
+total.elas_D2AB_BC<-apply(Kvals_elas_D2AB_BC, c(3,4), sum)
+total.elas_D2BA_BC<-apply(Kvals_elas_D2BA_BC, c(3,4), sum)
+total.elas_D2BB_BC<-apply(Kvals_elas_D2BB_BC, c(3,4), sum)
+total.elas_FA_BC<-apply(Kvals_elas_FA_BC, c(3,4), sum);
+total.elas_FB_BC<-apply(Kvals_elas_FB_BC, c(3,4), sum)
+total.elas_GA_BC<-apply(Kvals_elas_GA_BC, c(3,4), sum)
+total.elas_GB_BC<-apply(Kvals_elas_GB_BC, c(3,4), sum)
+
+save(total.elas_D1_BC, total.elas_D2AA_BC, total.elas_D2AB_BC,
+     total.elas_D2BA_BC, total.elas_D2BB_BC, total.elas_FA_BC,
+     total.elas_FB_BC, total.elas_GA_BC, total.elas_GB_BC,
      file="./BC/total.elas.RData")
+rm(total.elas_D1_BC, total.elas_D2AA_BC, total.elas_D2AB_BC,
+   total.elas_D2BA_BC, total.elas_D2BB_BC, total.elas_FA_BC,
+   total.elas_FB_BC, total.elas_GA_BC, total.elas_GB_BC)
 
 #Cape Canaveral
 load("./CC/Kvals_elas_D1_CC.RData")
-load("./CC/Kvals_elas_D2_CC.RData")
-load("./CC/Kvals_elas_F_CC.RData")
-load("./CC/Kvals_elas_G_CC.RData")
+load("./CC/Kvals_elas_D2AA_CC.RData")
+load("./CC/Kvals_elas_D2AB_CC.RData")
+load("./CC/Kvals_elas_D2BA_CC.RData")
+load("./CC/Kvals_elas_D2BB_CC.RData")
+Kvals_elas_FA_CC <- readRDS("./CC/Kvals_elas_FA_CC.rds")
+Kvals_elas_FB_CC <- readRDS("./CC/Kvals_elas_FB_CC.rds")
+Kvals_elas_GA_CC <- readRDS("./CC/Kvals_elas_GA_CC.rds")
+Kvals_elas_GB_CC <- readRDS("./CC/Kvals_elas_GB_CC.rds")
 
 total.elas_D1_CC<-apply(Kvals_elas_D1_CC, c(3,4), sum);
-total.elas_D2_CC<-apply(Kvals_elas_D2_CC, c(3,4), sum);
-total.elas_F_CC<-apply(Kvals_elas_F_CC, c(3,4), sum);
-total.elas_G_CC<-apply(Kvals_elas_G_CC, c(3,4), sum);
-save(total.elas_D1_CC, total.elas_D2_CC, total.elas_F_CC, total.elas_G_CC, 
+total.elas_D2AA_CC<-apply(Kvals_elas_D2AA_CC, c(3,4), sum);
+total.elas_D2AB_CC<-apply(Kvals_elas_D2AB_CC, c(3,4), sum)
+total.elas_D2BA_CC<-apply(Kvals_elas_D2BA_CC, c(3,4), sum)
+total.elas_D2BB_CC<-apply(Kvals_elas_D2BB_CC, c(3,4), sum)
+total.elas_FA_CC<-apply(Kvals_elas_FA_CC, c(3,4), sum);
+total.elas_FB_CC<-apply(Kvals_elas_FB_CC, c(3,4), sum)
+total.elas_GA_CC<-apply(Kvals_elas_GA_CC, c(3,4), sum)
+total.elas_GB_CC<-apply(Kvals_elas_GB_CC, c(3,4), sum)
+
+save(total.elas_D1_CC, total.elas_D2AA_CC, total.elas_D2AB_CC,
+     total.elas_D2BA_CC, total.elas_D2BB_CC, total.elas_FA_CC,
+     total.elas_FB_CC, total.elas_GA_CC, total.elas_GB_CC,
      file="./CC/total.elas.RData")
+rm(total.elas_D1_CC, total.elas_D2AA_CC, total.elas_D2AB_CC,
+   total.elas_D2BA_CC, total.elas_D2BB_CC, total.elas_FA_CC,
+   total.elas_FB_CC, total.elas_GA_CC, total.elas_GB_CC)
 
-
-# Chekika
+#Chekika
 load("./C/Kvals_elas_D1_C.RData")
-load("./C/Kvals_elas_D2_C.RData")
-load("./C/Kvals_elas_F_C.RData")
-load("./C/Kvals_elas_G_C.RData")
+load("./C/Kvals_elas_D2AA_C.RData")
+load("./C/Kvals_elas_D2AB_C.RData")
+load("./C/Kvals_elas_D2BA_C.RData")
+load("./C/Kvals_elas_D2BB_C.RData")
+Kvals_elas_FA_C <- readRDS("./C/Kvals_elas_FA_C.rds")
+Kvals_elas_FB_C <- readRDS("./C/Kvals_elas_FB_C.rds")
+Kvals_elas_GA_C <- readRDS("./C/Kvals_elas_GA_C.rds")
+Kvals_elas_GB_C <- readRDS("./C/Kvals_elas_GB_C.rds")
 
 total.elas_D1_C<-apply(Kvals_elas_D1_C, c(3,4), sum);
-total.elas_D2_C<-apply(Kvals_elas_D2_C, c(3,4), sum);
-total.elas_F_C<-apply(Kvals_elas_F_C, c(3,4), sum);
-total.elas_G_C<-apply(Kvals_elas_G_C, c(3,4), sum);
-save(total.elas_D1_C, total.elas_D2_C, total.elas_F_C, total.elas_G_C, 
+total.elas_D2AA_C<-apply(Kvals_elas_D2AA_C, c(3,4), sum);
+total.elas_D2AB_C<-apply(Kvals_elas_D2AB_C, c(3,4), sum)
+total.elas_D2BA_C<-apply(Kvals_elas_D2BA_C, c(3,4), sum)
+total.elas_D2BB_C<-apply(Kvals_elas_D2BB_C, c(3,4), sum)
+total.elas_FA_C<-apply(Kvals_elas_FA_C, c(3,4), sum);
+total.elas_FB_C<-apply(Kvals_elas_FB_C, c(3,4), sum)
+total.elas_GA_C<-apply(Kvals_elas_GA_C, c(3,4), sum)
+total.elas_GB_C<-apply(Kvals_elas_GB_C, c(3,4), sum)
+
+save(total.elas_D1_C, total.elas_D2AA_C, total.elas_D2AB_C,
+     total.elas_D2BA_C, total.elas_D2BB_C, total.elas_FA_C,
+     total.elas_FB_C, total.elas_GA_C, total.elas_GB_C,
      file="./C/total.elas.RData")
+rm(total.elas_D1_C, total.elas_D2AA_C, total.elas_D2AB_C,
+   total.elas_D2BA_C, total.elas_D2BB_C, total.elas_FA_C,
+   total.elas_FB_C, total.elas_GA_C, total.elas_GB_C)
 
 #Fort Pierce
 load("./FP/Kvals_elas_D1_FP.RData")
-load("./FP/Kvals_elas_D2_FP.RData")
-load("./FP/Kvals_elas_F_FP.RData")
-load("./FP/Kvals_elas_G_FP.RData")
+load("./FP/Kvals_elas_D2AA_FP.RData")
+load("./FP/Kvals_elas_D2AB_FP.RData")
+load("./FP/Kvals_elas_D2BA_FP.RData")
+load("./FP/Kvals_elas_D2BB_FP.RData")
+Kvals_elas_FA_FP <- readRDS("./FP/Kvals_elas_FA_FP.rds")
+Kvals_elas_FB_FP <- readRDS("./FP/Kvals_elas_FB_FP.rds")
+Kvals_elas_GA_FP <- readRDS("./FP/Kvals_elas_GA_FP.rds")
+Kvals_elas_GB_FP <- readRDS("./FP/Kvals_elas_GB_FP.rds")
 
 total.elas_D1_FP<-apply(Kvals_elas_D1_FP, c(3,4), sum);
-total.elas_D2_FP<-apply(Kvals_elas_D2_FP, c(3,4), sum);
-total.elas_F_FP<-apply(Kvals_elas_F_FP, c(3,4), sum);
-total.elas_G_FP<-apply(Kvals_elas_G_FP, c(3,4), sum);
-save(total.elas_D1_FP, total.elas_D2_FP, total.elas_F_FP, total.elas_G_FP, 
+total.elas_D2AA_FP<-apply(Kvals_elas_D2AA_FP, c(3,4), sum);
+total.elas_D2AB_FP<-apply(Kvals_elas_D2AB_FP, c(3,4), sum)
+total.elas_D2BA_FP<-apply(Kvals_elas_D2BA_FP, c(3,4), sum)
+total.elas_D2BB_FP<-apply(Kvals_elas_D2BB_FP, c(3,4), sum)
+total.elas_FA_FP<-apply(Kvals_elas_FA_FP, c(3,4), sum);
+total.elas_FB_FP<-apply(Kvals_elas_FB_FP, c(3,4), sum)
+total.elas_GA_FP<-apply(Kvals_elas_GA_FP, c(3,4), sum)
+total.elas_GB_FP<-apply(Kvals_elas_GB_FP, c(3,4), sum)
+
+save(total.elas_D1_FP, total.elas_D2AA_FP, total.elas_D2AB_FP,
+     total.elas_D2BA_FP, total.elas_D2BB_FP, total.elas_FA_FP,
+     total.elas_FB_FP, total.elas_GA_FP, total.elas_GB_FP,
      file="./FP/total.elas.RData")
+rm(total.elas_D1_FP, total.elas_D2AA_FP, total.elas_D2AB_FP,
+   total.elas_D2BA_FP, total.elas_D2BB_FP, total.elas_FA_FP,
+   total.elas_FB_FP, total.elas_GA_FP, total.elas_GB_FP)
 
 #Punta Gorda
 load("./PG/Kvals_elas_D1_PG.RData")
-load("./PG/Kvals_elas_D2_PG.RData")
-load("./PG/Kvals_elas_F_PG.RData")
-load("./PG/Kvals_elas_G_PG.RData")
+load("./PG/Kvals_elas_D2AA_PG.RData")
+load("./PG/Kvals_elas_D2AB_PG.RData")
+load("./PG/Kvals_elas_D2BA_PG.RData")
+load("./PG/Kvals_elas_D2BB_PG.RData")
+Kvals_elas_FA_PG <- readRDS("./PG/Kvals_elas_FA_PG.rds")
+Kvals_elas_FB_PG <- readRDS("./PG/Kvals_elas_FB_PG.rds")
+Kvals_elas_GA_PG <- readRDS("./PG/Kvals_elas_GA_PG.rds")
+Kvals_elas_GB_PG <- readRDS("./PG/Kvals_elas_GB_PG.rds")
 
 total.elas_D1_PG<-apply(Kvals_elas_D1_PG, c(3,4), sum);
-total.elas_D2_PG<-apply(Kvals_elas_D2_PG, c(3,4), sum);
-total.elas_F_PG<-apply(Kvals_elas_F_PG, c(3,4), sum);
-total.elas_G_PG<-apply(Kvals_elas_G_PG, c(3,4), sum);
-save(total.elas_D1_PG, total.elas_D2_PG, total.elas_F_PG, total.elas_G_PG, 
-     file="./PG/total.elas.RData")
+total.elas_D2AA_PG<-apply(Kvals_elas_D2AA_PG, c(3,4), sum);
+total.elas_D2AB_PG<-apply(Kvals_elas_D2AB_PG, c(3,4), sum)
+total.elas_D2BA_PG<-apply(Kvals_elas_D2BA_PG, c(3,4), sum)
+total.elas_D2BB_PG<-apply(Kvals_elas_D2BB_PG, c(3,4), sum)
+total.elas_FA_PG<-apply(Kvals_elas_FA_PG, c(3,4), sum);
+total.elas_FB_PG<-apply(Kvals_elas_FB_PG, c(3,4), sum)
+total.elas_GA_PG<-apply(Kvals_elas_GA_PG, c(3,4), sum)
+total.elas_GB_PG<-apply(Kvals_elas_GB_PG, c(3,4), sum)
 
+save(total.elas_D1_PG, total.elas_D2AA_PG, total.elas_D2AB_PG,
+     total.elas_D2BA_PG, total.elas_D2BB_PG, total.elas_FA_PG,
+     total.elas_FB_PG, total.elas_GA_PG, total.elas_GB_PG,
+     file="./PG/total.elas.RData")
+rm(total.elas_D1_PG, total.elas_D2AA_PG, total.elas_D2AB_PG,
+   total.elas_D2BA_PG, total.elas_D2BB_PG, total.elas_FA_PG,
+   total.elas_FB_PG, total.elas_GA_PG, total.elas_GB_PG)
 
 #Wild Turkey
 load("./WT/Kvals_elas_D1_WT.RData")
-load("./WT/Kvals_elas_D2_WT.RData")
-load("./WT/Kvals_elas_F_WT.RData")
-load("./WT/Kvals_elas_G_WT.RData")
+load("./WT/Kvals_elas_D2AA_WT.RData")
+load("./WT/Kvals_elas_D2AB_WT.RData")
+load("./WT/Kvals_elas_D2BA_WT.RData")
+load("./WT/Kvals_elas_D2BB_WT.RData")
+Kvals_elas_FA_WT <- readRDS("./WT/Kvals_elas_FA_WT.rds")
+Kvals_elas_FB_WT <- readRDS("./WT/Kvals_elas_FB_WT.rds")
+Kvals_elas_GA_WT <- readRDS("./WT/Kvals_elas_GA_WT.rds")
+Kvals_elas_GB_WT <- readRDS("./WT/Kvals_elas_GB_WT.rds")
 
 total.elas_D1_WT<-apply(Kvals_elas_D1_WT, c(3,4), sum);
-total.elas_D2_WT<-apply(Kvals_elas_D2_WT, c(3,4), sum);
-total.elas_F_WT<-apply(Kvals_elas_F_WT, c(3,4), sum);
-total.elas_G_WT<-apply(Kvals_elas_G_WT, c(3,4), sum);
-save(total.elas_D1_WT, total.elas_D2_WT, total.elas_F_WT, total.elas_G_WT, 
+total.elas_D2AA_WT<-apply(Kvals_elas_D2AA_WT, c(3,4), sum);
+total.elas_D2AB_WT<-apply(Kvals_elas_D2AB_WT, c(3,4), sum)
+total.elas_D2BA_WT<-apply(Kvals_elas_D2BA_WT, c(3,4), sum)
+total.elas_D2BB_WT<-apply(Kvals_elas_D2BB_WT, c(3,4), sum)
+total.elas_FA_WT<-apply(Kvals_elas_FA_WT, c(3,4), sum);
+total.elas_FB_WT<-apply(Kvals_elas_FB_WT, c(3,4), sum)
+total.elas_GA_WT<-apply(Kvals_elas_GA_WT, c(3,4), sum)
+total.elas_GB_WT<-apply(Kvals_elas_GB_WT, c(3,4), sum)
+
+save(total.elas_D1_WT, total.elas_D2AA_WT, total.elas_D2AB_WT,
+     total.elas_D2BA_WT, total.elas_D2BB_WT, total.elas_FA_WT,
+     total.elas_FB_WT, total.elas_GA_WT, total.elas_GB_WT,
      file="./WT/total.elas.RData")
-
-
-#Overall
-load("./Overall/Kvals_elas_D1_overall.RData")
-load("./Overall/Kvals_elas_D2_overall.RData")
-load("./Overall/Kvals_elas_F_overall.RData")
-load("./Overall/Kvals_elas_G_overall.RData")
-
-total.elas_D1_overall<-apply(Kvals_elas_D1_overall, c(3,4), sum);
-total.elas_D2_overall<-apply(Kvals_elas_D2_overall, c(3,4), sum);
-total.elas_F_overall<-apply(Kvals_elas_F_overall, c(3,4), sum);
-total.elas_G_overall<-apply(Kvals_elas_G_overall, c(3,4), sum);
-save(total.elas_D1_overall, total.elas_D2_overall, total.elas_F_overall, total.elas_G_overall, 
-     file="./Overall/total.elas.RData")
-
-
+rm(total.elas_D1_WT, total.elas_D2AA_WT, total.elas_D2AB_WT,
+   total.elas_D2BA_WT, total.elas_D2BB_WT, total.elas_FA_WT,
+   total.elas_FB_WT, total.elas_GA_WT, total.elas_GB_WT)
 
 # Separate rv and ssd #####
 #Separate:
@@ -1788,266 +1913,299 @@ stable.dist_PG <- readRDS("./PG/stable.dist_PG.rds")
 stable.dist_WT <- readRDS("./WT/stable.dist_WT.rds")
 stable.dist_overall <- readRDS("./Overall/stable.dist_overall.rds")
 
+#Big Cypress
+repro.val_seedlings_BC=matrix(v_BC[1:(m1*m2)], m1,m2);
+repro.val_smalls_BC = matrix(v_BC[((m1*m2)+1):(m1*m2+m3a*m4a)], m3a, m4a)
+repro.val_larges_BC = matrix(v_BC[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a +m3b*m4b)], m3b, m4b)
 
-repro.val_smalls_BC=matrix(v_BC[1:(m1*m2)], m1,m2);
-stable.state_smalls_BC=matrix(stable.dist_BC[1:(m1*m2)], m1, m2);
+stable.state_seedlings_BC=matrix(stable.dist_BC[1:(m1*m2)], m1,m2)
+stable.state_smalls_BC = matrix(stable.dist_BC[((m1*m2)+1):(m1*m2+m3a*m4a)], m3a, m4a)
+stable.state_larges_BC = matrix(stable.dist_BC[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a +m3b*m4b)], m3b, m4b)
+rm(v_BC, stable.dist_BC)
 
-repro.val_smalls_CC=matrix(v_CC[1:(m1*m2)], m1,m2);
-stable.state_smalls_CC=matrix(stable.dist_CC[1:(m1*m2)], m1, m2);
+#Cape Canaveral
+repro.val_seedlings_CC=matrix(v_CC[1:(m1*m2)], m1,m2);
+repro.val_smalls_CC = matrix(v_CC[((m1*m2)+1):(m1*m2+m3a*m4a)], m3a, m4a)
+repro.val_larges_CC = matrix(v_CC[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a +m3b*m4b)], m3b, m4b)
 
-repro.val_smalls_C=matrix(v_C[1:(m1*m2)], m1,m2);
-stable.state_smalls_C=matrix(stable.dist_C[1:(m1*m2)], m1, m2);
+stable.state_seedlings_CC=matrix(stable.dist_CC[1:(m1*m2)], m1,m2)
+stable.state_smalls_CC = matrix(stable.dist_CC[((m1*m2)+1):(m1*m2+m3a*m4a)], m3a, m4a)
+stable.state_larges_CC = matrix(stable.dist_CC[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a +m3b*m4b)], m3b, m4b)
+rm(v_CC, stable.dist_CC)
 
-repro.val_smalls_FP=matrix(v_FP[1:(m1*m2)], m1,m2);
-stable.state_smalls_FP=matrix(stable.dist_FP[1:(m1*m2)], m1, m2);
+#Chekika
+repro.val_seedlings_C=matrix(v_C[1:(m1*m2)], m1,m2);
+repro.val_smalls_C = matrix(v_C[((m1*m2)+1):(m1*m2+m3a*m4a)], m3a, m4a)
+repro.val_larges_C = matrix(v_C[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a +m3b*m4b)], m3b, m4b)
 
-repro.val_smalls_PG=matrix(v_PG[1:(m1*m2)], m1,m2);
-stable.state_smalls_PG=matrix(stable.dist_PG[1:(m1*m2)], m1, m2);
+stable.state_seedlings_C=matrix(stable.dist_C[1:(m1*m2)], m1,m2)
+stable.state_smalls_C = matrix(stable.dist_C[((m1*m2)+1):(m1*m2+m3a*m4a)], m3a, m4a)
+stable.state_larges_C = matrix(stable.dist_C[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a +m3b*m4b)], m3b, m4b)
+rm(v_C, stable.dist_C)
 
-repro.val_smalls_WT=matrix(v_WT[1:(m1*m2)], m1,m2);
-stable.state_smalls_WT=matrix(stable.dist_WT[1:(m1*m2)], m1, m2);
+#Fort Pierce
+repro.val_seedlings_FP=matrix(v_FP[1:(m1*m2)], m1,m2);
+repro.val_smalls_FP = matrix(v_FP[((m1*m2)+1):(m1*m2+m3a*m4a)], m3a, m4a)
+repro.val_larges_FP = matrix(v_FP[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a +m3b*m4b)], m3b, m4b)
 
-repro.val_smalls_overall=matrix(v_overall[1:(m1*m2)], m1,m2);
-stable.state_smalls_overall=matrix(stable.dist_overall[1:(m1*m2)], m1, m2);
+stable.state_seedlings_FP=matrix(stable.dist_FP[1:(m1*m2)], m1,m2)
+stable.state_smalls_FP = matrix(stable.dist_FP[((m1*m2)+1):(m1*m2+m3a*m4a)], m3a, m4a)
+stable.state_larges_FP = matrix(stable.dist_FP[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a +m3b*m4b)], m3b, m4b)
+rm(v_FP, stable.dist_FP)
 
+#Punta Gorda
+repro.val_seedlings_PG=matrix(v_PG[1:(m1*m2)], m1,m2);
+repro.val_smalls_PG = matrix(v_PG[((m1*m2)+1):(m1*m2+m3a*m4a)], m3a, m4a)
+repro.val_larges_PG = matrix(v_PG[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a +m3b*m4b)], m3b, m4b)
 
-repro.val_larges_BC=matrix(v_BC[((m1*m2)+1):((m1*m2)+(m3*m4))], m3, m4);
-stable.state_larges_BC=matrix(stable.dist_BC[((m1*m2) +1):((m1*m2) + (m3*m4))], m3, m4);
+stable.state_seedlings_PG=matrix(stable.dist_PG[1:(m1*m2)], m1,m2)
+stable.state_smalls_PG = matrix(stable.dist_PG[((m1*m2)+1):(m1*m2+m3a*m4a)], m3a, m4a)
+stable.state_larges_PG = matrix(stable.dist_PG[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a +m3b*m4b)], m3b, m4b)
+rm(v_PG, stable.dist_PG)
 
-repro.val_larges_CC=matrix(v_CC[((m1*m2)+1):((m1*m2)+(m3*m4))], m3, m4);
-stable.state_larges_CC=matrix(stable.dist_CC[((m1*m2) +1):((m1*m2) + (m3*m4))], m3, m4);
+#Wild Turkey
+repro.val_seedlings_WT=matrix(v_WT[1:(m1*m2)], m1,m2);
+repro.val_smalls_WT = matrix(v_WT[((m1*m2)+1):(m1*m2+m3a*m4a)], m3a, m4a)
+repro.val_larges_WT = matrix(v_WT[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a +m3b*m4b)], m3b, m4b)
 
-repro.val_larges_C=matrix(v_C[((m1*m2)+1):((m1*m2)+(m3*m4))], m3, m4);
-stable.state_larges_C=matrix(stable.dist_C[((m1*m2) +1):((m1*m2) + (m3*m4))], m3, m4);
-
-repro.val_larges_FP=matrix(v_FP[((m1*m2)+1):((m1*m2)+(m3*m4))], m3, m4);
-stable.state_larges_FP=matrix(stable.dist_FP[((m1*m2) +1):((m1*m2) + (m3*m4))], m3, m4);
-
-repro.val_larges_PG=matrix(v_PG[((m1*m2)+1):((m1*m2)+(m3*m4))], m3, m4);
-stable.state_larges_PG=matrix(stable.dist_PG[((m1*m2) +1):((m1*m2) + (m3*m4))], m3, m4);
-
-repro.val_larges_WT=matrix(v_WT[((m1*m2)+1):((m1*m2)+(m3*m4))], m3, m4);
-stable.state_larges_WT=matrix(stable.dist_WT[((m1*m2) +1):((m1*m2) + (m3*m4))], m3, m4);
-
-repro.val_larges_overall=matrix(v_overall[((m1*m2)+1):((m1*m2)+(m3*m4))], m3, m4);
-stable.state_larges_overall=matrix(stable.dist_overall[((m1*m2) +1):((m1*m2) + (m3*m4))], m3, m4);
-
+stable.state_seedlings_WT=matrix(stable.dist_WT[1:(m1*m2)], m1,m2)
+stable.state_smalls_WT = matrix(stable.dist_WT[((m1*m2)+1):(m1*m2+m3a*m4a)], m3a, m4a)
+stable.state_larges_WT = matrix(stable.dist_WT[((m1*m2 + m3a*m4a)+1):(m1*m2 + m3a*m4a +m3b*m4b)], m3b, m4b)
+rm(v_WT, stable.dist_WT)
 #============================================================================# 
 #  Calculate stable state distribution and state-dependent total elasticity 
 #============================================================================# 
 
 #Big Cypress
-ss_diam1_BC<-apply(stable.state_smalls_BC, 1, sum)
-ss_diam2_BC<-apply(stable.state_larges_BC, 1, sum)
-ss_diam_BC<-c(ss_diam1_BC, ss_diam2_BC)
+ss_diam1_BC<-apply(stable.state_seedlings_BC, 1, sum)
+ss_diam2_BC<-apply(stable.state_smalls_BC, 1, sum)
+ss_diam3_BC<-apply(stable.state_larges_BC, 1, sum)
+ss_diam_BC<-c(ss_diam1_BC, ss_diam2_BC, ss_diam3_BC)
 y_diam<-c(y1, y3)
-
-save(y_diam, file="./BC/y_diam.RData")
 save(ss_diam_BC, file="./BC/ss_diam_BC.Rdata")
 
 #Cape Canaveral
-ss_diam1_CC<-apply(stable.state_smalls_CC, 1, sum)
-ss_diam2_CC<-apply(stable.state_larges_CC, 1, sum)
-ss_diam_CC<-c(ss_diam1_CC, ss_diam2_CC)
+ss_diam1_CC<-apply(stable.state_seedlings_CC, 1, sum)
+ss_diam2_CC<-apply(stable.state_smalls_CC, 1, sum)
+ss_diam3_CC<-apply(stable.state_larges_CC, 1, sum)
+ss_diam_CC<-c(ss_diam1_CC, ss_diam2_CC, ss_diam3_CC)
 y_diam<-c(y1, y3)
-
-save(y_diam, file="./CC/y_diam.RData")
 save(ss_diam_CC, file="./CC/ss_diam_CC.Rdata")
 
 #Chekika
-ss_diam1_C<-apply(stable.state_smalls_C, 1, sum)
-ss_diam2_C<-apply(stable.state_larges_C, 1, sum)
-ss_diam_C<-c(ss_diam1_C, ss_diam2_C)
+ss_diam1_C<-apply(stable.state_seedlings_C, 1, sum)
+ss_diam2_C<-apply(stable.state_smalls_C, 1, sum)
+ss_diam3_C<-apply(stable.state_larges_C, 1, sum)
+ss_diam_C<-c(ss_diam1_C, ss_diam2_C, ss_diam3_C)
 y_diam<-c(y1, y3)
-
-save(y_diam, file="./C/y_diam.RData")
 save(ss_diam_C, file="./C/ss_diam_C.Rdata")
 
 #Fort Pierce
-ss_diam1_FP<-apply(stable.state_smalls_FP, 1, sum)
-ss_diam2_FP<-apply(stable.state_larges_FP, 1, sum)
-ss_diam_FP<-c(ss_diam1_FP, ss_diam2_FP)
+ss_diam1_FP<-apply(stable.state_seedlings_FP, 1, sum)
+ss_diam2_FP<-apply(stable.state_smalls_FP, 1, sum)
+ss_diam3_FP<-apply(stable.state_larges_FP, 1, sum)
+ss_diam_FP<-c(ss_diam1_FP, ss_diam2_FP, ss_diam3_FP)
 y_diam<-c(y1, y3)
-
-save(y_diam, file="./FP/y_diam.RData")
 save(ss_diam_FP, file="./FP/ss_diam_FP.Rdata")
 
 #Punta Gorda
-ss_diam1_PG<-apply(stable.state_smalls_PG, 1, sum)
-ss_diam2_PG<-apply(stable.state_larges_PG, 1, sum)
-ss_diam_PG<-c(ss_diam1_PG, ss_diam2_PG)
+ss_diam1_PG<-apply(stable.state_seedlings_PG, 1, sum)
+ss_diam2_PG<-apply(stable.state_smalls_PG, 1, sum)
+ss_diam3_PG<-apply(stable.state_larges_PG, 1, sum)
+ss_diam_PG<-c(ss_diam1_PG, ss_diam2_PG, ss_diam3_PG)
 y_diam<-c(y1, y3)
-
-save(y_diam, file="./PG/y_diam.RData")
 save(ss_diam_PG, file="./PG/ss_diam_PG.Rdata")
 
 #Wild Turkey
-ss_diam1_WT<-apply(stable.state_smalls_WT, 1, sum)
-ss_diam2_WT<-apply(stable.state_larges_WT, 1, sum)
-ss_diam_WT<-c(ss_diam1_WT, ss_diam2_WT)
+ss_diam1_WT<-apply(stable.state_seedlings_WT, 1, sum)
+ss_diam2_WT<-apply(stable.state_smalls_WT, 1, sum)
+ss_diam3_WT<-apply(stable.state_larges_WT, 1, sum)
+ss_diam_WT<-c(ss_diam1_WT, ss_diam2_WT, ss_diam3_WT)
 y_diam<-c(y1, y3)
-
-save(y_diam, file="./WT/y_diam.RData")
 save(ss_diam_WT, file="./WT/ss_diam_WT.Rdata")
-
-#Wild Turkey
-ss_diam1_overall<-apply(stable.state_smalls_overall, 1, sum)
-ss_diam2_overall<-apply(stable.state_larges_overall, 1, sum)
-ss_diam_overall<-c(ss_diam1_overall, ss_diam2_overall)
-y_diam<-c(y1, y3)
-
-save(y_diam, file="./Overall/y_diam.RData")
-save(ss_diam_overall, file="./Overall/ss_diam_overall.Rdata")
 
 
 ## Height
 #Big Cypress
-ss_height1_BC<-apply(stable.state_smalls_BC, 2, sum)
-ss_height2_BC<-apply(stable.state_larges_BC, 2, sum)
-ss_height_BC<-c(ss_height1_BC, ss_height2_BC)
+ss_height1_BC<-apply(stable.state_seedlings_BC, 2, sum)
+ss_height2_BC<-apply(stable.state_smalls_BC, 2, sum)
+ss_height3_BC<-apply(stable.state_larges_BC, 2,sum)
+ss_height_BC<-c(ss_height1_BC, ss_height2_BC, ss_height3_BC)
 y_height<-c(y2, y4)
-save(y_height, file="./BC/y_height.RData")
 save(ss_height_BC, file="./BC/ss_height_BC.RData")
+rm(stable.state_seedlings_BC, stable.state_smalls_BC, stable.state_larges_BC)
+rm(ss_diam_BC, ss_height_BC)
+rm(ss_diam1_BC, ss_diam2_BC, ss_diam3_BC, ss_height1_BC, ss_height2_BC,
+   ss_height3_BC)
 
 #Cape Canaveral
-ss_height1_CC<-apply(stable.state_smalls_CC, 2, sum)
-ss_height2_CC<-apply(stable.state_larges_CC, 2, sum)
-ss_height_CC<-c(ss_height1_CC, ss_height2_CC)
+ss_height1_CC<-apply(stable.state_seedlings_CC, 2, sum)
+ss_height2_CC<-apply(stable.state_smalls_CC, 2, sum)
+ss_height3_CC<-apply(stable.state_larges_CC, 2,sum)
+ss_height_CC<-c(ss_height1_CC, ss_height2_CC, ss_height3_CC)
 y_height<-c(y2, y4)
-save(y_height, file="./CC/y_height.RData")
 save(ss_height_CC, file="./CC/ss_height_CC.RData")
+rm(stable.state_seedlings_CC, stable.state_smalls_CC, stable.state_larges_CC)
+rm(ss_diam_CC, ss_height_CC)
+rm(ss_diam1_CC, ss_diam2_CC, ss_diam3_CC, ss_height1_CC, ss_height2_CC,
+   ss_height3_CC)
 
 #Chekika
-ss_height1_C<-apply(stable.state_smalls_C, 2, sum)
-ss_height2_C<-apply(stable.state_larges_C, 2, sum)
-ss_height_C<-c(ss_height1_C, ss_height2_C)
+ss_height1_C<-apply(stable.state_seedlings_C, 2, sum)
+ss_height2_C<-apply(stable.state_smalls_C, 2, sum)
+ss_height3_C<-apply(stable.state_larges_C, 2,sum)
+ss_height_C<-c(ss_height1_C, ss_height2_C, ss_height3_C)
 y_height<-c(y2, y4)
-save(y_height, file="./C/y_height.RData")
 save(ss_height_C, file="./C/ss_height_C.RData")
+rm(stable.state_seedlings_C, stable.state_smalls_C, stable.state_larges_C)
+rm(ss_diam_C, ss_height_C)
+rm(ss_diam1_C, ss_diam2_C, ss_diam3_C, ss_height1_C, ss_height2_C,
+   ss_height3_C)
 
 #Fort Pierce
-ss_height1_FP<-apply(stable.state_smalls_FP, 2, sum)
-ss_height2_FP<-apply(stable.state_larges_FP, 2, sum)
-ss_height_FP<-c(ss_height1_FP, ss_height2_FP)
+ss_height1_FP<-apply(stable.state_seedlings_FP, 2, sum)
+ss_height2_FP<-apply(stable.state_smalls_FP, 2, sum)
+ss_height3_FP<-apply(stable.state_larges_FP, 2,sum)
+ss_height_FP<-c(ss_height1_FP, ss_height2_FP, ss_height3_FP)
 y_height<-c(y2, y4)
-save(y_height, file="./FP/y_height.RData")
 save(ss_height_FP, file="./FP/ss_height_FP.RData")
+rm(stable.state_seedlings_FP, stable.state_smalls_FP, stable.state_larges_FP)
+rm(ss_diam_FP, ss_height_FP)
+rm(ss_diam1_FP, ss_diam2_FP, ss_diam3_FP, ss_height1_FP, ss_height2_FP,
+   ss_height3_FP)
 
 #Punta Gorda
-ss_height1_PG<-apply(stable.state_smalls_PG, 2, sum)
-ss_height2_PG<-apply(stable.state_larges_PG, 2, sum)
-ss_height_PG<-c(ss_height1_PG, ss_height2_PG)
+ss_height1_PG<-apply(stable.state_seedlings_PG, 2, sum)
+ss_height2_PG<-apply(stable.state_smalls_PG, 2, sum)
+ss_height3_PG<-apply(stable.state_larges_PG, 2,sum)
+ss_height_PG<-c(ss_height1_PG, ss_height2_PG, ss_height3_PG)
 y_height<-c(y2, y4)
-save(y_height, file="./PG/y_height.RData")
 save(ss_height_PG, file="./PG/ss_height_PG.RData")
+rm(stable.state_seedlings_PG, stable.state_smalls_PG, stable.state_larges_PG)
+rm(ss_diam_PG, ss_height_PG)
+rm(ss_diam1_PG, ss_diam2_PG, ss_diam3_PG, ss_height1_PG, ss_height2_PG,
+   ss_height3_PG)
 
 #Wild Turkey
-ss_height1_WT<-apply(stable.state_smalls_WT, 2, sum)
-ss_height2_WT<-apply(stable.state_larges_WT, 2, sum)
-ss_height_WT<-c(ss_height1_WT, ss_height2_WT)
+ss_height1_WT<-apply(stable.state_seedlings_WT, 2, sum)
+ss_height2_WT<-apply(stable.state_smalls_WT, 2, sum)
+ss_height3_WT<-apply(stable.state_larges_WT, 2,sum)
+ss_height_WT<-c(ss_height1_WT, ss_height2_WT, ss_height3_WT)
 y_height<-c(y2, y4)
-save(y_height, file="./WT/y_height.RData")
 save(ss_height_WT, file="./WT/ss_height_WT.RData")
-
-#Overall
-ss_height1_overall<-apply(stable.state_smalls_overall, 2, sum)
-ss_height2_overall<-apply(stable.state_larges_overall, 2, sum)
-ss_height_overall<-c(ss_height1_overall, ss_height2_overall)
-y_height<-c(y2, y4)
-save(y_height, file="./Overall/y_height.RData")
-save(ss_height_overall, file="./Overall/ss_height_overall.RData")
-
-
-
-
+rm(stable.state_seedlings_WT, stable.state_smalls_WT, stable.state_larges_WT)
+rm(ss_diam_WT, ss_height_WT)
+rm(ss_diam1_WT, ss_diam2_WT, ss_diam3_WT, ss_height1_WT, ss_height2_WT,
+   ss_height3_WT)
 
 
 ###Reproductive value
 ## Diameter 
 #Big Cypress
-rv_diam1_BC<-apply(repro.val_smalls_BC, 1, sum)
-rv_diam2_BC<-apply(repro.val_larges_BC, 1, sum)
-rv_diam_BC<-c(rv_diam1_BC, rv_diam2_BC)
+rv_diam1_BC<-apply(repro.val_seedlings_BC, 1, sum)
+rv_diam2_BC<-apply(repro.val_smalls_BC, 1, sum)
+rv_diam3_BC<-apply(repro.val_larges_BC, 1, sum)
+rv_diam_BC<-c(rv_diam1_BC, rv_diam2_BC, rv_diam3_BC)
 save(rv_diam_BC, file="./BC/rv_diam_BC.RData")
 
 #Cape Canaveral
-rv_diam1_CC<-apply(repro.val_smalls_CC, 1, sum)
-rv_diam2_CC<-apply(repro.val_larges_CC, 1, sum)
-rv_diam_CC<-c(rv_diam1_CC, rv_diam2_CC)
+rv_diam1_CC<-apply(repro.val_seedlings_CC, 1, sum)
+rv_diam2_CC<-apply(repro.val_smalls_CC, 1, sum)
+rv_diam3_CC<-apply(repro.val_larges_CC, 1, sum)
+rv_diam_CC<-c(rv_diam1_CC, rv_diam2_CC, rv_diam3_CC)
 save(rv_diam_CC, file="./CC/rv_diam_CC.RData")
 
 #Chekika
-rv_diam1_C<-apply(repro.val_smalls_C, 1, sum)
-rv_diam2_C<-apply(repro.val_larges_C, 1, sum)
-rv_diam_C<-c(rv_diam1_C, rv_diam2_C)
+rv_diam1_C<-apply(repro.val_seedlings_C, 1, sum)
+rv_diam2_C<-apply(repro.val_smalls_C, 1, sum)
+rv_diam3_C<-apply(repro.val_larges_C, 1, sum)
+rv_diam_C<-c(rv_diam1_C, rv_diam2_C, rv_diam3_C)
 save(rv_diam_C, file="./C/rv_diam_C.RData")
 
 #Fort Pierce
-rv_diam1_FP<-apply(repro.val_smalls_FP, 1, sum)
-rv_diam2_FP<-apply(repro.val_larges_FP, 1, sum)
-rv_diam_FP<-c(rv_diam1_FP, rv_diam2_FP)
+rv_diam1_FP<-apply(repro.val_seedlings_FP, 1, sum)
+rv_diam2_FP<-apply(repro.val_smalls_FP, 1, sum)
+rv_diam3_FP<-apply(repro.val_larges_FP, 1, sum)
+rv_diam_FP<-c(rv_diam1_FP, rv_diam2_FP, rv_diam3_FP)
 save(rv_diam_FP, file="./FP/rv_diam_FP.RData")
 
 #Punta Gorda
-rv_diam1_PG<-apply(repro.val_smalls_PG, 1, sum)
-rv_diam2_PG<-apply(repro.val_larges_PG, 1, sum)
-rv_diam_PG<-c(rv_diam1_PG, rv_diam2_PG)
+rv_diam1_PG<-apply(repro.val_seedlings_PG, 1, sum)
+rv_diam2_PG<-apply(repro.val_smalls_PG, 1, sum)
+rv_diam3_PG<-apply(repro.val_larges_PG, 1, sum)
+rv_diam_PG<-c(rv_diam1_PG, rv_diam2_PG, rv_diam3_PG)
 save(rv_diam_PG, file="./PG/rv_diam_PG.RData")
 
 #Wild Turkey
-rv_diam1_WT<-apply(repro.val_smalls_WT, 1, sum)
-rv_diam2_WT<-apply(repro.val_larges_WT, 1, sum)
-rv_diam_WT<-c(rv_diam1_WT, rv_diam2_WT)
+rv_diam1_WT<-apply(repro.val_seedlings_WT, 1, sum)
+rv_diam2_WT<-apply(repro.val_smalls_WT, 1, sum)
+rv_diam3_WT<-apply(repro.val_larges_WT, 1, sum)
+rv_diam_WT<-c(rv_diam1_WT, rv_diam2_WT, rv_diam3_WT)
 save(rv_diam_WT, file="./WT/rv_diam_WT.RData")
 
-#Overall
-rv_diam1_overall<-apply(repro.val_smalls_overall, 1, sum)
-rv_diam2_overall<-apply(repro.val_larges_overall, 1, sum)
-rv_diam_overall<-c(rv_diam1_overall, rv_diam2_overall)
-save(rv_diam_overall, file="./Overall/rv_diam_Overall.RData")
 
 ##Height
 #Big Cypress
-rv_height1_BC<-apply(repro.val_smalls_BC, 2, sum)
-rv_height2_BC<-apply(repro.val_larges_BC, 2, sum)
-rv_height_BC<-c(rv_height1_BC, rv_height2_BC)
+rv_height1_BC<-apply(repro.val_seedlings_BC, 2, sum)
+rv_height2_BC<-apply(repro.val_smalls_BC, 2, sum)
+rv_height3_BC<-apply(repro.val_larges_BC, 2, sum)
+rv_height_BC<-c(rv_height1_BC, rv_height2_BC, rv_height3_BC)
 save(rv_height_BC, file="./BC/rv_height_BC.RData")
+rm(repro.val_seedlings_BC, repro.val_smalls_BC, repro.val_larges_BC,
+   rv_diam1_BC, rv_diam2_BC, rv_diam3_BC, rv_diam_BC,
+   rv_height1_BC, rv_height2_BC, rv_height3_BC, rv_height_BC)
 
 #Cape Canaveral
-rv_height1_CC<-apply(repro.val_smalls_CC, 2, sum)
-rv_height2_CC<-apply(repro.val_larges_CC, 2, sum)
-rv_height_CC<-c(rv_height1_CC, rv_height2_CC)
+rv_height1_CC<-apply(repro.val_seedlings_CC, 2, sum)
+rv_height2_CC<-apply(repro.val_smalls_CC, 2, sum)
+rv_height3_CC<-apply(repro.val_larges_CC, 2, sum)
+rv_height_CC<-c(rv_height1_CC, rv_height2_CC, rv_height3_CC)
 save(rv_height_CC, file="./CC/rv_height_CC.RData")
+rm(repro.val_seedlings_CC, repro.val_smalls_CC, repro.val_larges_CC,
+   rv_diam1_CC, rv_diam2_CC, rv_diam3_CC, rv_diam_CC,
+   rv_height1_CC, rv_height2_CC, rv_height3_CC, rv_height_CC)
 
 #Chekika
-rv_height1_C<-apply(repro.val_smalls_C, 2, sum)
-rv_height2_C<-apply(repro.val_larges_C, 2, sum)
-rv_height_C<-c(rv_height1_C, rv_height2_C)
+rv_height1_C<-apply(repro.val_seedlings_C, 2, sum)
+rv_height2_C<-apply(repro.val_smalls_C, 2, sum)
+rv_height3_C<-apply(repro.val_larges_C, 2, sum)
+rv_height_C<-c(rv_height1_C, rv_height2_C, rv_height3_C)
 save(rv_height_C, file="./C/rv_height_C.RData")
+rm(repro.val_seedlings_C, repro.val_smalls_C, repro.val_larges_C,
+   rv_diam1_C, rv_diam2_C, rv_diam3_C, rv_diam_C,
+   rv_height1_C, rv_height2_C, rv_height3_C, rv_height_C)
 
 #Fort Pierce
-rv_height1_FP<-apply(repro.val_smalls_FP, 2, sum)
-rv_height2_FP<-apply(repro.val_larges_FP, 2, sum)
-rv_height_FP<-c(rv_height1_FP, rv_height2_FP)
+rv_height1_FP<-apply(repro.val_seedlings_FP, 2, sum)
+rv_height2_FP<-apply(repro.val_smalls_FP, 2, sum)
+rv_height3_FP<-apply(repro.val_larges_FP, 2, sum)
+rv_height_FP<-c(rv_height1_FP, rv_height2_FP, rv_height3_FP)
 save(rv_height_FP, file="./FP/rv_height_FP.RData")
+rm(repro.val_seedlings_FP, repro.val_smalls_FP, repro.val_larges_FP,
+   rv_diam1_FP, rv_diam2_FP, rv_diam3_FP, rv_diam_FP,
+   rv_height1_FP, rv_height2_FP, rv_height3_FP, rv_height_FP)
 
 #Punta Gorda
-rv_height1_PG<-apply(repro.val_smalls_PG, 2, sum)
-rv_height2_PG<-apply(repro.val_larges_PG, 2, sum)
-rv_height_PG<-c(rv_height1_PG, rv_height2_PG)
+rv_height1_PG<-apply(repro.val_seedlings_PG, 2, sum)
+rv_height2_PG<-apply(repro.val_smalls_PG, 2, sum)
+rv_height3_PG<-apply(repro.val_larges_PG, 2, sum)
+rv_height_PG<-c(rv_height1_PG, rv_height2_PG, rv_height3_PG)
 save(rv_height_PG, file="./PG/rv_height_PG.RData")
+rm(repro.val_seedlings_PG, repro.val_smalls_PG, repro.val_larges_PG,
+   rv_diam1_PG, rv_diam2_PG, rv_diam3_PG, rv_diam_PG,
+   rv_height1_PG, rv_height2_PG, rv_height3_PG, rv_height_PG)
 
 #Wild Turkey
-rv_height1_WT<-apply(repro.val_smalls_WT, 2, sum)
-rv_height2_WT<-apply(repro.val_larges_WT, 2, sum)
-rv_height_WT<-c(rv_height1_WT, rv_height2_WT)
+rv_height1_WT<-apply(repro.val_seedlings_WT, 2, sum)
+rv_height2_WT<-apply(repro.val_smalls_WT, 2, sum)
+rv_height3_WT<-apply(repro.val_larges_WT, 2, sum)
+rv_height_WT<-c(rv_height1_WT, rv_height2_WT, rv_height3_WT)
 save(rv_height_WT, file="./WT/rv_height_WT.RData")
+rm(repro.val_seedlings_WT, repro.val_smalls_WT, repro.val_larges_WT,
+   rv_diam1_WT, rv_diam2_WT, rv_diam3_WT, rv_diam_WT,
+   rv_height1_WT, rv_height2_WT, rv_height3_WT, rv_height_WT)
 
-#Overall
-rv_height1_overall<-apply(repro.val_smalls_overall, 2, sum)
-rv_height2_overall<-apply(repro.val_larges_overall, 2, sum)
-rv_height_overall<-c(rv_height1_overall, rv_height2_overall)
-save(rv_height_overall, file="./Overall/rv_height_overall.RData")
+
 
 
 
