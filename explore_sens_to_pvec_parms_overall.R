@@ -30,9 +30,15 @@ getLambda <- function(p.vec) {
   # Part II: Building the IPM #####
   m1=10
   m2=m1+1
-  m3=100
-  m4=m3+1
+  m3a=250
+  m4a=50
+  
+  m3b = 120
+  m4b = 100
+  m3=m3a + m3b
+  m4=m4a + m4b
   tol=1.e-8; 
+  
   
   # Define the kernels and iteration matrix:
   #Domain 1: Seedling Domain
@@ -70,11 +76,20 @@ getLambda <- function(p.vec) {
   y1=(h1/2)*((0:(m1-1))+(1:m1)); #for diameter in D1
   h2=16/m2
   y2=(h2/2)*((0:(m2-1))+(1:m2)); #for height in D1
-  h3=(700-1.6)/m3;
-  y3=(h3/2)*((0:(m3-1))+(1:m3))+1.6; #for diameter in D2
-  h4=(800-16)/m4
-  y4=(h4/2)*((0:(m4-1))+(1:m4))+16; #for height in D2
   
+  h3a = (150-1.6)/m3a; 
+  
+  y3a=(h3a/2)*((0:(m3a-1))+(1:m3a))+1.6; #for diameter in D2a
+  h3b = (700-150)/m3b
+  y3b=(h3b/2)*((0:(m3b-1))+(1:m3b))+150; #for diameter in D2b
+  y3 <- c(y3a, y3b)
+  
+  #h4=(800-16)/m4
+  h4a = (300-16)/m4a
+  y4a=(h4a/2)*((0:(m4a-1))+(1:m4a))+16;
+  h4b = (800-300)/m4b 
+  y4b=(h4b/2)*((0:(m4b-1))+(1:m4b))+300;
+  y4 = c(y4a, y4b)
   # Compute the iteration matrix. With a bit of vectorizing it's not too slow,
   # though you can probably do better if you need to. The shortcuts here have 
   # been checked against the results from code that uses loops for everything. (comment from Ellner and Rees)
@@ -108,87 +123,229 @@ getLambda <- function(p.vec) {
     thing <- build_D1(p.vec)
     D1 <- thing$D1
     
-    # Construct D2 (Large Domain): #####
-    build_D2 = function(p.vec) {
-      plop=function(i,j) {(j-1)*m3+i} # for putting values in proper place in A 
-      Plop=outer(1:m3,1:m4,plop); 
+    build_D2AA = function(p.vec) {
+      plop=function(i,j) {(j-1)*m3a+i} # for putting values in proper place in A 
+      Plop=outer(1:m3a,1:m4a,plop); 
       
-      D2=matrix(0,m3*m4,m3*m4);
-      Kvals_D2=array(0,c(m3,m4,m3,m4));  
+      D2AA=matrix(0,m3a*m4a,m3a*m4a);
+      Kvals_D2AA=array(0,c(m3a,m4a,m3a,m4a));  
       
-      for(i in 1:m3){
-        for(j in 1:m4){
-          for(k in 1:m3){
-            kvals=pyx2(y3[k],y4[1:m4],y3[i],y4[j], p.vec)
-            D2[Plop[k,1:m4],Plop[i,j]]=kvals
-            Kvals_D2[k,1:m4,i,j]=kvals
+      for(i in 1:m3a){
+        for(j in 1:m4a){
+          for(k in 1:m3a){
+            kvals=pyx2(y3a[k],y4a[1:m4a],y3a[i],y4a[j], p.vec)
+            D2AA[Plop[k,1:m4a],Plop[i,j]]=kvals
+            Kvals_D2AA[k,1:m4a,i,j]=kvals
             
           }}
-        
+        cat(i,"\n"); 
       }		
-      D2=D2*h3*h4 #Multiply D2 by widths
-      return(list(D2 = D2, Kvals_D2 = Kvals_D2))
+      D2AA=D2AA*h3a*h4a #Multiply D2 by widths
+      return(list(D2AA = D2AA, Kvals_D2AA = Kvals_D2AA))
     }
     
-    thing <- build_D2(p.vec)
-    D2 <-thing$D2
-    
-    # Construct F (Fertility): #####
-    build_F = function(p.vec) {
-      plop1=function(i, j) {(j-1)*m1 + i}
-      plop2=function(i, j) {(j-1)*m3 + i}
-      Plop1=outer(1:m1,1:m2,plop1); 
-      Plop2=outer(1:m3, 1:m4, plop2);
+    thing <- build_D2AA(p.vec)
+    D2AA <- thing$D2AA
+  
+# D2BB #####
+    build_D2BB = function(p.vec) {
       
-      F=matrix(0,m1*m2,m3*m4); 
-      Kvals_F=array(0, c(m1, m2, m3, m4))
+      plop=function(i,j) {(j-1)*m3b+i} # for putting values in proper place in A 
+      Plop=outer(1:m3b,1:m4b,plop); 
       
-      for(i in 1:m3) {
-        for (j in 1:m4) {
-          for (k in 1:m1) {
-            kvals=fyx(y1[k], y2[1:m2], y3[i], y4[j], p.vec)
-            F[Plop1[k, 1:m2], Plop2[i,j]]=kvals
-            Kvals_F[k, 1:m2, i, j]=kvals
+      D2BB=matrix(0,m3b*m4b,m3b*m4b);
+      Kvals_D2BB=array(0,c(m3b,m4b,m3b,m4b));  
+      
+      for(i in 1:m3b){
+        for(j in 1:m4b){
+          for(k in 1:m3b){
+            kvals=pyx2(y3b[k],y4b[1:m4b],y3b[i],y4b[j], p.vec)
+            D2BB[Plop[k,1:m4b],Plop[i,j]]=kvals
+            Kvals_D2BB[k,1:m4b,i,j]=kvals
+            
           }}
-      }
-      F=F*h1*h2
-      return(list(F = F, Kvals_F = Kvals_F))
+        cat(i,"\n"); 
+      }		
+      D2BB=D2BB*h3b*h4b #Multiply D2 by widths
+      return(list(D2BB = D2BB, Kvals_D2BB = Kvals_D2BB))
     }
     
+    thing <- build_D2BB(p.vec)
+    D2BB <- thing$D2BB
+# Construct D2BA (Large Domain): #####
+    build_D2BA = function(p.vec) {
+      
+      plop1=function(i, j) {(j-1)*m3a + i}
+      plop2=function(i, j) {(j-1)*m3b + i}
+      Plop1=outer(1:m3a,1:m4a,plop1); 
+      Plop2=outer(1:m3b, 1:m4b, plop2);
+      
+      D2BA=matrix(0,m3a*m4a,m3b*m4b); 
+      Kvals_D2BA=array(0, c(m3a, m4a, m3b, m4b))
+      
+      for(i in 1:m3b) {
+        for (j in 1:m4b) {
+          for (k in 1:m3a) {
+            kvals=pyx2(y3a[k], y4a[1:m4a], y3b[i], y4b[j], p.vec)
+            D2BA[Plop1[k, 1:m4a], Plop2[i,j]]=kvals
+            Kvals_D2BA[k, 1:m4a, i, j]=kvals
+          }}
+        cat(i, "\n");
+      }
+      D2BA=D2BA*h3a*h4a
+      return(list(D2BA = D2BA, Kvals_D2BA = Kvals_D2BA))
+    }
     
-    thing <- build_F(p.vec)
-    F<- thing$F
+
+    thing <- build_D2BA(p.vec)
+    D2BA <- thing$D2BA
+# Construct D2AB (Large Domain): #####
+    build_D2AB = function(p.vec) {
+      
+      plop1=function(i, j) {(j-1)*m3b + i}
+      plop2=function(i, j) {(j-1)*m3a + i}
+      Plop1=outer(1:m3b,1:m4b,plop1); 
+      Plop2=outer(1:m3a, 1:m4a, plop2);
+      
+      D2AB=matrix(0,m3b*m4b,m3a*m4a); 
+      Kvals_D2AB=array(0, c(m3b, m4b, m3a, m4a))
+      
+      for(i in 1:m3a) {
+        for (j in 1:m4a) {
+          for (k in 1:m3b) {
+            kvals=pyx2(y3b[k], y4b[1:m4b], y3a[i], y4a[j], p.vec)
+            D2AB[Plop1[k, 1:m4b], Plop2[i,j]]=kvals
+            Kvals_D2AB[k, 1:m4b, i, j]=kvals
+          }}
+        cat(i, "\n");
+      }
+      D2AB=D2AB*h3b*h4b
+      return(list(D2AB = D2AB, Kvals_D2AB = Kvals_D2AB))
+    }
     
-    # Construct M (Maturation): #####
-    build_G = function(p.vec) {
-      plop1=function(i, j) {(j-1)*m3 + i}
+
+    thing <- build_D2AB(p.vec)
+    D2AB <- thing$D2AB
+    D2 <- rbind(cbind(D2AA, D2BA), cbind(D2AB, D2BB)) 
+    rm(D2AA, D2BA, D2AB, D2BB)
+# Construct F #####
+    
+    build_FA = function(p.vec) {
+      plop1=function(i, j) {(j-1)*m1 + i}
+      plop2=function(i, j) {(j-1)*m3a + i}
+      Plop1=outer(1:m1,1:m2,plop1); 
+      Plop2=outer(1:m3a, 1:m4a, plop2);
+      
+      FA=matrix(0,m1*m2,m3a*m4a); 
+      Kvals_FA=array(0, c(m1, m2, m3a, m4a))
+      
+      for(i in 1:m3a) {
+        for (j in 1:m4a) {
+          for (k in 1:m1) {
+            kvals=fyx(y1[k], y2[1:m2], y3a[i], y4a[j], p.vec)
+            FA[Plop1[k, 1:m2], Plop2[i,j]]=kvals
+            Kvals_FA[k, 1:m2, i, j]=kvals
+          }}
+        cat(i, "\n");
+      }
+      FA=FA*h1*h2
+      return(list(FA = FA, Kvals_FA = Kvals_FA))
+    }
+    
+    # Construct FB (Fertility): #####
+    build_FB = function(p.vec) {
+      plop1=function(i, j) {(j-1)*m1 + i}
+      plop2=function(i, j) {(j-1)*m3b + i}
+      Plop1=outer(1:m1,1:m2,plop1); 
+      Plop2=outer(1:m3b, 1:m4b, plop2);
+      
+      FB=matrix(0,m1*m2,m3b*m4b); 
+      Kvals_FB=array(0, c(m1, m2, m3b, m4b))
+      
+      for(i in 1:m3b) {
+        for (j in 1:m4b) {
+          for (k in 1:m1) {
+            kvals=fyx(y1[k], y2[1:m2], y3b[i], y4b[j], p.vec)
+            FB[Plop1[k, 1:m2], Plop2[i,j]]=kvals
+            Kvals_FB[k, 1:m2, i, j]=kvals
+          }}
+        cat(i, "\n");
+      }
+      FB=FB*h1*h2
+      return(list(FB = FB, Kvals_FB = Kvals_FB))
+    }
+    
+    thing <- build_FA(p.vec)
+    FA <- thing$FA
+    thing <- build_FB(p.vec)
+    FB <-thing$FB
+  
+    F<- cbind(FA, FB)
+    rm(FA, FB)
+  # Construct M #####
+    build_GA = function(p.vec) {
+      plop1=function(i, j) {(j-1)*m3a + i}
       plop2=function(i, j) {(j-1)*m1 + i}
-      Plop1=outer(1:m3,1:m4,plop1); 
+      Plop1=outer(1:m3a,1:m4a,plop1); 
       Plop2=outer(1:m1, 1:m2, plop2);
       
-      G=matrix(0,m3*m4,m1*m2); 
-      Kvals_G=array(0, c(m3, m4, m1, m2))
+      GA=matrix(0,m3a*m4a,m1*m2); 
+      Kvals_GA=array(0, c(m3a, m4a, m1, m2))
       
       for(i in 1:m1) {
         for (j in 1:m2) {
-          for (k in 1:m3) {
-            kvals=gyx(y3[k], y4[1:m4], y1[i], y2[j], p.vec)
-            G[Plop1[k, 1:m4], Plop2[i,j]]=kvals
-            Kvals_G[k, 1:m4, i, j]=kvals
+          for (k in 1:m3a) {
+            kvals=gyx(y3a[k], y4a[1:m4a], y1[i], y2[j], p.vec)
+            GA[Plop1[k, 1:m4a], Plop2[i,j]]=kvals
+            Kvals_GA[k, 1:m4a, i, j]=kvals
           }}
+        cat(i, "\n");
       }
-      G=G*h3*h4
-      return(list(G = G, Kvals_G = Kvals_G))
+      GA=GA*h3a*h4a
+      
+      return(list(GA = GA, Kvals_GA = Kvals_GA))
     }
     
-    thing <- build_G(p.vec)
-    G <- thing$G
+    build_GB = function(p.vec) {
+      plop1=function(i, j) {(j-1)*m3b + i}
+      plop2=function(i, j) {(j-1)*m1 + i}
+      Plop1=outer(1:m3b,1:m4b,plop1); 
+      Plop2=outer(1:m1, 1:m2, plop2);
+      
+      GB=matrix(0,m3b*m4b,m1*m2); 
+      Kvals_GB=array(0, c(m3b, m4b, m1, m2))
+      
+      for(i in 1:m1) {
+        for (j in 1:m2) {
+          for (k in 1:m3b) {
+            kvals=gyx(y3b[k], y4b[1:m4b], y1[i], y2[j], p.vec)
+            GB[Plop1[k, 1:m4b], Plop2[i,j]]=kvals
+            Kvals_GB[k, 1:m4b, i, j]=kvals
+          }}
+        cat(i, "\n");
+      }
+      GB=GB*h3b*h4b
+      
+      return(list(GB = GB, Kvals_GB = Kvals_GB))
+    }
     
+  
+    thing <- build_GA(p.vec)
+    GA<-thing$GA
+    
+    thing <- build_GB(p.vec)
+   
+    GB<-thing$GB
+    
+    
+    G <- rbind(GA, GB)
+    rm(GA, GB)
     rm(thing)
     gc()
     # Assemble the matrix #####
     
     A <- cbind(rbind(D1, G), rbind(F, D2))
+    rm(D2, G, F, D2)
     
     
     #  Find lambda, w by iteration #####
@@ -197,9 +354,10 @@ getLambda <- function(p.vec) {
     #  for convergence requires extracting matrix entries via the @x slot
     #  of a Matrix object. Matrix is S4-style -- see ?Matrix. 
     
+    
     find_lambda = function(A) {
       
-      A2=Matrix(A); nt=Matrix(1,m1*m2+m3*m4,1); nt1=nt; 
+      A2=Matrix(A); nt=Matrix(1,m1*m2+m3a*m4a + m3b*m4b,1); nt1=nt; 
       
       qmax=1000; lam=1; 
       while(qmax>tol) {
@@ -207,19 +365,20 @@ getLambda <- function(p.vec) {
         qmax=sum(abs((nt1-lam*nt)@x));  
         lam=sum(nt1@x); 
         nt@x=(nt1@x)/lam; #we're cheating here - don't tell Doug Bates.  
-        
+        cat(lam,qmax,"\n");
       } 
-      nt=matrix(nt@x,m1*m2+m3*m4,1); 
+      
+      nt=matrix(nt@x,m1*m2+m3a*m4a + m3b*m4b,1); 
       #stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
       stable.dist=nt
       lam.stable=lam;
       
       # Check that the @bits worked as intended.   
       qmax=sum(abs(lam*nt-A%*%nt)); 
-      
+      cat("Convergence: ",qmax," should be less than ",tol,"\n");
       
       #Find the reproductive value function by iteration
-      vt=Matrix(1,1,m1*m2+m3*m4); vt1=vt; 
+      vt=Matrix(1,1,m1*m2+m3a*m4a + m3b*m4b); vt1=vt; 
       
       qmax=1000; lam=1; 
       while(qmax>tol) {
@@ -227,8 +386,9 @@ getLambda <- function(p.vec) {
         qmax=sum(abs((vt1-lam*vt)@x));  
         lam=sum(vt1@x); 
         vt@x=(vt1@x)/lam;   
+        cat(lam,qmax,"\n");
       } 
-      v=t(matrix(vt@x,1,m1*m2+m3*m4)); 
+      v=t(matrix(vt@x,1,m1*m2+m3a*m4a + m3b*m4b)); 
       lam.stable.t=lam; 
       
       return(list(lam.stable = lam.stable, stable.dist = stable.dist, v=v))
@@ -242,10 +402,10 @@ getLambda <- function(p.vec) {
 
 
 time_start <- proc.time()
-for(i in 101:nrow(results)) {
+for(i in 2:10) {
   cat("Param: ", i, "of ", nrow(results), ": \n");
   p.vec_new <- p.vec_overall
-  p.vec_new[results$pos[i]] <- results$new_par[i]
+  p.vec_new[results$pos[i]] <- results$new_par[i] 
   results$lambda[i] <- getLambda(p.vec_new)
 }
 time_end <- proc.time() - time_start 
