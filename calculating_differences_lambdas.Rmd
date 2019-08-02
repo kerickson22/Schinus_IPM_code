@@ -765,7 +765,7 @@ save(lam.boot, file = "lam.boot.RData")
 Store them in a dataframe called 'differences': 
 
 ```{r initialize dataframe}
-lam.boot <- readRDS("lam.boot_13.rds")
+lam.boot <- readRDS("lam.boot_271.rds")
 lam.boot
 colnames(lam.boot) <- c("BC", "CC", "C", "FP", "PG", "WT")
 differences <- data.frame(BC_CC = rep(NA, nrow(lam.boot)),
@@ -857,8 +857,9 @@ f<-ecdf(differences[,1])
 
 #Big Cypress - Chekika 
 
-hist(differences[,2], main = "|BC - C|", xlab="Difference", xlim=c(0, 0.2))
+hist(differences[,1], main = "|BC - C|", xlab="Difference", xlim=c(0, 0.2))
 abline(v=BC_C_obs, col="red")
+text("topright", col="red", "0")
 plot(ecdf(differences[,2]), main = "|BC - C|", xlab="Magnitude of Difference", xlim = c(0, 0.2))
 abline(v=BC_C_obs, col="red") 
 #0% of the resampled differences are more extreme than the observed difference 
