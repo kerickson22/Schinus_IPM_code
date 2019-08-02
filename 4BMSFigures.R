@@ -3186,13 +3186,13 @@ dev.off()
 
 #(b) Pooled figure 
 setEPS(horizontal=F, onefile=F, paper="special")
-postscript("./Figures/barplot_contributions_pool.eps", width=width.cm_onepanel/2.54, 
-           height=height.cm/2.54, pointsize=pointsize)
+postscript("./Figures/barplot_contributions_pool_dashed_letters.eps", width=width.cm_onepanel/2.54, 
+           height=width.cm_onepanel/2.54, pointsize=pointsize)
 #png(file="./Figures/barplot_contributions.png")
 #x11(width = width.cm_onepanel/2.54, height = width.cm_onepanel/2.54, 
 #   pointsize = pointsize)
 
-par(mar = c(3, 0.1, 1, 0.1), # Margins
+par(mar = c(3, 1, 1, 1), # Margins
     mgp = c(0, 0, 0), # Distance of axis tickmark labels (second value)
     tcl = 0.3, # Length of axis tickmarks
     xpd=F,
@@ -3221,6 +3221,8 @@ text(x=xx[3], y = WT[3], label = "F",  pos=1, cex = 1)
 text(x=xx[4], y = WT[4], label = "D2", pos=3, cex = 1)
 mtext(side=1, "WT")
 abline(h=0)
+abline(v=6.5, lty=2, xpd=T)
+mtext(side=3, "(a)", adj=0)
 
 #2) FP
 xx<- barplot(FP, col=cols[4], ylim=c(-0.05, 0.09), 
@@ -3231,6 +3233,8 @@ text(x=xx[3], y = FP[3], label = "F",  pos=1, cex=1)
 text(x=xx[4], y = FP[4], label = "D2", pos=1, cex = 1)
 mtext(side=1, "FP")
 abline(h=0)
+abline(v=6, lty=2, xpd=T)
+mtext(side=3, "(b)", adj=0)
 
 #3) BC
 barplot(BC, col=cols[3], ylim=c(-0.05, 0.09),
@@ -3241,6 +3245,8 @@ text(x=xx[2], y = BC[2], label = "M",  pos=3, cex=1)
 text(x=xx[3], y = BC[3], label = "F",  pos=3, cex=1)
 text(x=xx[4], y = BC[4], label = "D2", pos=1, cex = 1)
 abline(h=0)
+abline(v=6.5, lty=2, xpd=T)
+mtext(side=3, "(c)", adj=0)
 
 #4)CC
 xx<-barplot(CC, col=cols[2], ylim=c(-0.05, 0.09), 
@@ -3255,6 +3261,8 @@ text(x=xx[2], y = CC[2], label = "M",  pos=3, cex=1)
 text(x=xx[3], y = CC[3], label = "F",  pos=1, cex=1)
 text(x=xx[4], y = CC[4], label = "D2", pos=1, cex = 1)
 abline(h=0)
+abline(v=6.5, lty=2, xpd=T)
+mtext(side=3, "(d)", adj=0)
 
 #5) PG
 barplot(PG, col=cols[5], ylim=c(-0.05, 0.09),
@@ -3265,7 +3273,8 @@ text(x=xx[2], y = PG[2], label = "M",  pos=3, cex=1)
 text(x=xx[3], y = PG[3], label = "F",  pos=1, cex=1)
 text(x=xx[4], y = PG[4], label = "D2", pos=1, cex = 1)
 abline(h=0)
-
+abline(v=6.5, lty=2, xpd=T)
+mtext(side=3, "(e)", adj=0)
 #)6 C
 barplot(C, col= cols[3], ylim=c(-0.05, 0.09), 
         axes=F, cex.names=0.6, cex.axis=1, horiz=F)
@@ -3275,6 +3284,7 @@ text(x=xx[2], y = C[2], label = "M",  pos=1, cex=1)
 text(x=xx[3], y = C[3], label = "F",  pos=1, cex=1)
 text(x=xx[4], y = C[4], label = "D2", pos=1, cex = 1)
 abline(h=0)
+mtext(side=3, "(f)", adj=0)
 
 dev.off()
 
@@ -3828,106 +3838,110 @@ x1_adults <- seq(1.6, 800, length.out=370)
 x2_seedlings <- seq(0, 16, length.out=11)
 x2_adults <- seq(16, 800, length.out=150)
 
-
+#Marginal elasticity seedlings by diameter
 plot(x1_seedlings, rowSums(total.elas_D1_BC), ylim=c(0, 0.03), xlim=c(0, 1.6), xlab="", 
-     ylab="", main="",  type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
+     ylab="", main="",  type='l', lwd=1, lty=1, cex.axis=1.5, col=cols[1])
 text(0.2, 0.029, "Seedling", cex=1.5)
-lines(x1_seedlings, rowSums(total.elas_D1_CC), type='l', lwd=1, lty=1, col=cols[2])
+lines(x1_seedlings, rowSums(total.elas_D1_CC), type='l', lwd=1, lty=2, col=cols[2])
 lines(x1_seedlings, rowSums(total.elas_D1_C), type='l', lwd=1, lty=3, col=cols[3])
 lines(x1_seedlings, rowSums(total.elas_D1_FP), type='l', lwd=1, lty=4, col=cols[4])
-lines(x1_seedlings, rowSums(total.elas_D1_PG), type='l', lwd=1, lty=6, col=cols[5])
-lines(x1_seedlings, rowSums(total.elas_D1_WT), type='l', lwd=1, lty=7, col=cols[6])
-mtext(side=3, "(a) Marginal elasticity over diameter", line=1, cex=1.2, adj=0)
+lines(x1_seedlings, rowSums(total.elas_D1_PG), type='l', lwd=1, lty=5, col=cols[5])
+lines(x1_seedlings, rowSums(total.elas_D1_WT), type='l', lwd=1, lty=6, col=cols[6])
+mtext(side=3, "(a)", line=1, cex=1.2, adj=0)
 mtext(side=2, "Elasticity", line=2, cex=1)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
-
-plot(x1_adults, c(rowSums(total.elas_FA_BC), rowSums(total.elas_FB_BC)), ylim=c(0, 0.03), xlim=c(1.6, 800), xlab="", 
-     ylab= "", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
-text(65, 0.029, "Fertility", cex=1.5)
-lines(x1_adults, c(rowSums(total.elas_FA_CC), rowSums(total.elas_FB_CC)), type='l', lwd=1, lty=1, col=cols[2])
-lines(x1_adults, c(rowSums(total.elas_FA_C), rowSums(total.elas_FB_C)), type='l', lwd=1, lty=3, col=cols[3])
-lines(x1_adults, c(rowSums(total.elas_FA_FP), rowSums(total.elas_FB_FP)), type='l', lwd=1, lty=4, col=cols[4])
-lines(x1_adults, c(rowSums(total.elas_FA_PG), rowSums(total.elas_FB_PG)), type='l', lwd=1, lty=6, col=cols[5])
-lines(x1_adults, c(rowSums(total.elas_FA_WT), rowSums(total.elas_FB_WT)), type='l', lwd=1, lty=7, col=cols[6])
+#Marginal elasticity of seedlings by height
+plot(x2_seedlings, colSums(total.elas_D1_BC), ylim=c(0, 0.03), xlim=c(0, 16), xlab=" ", 
+     ylab="", main="",  type='l', lwd=1, lty=1, cex.axis=1.5, col=cols[1])
+text(2, 0.029, "Seedling", cex=1.5)
+lines(x2_seedlings, colSums(total.elas_D1_CC), type='l', lwd=1, lty=2, col=cols[2])
+lines(x2_seedlings, colSums(total.elas_D1_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x2_seedlings, colSums(total.elas_D1_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x2_seedlings, colSums(total.elas_D1_PG), type='l', lwd=1, lty=5, col=cols[5])
+lines(x2_seedlings, colSums(total.elas_D1_WT), type='l', lwd=1, lty=6, col=cols[6])
+mtext(side=3, "(b)", line=1, cex=1.2, adj=0)
 mtext(side=2, "Elasticity", line=2, cex=1)
-mtext(side=1, "Diameter (mm)", line=2,cex=1)
+mtext(side=1, "Height (cm)", line=2,cex=1)
 
-
+#marginal elasticity of maturation by diameter
 plot(x1_seedlings, rowSums(total.elas_GA_BC,total.elas_GB_BC), ylim= c(0, 0.03), xlim=c(0, 1.6), xlab="",
-     ylab="", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
-text(0.2, 0.039, "Maturation", cex=1.5)
-lines(x1_seedlings, rowSums(total.elas_GA_CC, total.elas_GB_CC), type='l', lty=1, col=cols[2])
+     ylab="", main="", type='l', lwd=1, lty=1, cex.axis=1.5, col=cols[1])
+text(0.2, 0.029, "Maturation", cex=1.5)
+lines(x1_seedlings, rowSums(total.elas_GA_CC, total.elas_GB_CC), type='l', lty=2, col=cols[2])
 lines(x1_seedlings, rowSums(total.elas_GA_C, total.elas_GB_C), type='l', lty=3, col=cols[3])
 lines(x1_seedlings, rowSums(total.elas_GA_FP, total.elas_GB_FP), type='l', lty=4, col=cols[4])
-lines(x1_seedlings, rowSums(total.elas_GA_PG, total.elas_GB_PG), type='l', lty=6, col=cols[5])
-lines(x1_seedlings, rowSums(total.elas_GA_WT, total.elas_GB_WT), type='l', lty=7, col=cols[6])
+lines(x1_seedlings, rowSums(total.elas_GA_PG, total.elas_GB_PG), type='l', lty=5, col=cols[5])
+lines(x1_seedlings, rowSums(total.elas_GA_WT, total.elas_GB_WT), type='l', lty=6, col=cols[6])
 mtext(side=2, "Elasticity", line=2, cex=1)
+mtext(side=3, "(c)", line=1, cex=1.2, adj=0)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
 
+#marginal elasticity maturation by height
+plot(x2_seedlings, colSums(total.elas_GA_BC, total.elas_GB_BC ), ylim= c(0, 0.03), xlim=c(0, 16), xlab="",
+     ylab="", main="", type='l', lwd=1, lty=1, cex.axis=1.5, col=cols[1])
+lines(x2_seedlings, colSums(total.elas_GA_CC, total.elas_GB_CC), type='l', lwd=1, lty=2, col=cols[2])
+lines(x2_seedlings, colSums(total.elas_GA_C, total.elas_GB_C), type='l', lwd=1, lty=3, col=cols[3])
+lines(x2_seedlings, colSums(total.elas_GA_FP, total.elas_GB_FP), type='l', lwd=1, lty=4, col=cols[4])
+lines(x2_seedlings, colSums(total.elas_GA_PG, total.elas_GB_PG), type='l', lwd=1, lty=5, col=cols[5])
+lines(x2_seedlings, colSums(total.elas_GA_WT, total.elas_GB_WT), type='l', lwd=1, lty=6, col=cols[6])
+text(2, 0.029, "Maturation", cex=1.5)
+mtext(side=3, "(d)", line=1, cex=1.2, adj=0)
+mtext(side=2, "Elasticity", line=2, cex=1)
+mtext(side=1, "Height (cm)", line=2,cex=1)
 
+#marginal elasticity of fertility by diameter
+plot(x1_adults, c(rowSums(total.elas_FA_BC), rowSums(total.elas_FB_BC)), ylim=c(0, 0.03), xlim=c(1.6, 800), xlab="", 
+     ylab= "", main="", type='l', lwd=1, lty=1, cex.axis=1.5, col=cols[1])
+text(65, 0.029, "Fertility", cex=1.5)
+lines(x1_adults, c(rowSums(total.elas_FA_CC), rowSums(total.elas_FB_CC)), type='l', lwd=1, lty=2, col=cols[2])
+lines(x1_adults, c(rowSums(total.elas_FA_C), rowSums(total.elas_FB_C)), type='l', lwd=1, lty=3, col=cols[3])
+lines(x1_adults, c(rowSums(total.elas_FA_FP), rowSums(total.elas_FB_FP)), type='l', lwd=1, lty=4, col=cols[4])
+lines(x1_adults, c(rowSums(total.elas_FA_PG), rowSums(total.elas_FB_PG)), type='l', lwd=1, lty=5, col=cols[5])
+lines(x1_adults, c(rowSums(total.elas_FA_WT), rowSums(total.elas_FB_WT)), type='l', lwd=1, lty=6, col=cols[6])
+mtext(side=2, "Elasticity", line=2, cex=1)
+mtext(side=3, "(e)", line=1, cex=1.2, adj=0)
+mtext(side=1, "Diameter (mm)", line=2,cex=1)
+
+#marginal elasticity fertility by height
+plot(x2_adults, c(colSums(total.elas_FA_BC), colSums(total.elas_FB_BC)), ylim=c(0, 0.03), xlim=c(16,800),  xlab=" ",
+     ylab= "", main="", type='l', lwd=1, lty=1, cex.axis=1.5, col=cols[1])
+text(65, 0.029, "Fertility", cex=1.5)
+lines(x2_adults, c(colSums(total.elas_FA_CC), colSums(total.elas_FB_CC)), type='l', lwd=1, lty=2, col=cols[2])
+lines(x2_adults, c(colSums(total.elas_FA_C), colSums(total.elas_FB_C)), type='l', lwd=1, lty=3, col=cols[3])
+lines(x2_adults, c(colSums(total.elas_FA_FP), colSums(total.elas_FB_FP)), type='l', lwd=1, lty=4, col=cols[4])
+lines(x2_adults, c(colSums(total.elas_FA_PG), colSums(total.elas_FB_PG)), type='l', lwd=1, lty=5, col=cols[5])
+lines(x2_adults, c(colSums(total.elas_FA_WT), colSums(total.elas_FB_WT)), type='l', lwd=1, lty=6, col=cols[6])
+mtext(side=2, "Elasticity", line=2, cex=1)
+mtext(side=3, "(f)", line=1, cex=1.2, adj=0)
+mtext(side=1, "Height (cm)", line=2,cex=1)
+
+#marginal elasticity adults by diameter
 plot(x1_adults, c(rowSums(total.elas_D2AA_BC, total.elas_D2AB_BC), 
                   rowSums(total.elas_D2BA_BC, total.elas_D2BB_BC)), ylim= c(0, 0.03), xlim=c(1.6, 800), xlab=" ",
-     ylab="", main="",  type='l',  lwd=1, lty=5, cex.axis=1.5, col=cols[1])
+     ylab="", main="",  type='l',  lwd=1, lty=1, cex.axis=1.5, col=cols[1])
 text(65, 0.029, "Adult", cex=1.5)
 lines(x1_adults, c(rowSums(total.elas_D2AA_CC, total.elas_D2AB_CC), 
-                   rowSums(total.elas_D2BA_CC, total.elas_D2BB_CC)), type='l', lwd=1, lty=1, col=cols[2])
+                   rowSums(total.elas_D2BA_CC, total.elas_D2BB_CC)), type='l', lwd=1, lty=2, col=cols[2])
 lines(x1_adults, c(rowSums(total.elas_D2AA_C, total.elas_D2AB_C), 
                    rowSums(total.elas_D2BA_C, total.elas_D2BB_C)), type='l', lwd=1, lty=3, col=cols[3])
 lines(x1_adults, c(rowSums(total.elas_D2AA_FP, total.elas_D2AB_FP), 
                    rowSums(total.elas_D2BA_FP, total.elas_D2BB_FP)), type='l', lwd=1, lty=4, col=cols[4])
 lines(x1_adults, c(rowSums(total.elas_D2AA_PG, total.elas_D2AB_PG), 
-                   rowSums(total.elas_D2BA_PG, total.elas_D2BB_PG)), type='l', lwd=1, lty=6, col=cols[5])
+                   rowSums(total.elas_D2BA_PG, total.elas_D2BB_PG)), type='l', lwd=1, lty=5, col=cols[5])
 lines(x1_adults, c(rowSums(total.elas_D2AA_WT, total.elas_D2AB_WT), 
-                   rowSums(total.elas_D2BA_WT, total.elas_D2BB_WT)), type='l', lwd=1, lty=7, col=cols[6])
+                   rowSums(total.elas_D2BA_WT, total.elas_D2BB_WT)), type='l', lwd=1, lty=6, col=cols[6])
 mtext(side=2, "Elasticity", line=2, cex=1)
+mtext(side=3, "(g)", line=1, cex=1.2, adj=0)
 mtext(side=1, "Diameter (mm)", line=2,cex=1)
-
-
-
-
-plot(x2_seedlings, colSums(total.elas_D1_BC), ylim=c(0, 0.03), xlim=c(0, 16), xlab=" ", 
-     ylab="", main="",  type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
-text(2, 0.029, "Seedling", cex=1.5)
-lines(x2_seedlings, colSums(total.elas_D1_CC), type='l', lwd=1, lty=1, col=cols[2])
-lines(x2_seedlings, colSums(total.elas_D1_C), type='l', lwd=1, lty=3, col=cols[3])
-lines(x2_seedlings, colSums(total.elas_D1_FP), type='l', lwd=1, lty=4, col=cols[4])
-lines(x2_seedlings, colSums(total.elas_D1_PG), type='l', lwd=1, lty=6, col=cols[5])
-lines(x2_seedlings, colSums(total.elas_D1_WT), type='l', lwd=1, lty=7, col=cols[6])
-mtext(side=3, "(b) Marginal elasticity over height", line=1, cex=1.2, adj=0)
-mtext(side=2, "Elasticity", line=2, cex=1)
-mtext(side=1, "Height (cm)", line=2,cex=1)
-
-plot(x2_adults, c(colSums(total.elas_FA_BC), colSums(total.elas_FB_BC)), ylim=c(0, 0.03), xlim=c(16,800),  xlab=" ",
-     ylab= "", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
-text(65, 0.029, "Fertility", cex=1.5)
-lines(x2_adults, c(colSums(total.elas_FA_CC), colSums(total.elas_FB_CC)), type='l', lwd=1, lty=1, col=cols[2])
-lines(x2_adults, c(colSums(total.elas_FA_C), colSums(total.elas_FB_C)), type='l', lwd=1, lty=3, col=cols[3])
-lines(x2_adults, c(colSums(total.elas_FA_FP), colSums(total.elas_FB_FP)), type='l', lwd=1, lty=4, col=cols[4])
-lines(x2_adults, c(colSums(total.elas_FA_PG), colSums(total.elas_FB_PG)), type='l', lwd=1, lty=6, col=cols[5])
-lines(x2_adults, c(colSums(total.elas_FA_WT), colSums(total.elas_FB_WT)), type='l', lwd=1, lty=7, col=cols[6])
-mtext(side=2, "Elasticity", line=2, cex=1)
-mtext(side=1, "Height (cm)", line=2,cex=1)
-
-
-plot(x2_seedlings, colSums(total.elas_GA_BC, total.elas_GB_BC ), ylim= c(0, 0.03), xlim=c(0, 16), xlab="",
-     ylab="", main="", type='l', lwd=1, lty=5, cex.axis=1.5, col=cols[1])
-lines(x2_seedlings, colSums(total.elas_GA_CC, total.elas_GB_CC), type='l', lwd=1, lty=1, col=cols[2])
-lines(x2_seedlings, colSums(total.elas_GA_C, total.elas_GB_C), type='l', lwd=1, lty=3, col=cols[3])
-lines(x2_seedlings, colSums(total.elas_GA_FP, total.elas_GB_FP), type='l', lwd=1, lty=4, col=cols[4])
-lines(x2_seedlings, colSums(total.elas_GA_PG, total.elas_GB_PG), type='l', lwd=1, lty=6, col=cols[5])
-lines(x2_seedlings, colSums(total.elas_GA_WT, total.elas_GB_WT), type='l', lwd=1, lty=7, col=cols[6])
-text(2, 0.029, "Maturation", cex=1.5)
-mtext(side=2, "Elasticity", line=2, cex=1)
-mtext(side=1, "Height (cm)", line=2,cex=1)
-
+#marginal elasticity adults by height
 plot(x2_adults, c(colSums(total.elas_D2AA_BC, total.elas_D2AB_BC), 
                   colSums(total.elas_D2BA_BC, total.elas_D2BB_BC)),
     ylim= c(0, 0.03), xlim=c(16, 800),  xlab=" ", ylab="", main="", 
-    type='l',  lwd=1, lty=5, cex.axis=1.5, col=cols[1])
+    type='l',  lwd=1, lty=1, cex.axis=1.5, col=cols[1])
 lines(x2_adults, c(colSums(total.elas_D2AA_CC, total.elas_D2AB_CC), 
                    colSums(total.elas_D2BA_CC, total.elas_D2BB_CC)), 
-      type='l', lwd=1, lty=1, col=cols[2])
+      type='l', lwd=1, lty=2, col=cols[2])
 lines(x2_adults, c(colSums(total.elas_D2AA_C, total.elas_D2AB_C), 
                    colSums(total.elas_D2BA_C, total.elas_D2BB_C)), 
       type='l', lwd=1, lty=3, col=cols[3])
@@ -3936,14 +3950,15 @@ lines(x2_adults, c(colSums(total.elas_D2AA_FP, total.elas_D2AB_FP),
       type='l', lwd=1, lty=4, col=cols[4])
 lines(x2_adults, c(colSums(total.elas_D2AA_PG, total.elas_D2AB_PG), 
                    colSums(total.elas_D2BA_PG, total.elas_D2BB_PG)),
-      type='l', lwd=1, lty=6, col=cols[5])
+      type='l', lwd=1, lty=5, col=cols[5])
 lines(x2_adults, c(colSums(total.elas_D2AA_WT, total.elas_D2AB_WT), 
-                   colSums(total.elas_D2BA_WT, total.elas_D2BB_WT)), type='l', lwd=1, lty=7, col=cols[6])
+                   colSums(total.elas_D2BA_WT, total.elas_D2BB_WT)), type='l', lwd=1, lty=6, col=cols[6])
 text(75, 0.029, "Adult", cex=1.5)
-legend(250, 0.03, lty=c(3, 1, 5, 4, 6, 7), col=cols, lwd=1,
+legend(250, 0.03, lty=c(1, 2, 3, 4, 5, 6), col=cols, lwd=1,
        c("BC", "CC", "C", "FP", "PG", "WT"),
        seg.len=2)
 mtext(side=2, "Elasticity", line=2, cex=1)
+mtext(side=3, "(h)", line=1, cex=1.2, adj=0)
 mtext(side=1, "Height (cm)", line=2,cex=1)
 dev.off() #x11(width = width.cm/2.54, height = 1.5*width.cm/(2.54), 
   #   pointsize = pointsize)
@@ -4552,27 +4567,16 @@ data = data.frame(site, domain, value, value2)
 
 
 # Stacked
-p1 <- ggplot(data, aes(fill=domain, y=value, x=site)) + 
-  geom_bar( stat="identity") +
-  scale_fill_brewer(palette = "Set2") +
-  labs(fill = "") + 
-  labs(x = "Site") + 
-  labs(y = "Marginal Elasticity - Diameter") +
-  ggtitle("(a)") + theme(plot.title = element_text(hjust=0))
-
-p2 <- ggplot(data, aes(fill=domain, y=value2, x=site)) + 
-  geom_bar( stat="identity") +
-  scale_fill_brewer(palette = "Set2") +
-  labs(fill = "") + 
-  labs(x = "Site") + 
-  labs(y = "Marginal Elasticity - Height") +
-  ggtitle("(b)") + theme(plot.title = element_text(hjust=0))
-
 
 setEPS(horizontal=F, onefile=F, paper="special")
-postscript("./Figures/marginal_elasticity.eps", width=width.cm/2.54, 
+postscript("./Figures/total_elasticity.eps", width=width.cm/2.54, 
            height=2*height.cm/2.54, pointsize=pointsize,  encoding = "TeXtext.enc")
-grid.arrange(p1, p2, ncol=1)
+ggplot(data, aes(fill=domain, y=value, x=site)) + 
+  geom_bar( stat="identity") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(fill = "") + 
+  labs(x = "Site") + 
+  labs(y = "Elasticity") 
 dev.off()
 
 
@@ -4832,87 +4836,98 @@ dev.off()
 ##### Randomization #####
 setEPS(horizontal=F, onefile=F, paper="special")
 postscript("./Figures/randomization.eps", width=width.cm/2.54, 
-           height=2*width.cm/(2.54), pointsize=pointsize,  encoding = "TeXtext.enc")
-#x11(width = width.cm/2.54, height = 2*width.cm/(2.54), 
+           height=1.5*width.cm/(2.54), pointsize=pointsize,  encoding = "TeXtext.enc")
+#x11(width = width.cm/2.54, height = 1.5*width.cm/(2.54), 
 #pointsize = pointsize)
 #png(file="./Figures/variability.png")
 par(mar = c(3, 3, 2, 1), # Margins
     mgp = c(1.5, .5, 0), # Distance of axis tickmark labels (second value)
     tcl = -0.3, # Length of axis tickmarks
     xpd=F,
-    mai=c(0.3,0.4,0.35,0.1),
+    oma=c(0, 1, 4,1),
+    mai=c(0.3,0.4,0.05,0.1),
     mfrow=c(5, 5))
 
-hist(differences[,1], main = "|BC - CC|", xlab="Difference", 
+hist(differences[,1], main = "", xlab="Difference", 
      xlim=c(0, 0.2), breaks=12)
 abline(v=BC_CC_obs, col="red")
+mtext(side=3, "Cape Canaveral", line =2, cex = 1.5)
+mtext(side=2, "Big Cypress", line = 3, cex=1.5)
 
-hist(differences[,2], main = "|BC - C|", xlab="Difference",
+hist(differences[,2], main = "", xlab="Difference",
      breaks=12, xlim=c(0, 0.2))
 abline(v=BC_C_obs, col="red")
+mtext(side=3, "Chekika", line =2, cex=1.5)
 
-hist(differences[,3], main = "|BC - FP|", xlab="Difference",
+hist(differences[,3], main = "", xlab="Difference",
      breaks=12, xlim=c(0,0.2))
 abline(v=BC_FP_obs, col="red")
+mtext(side=3, "Fort Pierce", line =2, cex=1.5)
 
-hist(differences[,4], main= "|BC - PG|", xlab="Difference",
+hist(differences[,4], main= "", xlab="Difference",
      breaks=12, xlim=c(0,0.2))
 abline(v=BC_PG_obs, col="red")
+mtext(side=3, "Punta Gorda", line = 2, cex=1.5)
 
-hist(differences[,5], main="|BC - WT|", xlab="Difference",
+hist(differences[,5], main="", xlab="Difference",
      breaks=12, xlim=c(0,0.2))
 abline(v=BC_WT_obs, col="red")
+mtext(side=3, "Wild Turkey", line = 2, cex = 1.5)
 
 plot(0,type='n',axes=FALSE,ann=FALSE)
+mtext(side=2, "Cape Canaveral", line =3, cex=1.5)
 
-hist(differences[,6], main="|CC - C|", xlab="Difference",
+hist(differences[,6], main="", xlab="Difference",
      breaks=12, xlim=c(0,0.2))
 abline(v=CC_C_obs, col="red")
 
-hist(differences[,7], main ="|CC - FP|", xlab="Difference",
+hist(differences[,7], main ="", xlab="Difference",
      breaks=12, xlim=c(0,0.2))
 abline(v=CC_FP_obs, col="red")
 
-hist(differences[,8], main = "|CC - PG|", xlab="Difference",
+hist(differences[,8], main = "", xlab="Difference",
      breaks=12, xlim=c(0,0.2))
 abline(v=CC_PG_obs, col="red")
 
-hist(differences[,9], main = "|CC - WT|", xlab="Difference",
+hist(differences[,9], main = "", xlab="Difference",
      breaks=12, xlim=c(0,0.2))
 abline(v=CC_WT_obs, col="red")
 
 plot(0,type='n',axes=FALSE,ann=FALSE)
+mtext(side=2, "Chekika", line =3, cex=1.5)
 plot(0,type='n',axes=FALSE,ann=FALSE)
 
-hist(differences[,10], main="|C - FP|", xlab="Difference", 
+hist(differences[,10], main="", xlab="Difference", 
      breaks=12, xlim=c(0,0.2))
 abline(v=C_FP_obs, col="red")
 
-hist(differences[,11], main = "|C - PG|", xlab="Difference",
+hist(differences[,11], main = "", xlab="Difference",
      breaks=12, xlim=c(0,0.2))
 abline(v=C_PG_obs, col="red")
 
-hist(differences[,12], main = "|C - WT|", xlab="Difference", 
+hist(differences[,12], main = "", xlab="Difference", 
      breaks=12, xlim=c(0,0.2))
 abline(v=C_WT_obs, col="red")
 
 plot(0,type='n',axes=FALSE,ann=FALSE)
+mtext(side=2, "Fort Pierce", line =3, cex=1.5)
 plot(0,type='n',axes=FALSE,ann=FALSE)
 plot(0,type='n',axes=FALSE,ann=FALSE)
 
-hist(differences[,13], main = "|FP - PG|", xlab="Difference",
+hist(differences[,13], main = "", xlab="Difference",
      breaks=12, xlim=c(0,0.2))
 abline(v=FP_PG_obs, col="red")
 
-hist(differences[,14], main = "|FP - WT|", xlab="Difference",
+hist(differences[,14], main = "", xlab="Difference",
      breaks=12, xlim=c(0,0.2))
 abline(v=FP_WT_obs, col="red")
 
 plot(0,type='n',axes=FALSE,ann=FALSE)
+mtext(side=2, "Punta Gorda", line =3, cex=1.5)
 plot(0,type='n',axes=FALSE,ann=FALSE)
 plot(0,type='n',axes=FALSE,ann=FALSE)
 plot(0,type='n',axes=FALSE,ann=FALSE)
-hist(differences[,15], main = "|PG - WT|", xlab="Difference",
+hist(differences[,15], main = "", xlab="Difference",
      breaks=12, xlim=c(0,0.2))
 abline(v=PG_WT_obs, col="red")
 dev.off()
