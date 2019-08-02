@@ -8,7 +8,12 @@ library(mvtnorm)
 library(msm)
 
 
-load("./Overall/p.vec_overall.RData")
+load("./BC/p.vec_BC.RData")
+load("./CC/p.vec_CC.RData")
+load("./C/p.vec_C.RData")
+load("./FP/p.vec_FP.RData")
+load("./PG/p.vec_PG.RData")
+load("./WT/p.vec_WT.RData")
 #results <- read.csv("parms_to_explore.csv", head=T)
 #results2 <- read.csv("parms_to_explore2.csv", head=T)
 #results <- rbind(results, results2)
@@ -16,16 +21,23 @@ load("./Overall/p.vec_overall.RData")
 
 percentages <- c(0.5, 0.6, 0.7, 0.8, 0.9, 1.1, 1.2, 1.3, 1.4, 1.5)
 
-results <- expand.grid(percentages, p.vec_overall)
-names(results) <- c("percent", "par_original")
-results$pos <- rep(1:length(p.vec_overall), times = 1, each = length(percentages))
-results$new_par <- results$percent * results$par_original
+results <- data.frame(percent = percentages, 
+                      parm = rep(p.vec_BC[37], length(percentages)),
+                      pos  = rep(37, length(percentages)),
+                      newparm = rep(NA, length(percentages)),
+                      lambda_BC = rep(NA, length(percentages)),
+                      lambda_CC = rep(NA, length(percentages)),
+                      lambda_C = rep(NA, length(percentages)),
+                      lambda_FP = rep(NA, length(percentages)),
+                      lambda_PG = rep(NA, length(percentages)),
+                      lambda_WT = rep(NA, length(percentages)))
 
-results$lambda <- rep(NA, nrow(results))
+results$newparm <- results$percent * results$parm
 
 
 
-getLambda <- function(p.vec) {
+
+getLambda <- function(p.vecs) {
   
   # Part II: Building the IPM #####
   m1=10
@@ -90,12 +102,14 @@ getLambda <- function(p.vec) {
   h4b = (800-300)/m4b 
   y4b=(h4b/2)*((0:(m4b-1))+(1:m4b))+300;
   y4 = c(y4a, y4b)
+  
   # Compute the iteration matrix. With a bit of vectorizing it's not too slow,
   # though you can probably do better if you need to. The shortcuts here have 
   # been checked against the results from code that uses loops for everything. (comment from Ellner and Rees)
-
   
-
+  for (j in 1:6) {
+    
+    p.vec <- p.vecs[[j]]
     # Construct D1 (Seedling Domain): #####
     
     build_D1 = function(p.vec) {
@@ -146,8 +160,8 @@ getLambda <- function(p.vec) {
     
     thing <- build_D2AA(p.vec)
     D2AA <- thing$D2AA
-  
-# D2BB #####
+    
+    # D2BB #####
     build_D2BB = function(p.vec) {
       
       plop=function(i,j) {(j-1)*m3b+i} # for putting values in proper place in A 
@@ -172,7 +186,7 @@ getLambda <- function(p.vec) {
     
     thing <- build_D2BB(p.vec)
     D2BB <- thing$D2BB
-# Construct D2BA (Large Domain): #####
+    # Construct D2BA (Large Domain): #####
     build_D2BA = function(p.vec) {
       
       plop1=function(i, j) {(j-1)*m3a + i}
@@ -196,10 +210,10 @@ getLambda <- function(p.vec) {
       return(list(D2BA = D2BA, Kvals_D2BA = Kvals_D2BA))
     }
     
-
+    
     thing <- build_D2BA(p.vec)
     D2BA <- thing$D2BA
-# Construct D2AB (Large Domain): #####
+    # Construct D2AB (Large Domain): #####
     build_D2AB = function(p.vec) {
       
       plop1=function(i, j) {(j-1)*m3b + i}
@@ -223,12 +237,12 @@ getLambda <- function(p.vec) {
       return(list(D2AB = D2AB, Kvals_D2AB = Kvals_D2AB))
     }
     
-
+    
     thing <- build_D2AB(p.vec)
     D2AB <- thing$D2AB
     D2 <- rbind(cbind(D2AA, D2BA), cbind(D2AB, D2BB)) 
     rm(D2AA, D2BA, D2AB, D2BB)
-# Construct F #####
+    # Construct F #####
     
     build_FA = function(p.vec) {
       plop1=function(i, j) {(j-1)*m1 + i}
@@ -279,10 +293,10 @@ getLambda <- function(p.vec) {
     FA <- thing$FA
     thing <- build_FB(p.vec)
     FB <-thing$FB
-  
+    
     F<- cbind(FA, FB)
     rm(FA, FB)
-  # Construct M #####
+    # Construct M #####
     build_GA = function(p.vec) {
       plop1=function(i, j) {(j-1)*m3a + i}
       plop2=function(i, j) {(j-1)*m1 + i}
@@ -329,12 +343,12 @@ getLambda <- function(p.vec) {
       return(list(GB = GB, Kvals_GB = Kvals_GB))
     }
     
-  
+    
     thing <- build_GA(p.vec)
     GA<-thing$GA
     
     thing <- build_GB(p.vec)
-   
+    
     GB<-thing$GB
     
     
@@ -345,7 +359,7 @@ getLambda <- function(p.vec) {
     # Assemble the matrix #####
     
     A <- cbind(rbind(D1, G), rbind(F, D2))
-    rm(D2, G, F, D2)
+    rm(D1, G, F, D2)
     
     
     #  Find lambda, w by iteration #####
@@ -354,10 +368,11 @@ getLambda <- function(p.vec) {
     #  for convergence requires extracting matrix entries via the @x slot
     #  of a Matrix object. Matrix is S4-style -- see ?Matrix. 
     
-    
     find_lambda = function(A) {
       
       A2=Matrix(A); nt=Matrix(1,m1*m2+m3a*m4a + m3b*m4b,1); nt1=nt; 
+      rm(A)
+      gc()
       
       qmax=1000; lam=1; 
       while(qmax>tol) {
@@ -394,19 +409,40 @@ getLambda <- function(p.vec) {
       return(list(lam.stable = lam.stable, stable.dist = stable.dist, v=v))
     }
     
+    
     thing <- find_lambda(A)
-    lambda <- thing$lam.stable
-  return(lambda)
+   results[i, j + 4 ]<- thing$lambda
+    cat("Bootstrap:", boots,"Site:", j,"\n");
+  }
 }
 
 
-
 time_start <- proc.time()
-for(i in 2:10) {
-  cat("Param: ", i, "of ", nrow(results), ": \n");
-  p.vec_new <- p.vec_overall
-  p.vec_new[results$pos[i]] <- results$new_par[i] 
-  results$lambda[i] <- getLambda(p.vec_new)
+for(i in 1:10) {
+  cat("Param set: ", i, "of ", nrow(results), ": \n");
+  p.vec_new_BC <- p.vec_BC
+  p.vec_new_CC <- p.vec_CC
+  p.vec_new_C  <- p.vec_C 
+  p.vec_new_FP <- p.vec_FP
+  p.vec_new_PG <- p.vec_PG
+  p.vec_new_WT <- p.vec_WT
+
+  
+  p.vec_new_BC[results$pos[i]] <- results$newparm[i] 
+  p.vec_new_CC[results$pos[i]] <- results$newparm[i]
+  p.vec_new_C[results$pos[i]] <- results$newparm[i]
+  p.vec_new_FP[results$pos[i]] <- results$newparm[i]
+  p.vec_new_PG[results$pos[i]] <- results$newparm[i]
+  p.vec_new_WT[results$pos[i]] <- results$newparm[i]
+
+  thing <- getLambda(c(p.vec_new_BC, p.vec_new_CC, p.vec_new_C,
+                       p.vec_new_FP, p.vec_new_PG, p.vec_new_WT))
+  results$lambda_BC[i] <- getLambda(p.vec_new_BC)
+  results$lambda_CC[i] <- getLambda(p.vec_new_CC)
+  results$lambda_C[i] <- getLambda(p.vec_new_C)
+  results$lambda_FP[i] <- getLambda(p.vec_new_FP)
+  results$lambda_PG[i] <- getLambda(p.vec_new_PG)
+  results$lambda_WT[i] <- getLambda(p.vec_new_WT)
 }
 time_end <- proc.time() - time_start 
 
