@@ -1497,7 +1497,7 @@ geom_point(data=subset(larges,
                             larges$Site == "Punta Gorda")),
            aes(x=Diameter_t, y=Height_t, col = factor(Surv_tplus1)), 
            shape=1, size=0.8) +
-  ggtitle(" ") + 
+  ggtitle("(a) ") + 
   scale_color_manual(values=c("red", "black")) +
   xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
   theme(text = element_text(size=10), plot.margin = margin(c(10,2,2,2))) + 
@@ -1523,7 +1523,7 @@ plot_Cs2_meas <- ggplot()  + xlim(1.6, 800) + ylim(16, 800) +
               !is.na(larges$Surv_tplus1) & (larges$Site == "Chekika")),
               aes(x=Diameter_t, y=Height_t, col = factor(Surv_tplus1)), 
                shape=1, size=0.8) +
-  ggtitle(" ") + 
+  ggtitle(" (b) ") + 
   scale_color_manual(values=c("red", "black")) +
   xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
   theme(text = element_text(size=10), plot.margin = margin(c(10,2,2,2))) + 
@@ -1552,7 +1552,7 @@ plot_FPs2_meas <- ggplot()  + xlim(1.6, 800) + ylim(16, 800) +
                       aes(x=Diameter_t, y=Height_t, 
                       col = factor(Surv_tplus1)), 
                       shape=1, size=0.8) +
-  ggtitle(" ") + 
+  ggtitle("(c)") + 
   scale_color_manual(values=c("red", "black")) +
   xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
   theme(text = element_text(size=10), plot.margin = margin(c(10,2,2,2))) + 
@@ -1578,7 +1578,7 @@ plot_WTs2_meas <- ggplot()  + xlim(1.6, 800) + ylim(16, 800) +
         !is.na(larges$Surv_tplus1) & (larges$Site == "Wild Turkey")),
         aes(x=Diameter_t, y=Height_t, col = factor(Surv_tplus1)), 
         shape=1, size=0.8) +
-  ggtitle(" ") + 
+  ggtitle("(d) ") + 
   scale_color_manual(values=c("red", "black")) +
   xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
   theme(text = element_text(size=10), plot.margin = margin(c(10,2,2,2))) + 
@@ -4932,6 +4932,14 @@ hist(differences[,15], main = "", xlab="Difference",
 abline(v=PG_WT_obs, col="red")
 dev.off()
 
+#*- Sensitivity analysis of tau#####
 
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/randomization.eps", width=width.cm/2.54, 
+           height=1.5*width.cm/(2.54), pointsize=pointsize,  encoding = "TeXtext.enc")
+x11(width = width.cm/2.54, height = width.cm/(2.54), 
+pointsize = pointsize)
+
+load("results_tau_sensitivity.RData")
 
 

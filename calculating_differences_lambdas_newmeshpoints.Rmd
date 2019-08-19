@@ -945,7 +945,9 @@ saveRDS(lam.boot_random, file = "lam.boot_random.rds")
 Store them in a dataframe called 'differences': 
 
 ```{r initialize dataframe}
-load("lam.boot.RData")
+lam.boot_random <- readRDS("lam.boot_random.rds")
+lam.boot_71 <- readRDS("lam.boot_random.rds")
+lam.boot <- thing
 colnames(lam.boot) <- c("BC", "CC", "C", "FP", "PG", "WT")
 differences <- data.frame(BC_CC = rep(NA, nrow(lam.boot)),
                           BC_C  = rep(NA, nrow(lam.boot)),
