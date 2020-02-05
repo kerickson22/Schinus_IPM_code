@@ -21,23 +21,21 @@ load("./WT/p.vec_WT.RData")
 
 percentages <- c(0.5, 0.6, 0.7, 0.8, 0.9, 1.1, 1.2, 1.3, 1.4, 1.5)
 
-results <- data.frame(percent = percentages, 
-                      parm = rep(p.vec_BC[37], length(percentages)),
-                      pos  = rep(37, length(percentages)),
-                      newparm = rep(NA, length(percentages)),
-                      lambda_BC = rep(NA, length(percentages)),
-                      lambda_CC = rep(NA, length(percentages)),
-                      lambda_C = rep(NA, length(percentages)),
-                      lambda_FP = rep(NA, length(percentages)),
-                      lambda_PG = rep(NA, length(percentages)),
-                      lambda_WT = rep(NA, length(percentages)))
-
-results$newparm <- results$percent * results$parm
+newparm <- c(0.2, 0.02, 0.001, 0.003, 0.0002)
+results <- data.frame(pos  = rep(37, length(newparm)),
+                      newparm = newparm,
+                      lambda_BC = rep(NA, length(newparm)),
+                      lambda_CC = rep(NA, length(newparm)),
+                      lambda_C = rep(NA, length(newparm)),
+                      lambda_FP = rep(NA, length(newparm)),
+                      lambda_PG = rep(NA, length(newparm)),
+                      lambda_WT = rep(NA, length(newparm)))
 
 
 
 
-getLambda <- function(p.vecs) {
+
+getLambda <- function(p.vec) {
   
   # Part II: Building the IPM #####
   m1=10
@@ -106,10 +104,8 @@ getLambda <- function(p.vecs) {
   # Compute the iteration matrix. With a bit of vectorizing it's not too slow,
   # though you can probably do better if you need to. The shortcuts here have 
   # been checked against the results from code that uses loops for everything. (comment from Ellner and Rees)
-  
-  for (j in 1:6) {
-    
-    p.vec <- p.vecs[[j]]
+
+
     # Construct D1 (Seedling Domain): #####
     
     build_D1 = function(p.vec) {
@@ -371,8 +367,6 @@ getLambda <- function(p.vecs) {
     find_lambda = function(A) {
       
       A2=Matrix(A); nt=Matrix(1,m1*m2+m3a*m4a + m3b*m4b,1); nt1=nt; 
-      rm(A)
-      gc()
       
       qmax=1000; lam=1; 
       while(qmax>tol) {
@@ -383,68 +377,85 @@ getLambda <- function(p.vecs) {
         cat(lam,qmax,"\n");
       } 
       
-      nt=matrix(nt@x,m1*m2+m3a*m4a + m3b*m4b,1); 
-      #stable.dist=nt/(h1*h2*sum(nt)); #normalize so that integral=1
-      stable.dist=nt
       lam.stable=lam;
       
-      # Check that the @bits worked as intended.   
-      qmax=sum(abs(lam*nt-A%*%nt)); 
-      cat("Convergence: ",qmax," should be less than ",tol,"\n");
-      
-      #Find the reproductive value function by iteration
-      vt=Matrix(1,1,m1*m2+m3a*m4a + m3b*m4b); vt1=vt; 
-      
-      qmax=1000; lam=1; 
-      while(qmax>tol) {
-        vt1=vt%*%A2;
-        qmax=sum(abs((vt1-lam*vt)@x));  
-        lam=sum(vt1@x); 
-        vt@x=(vt1@x)/lam;   
-        cat(lam,qmax,"\n");
-      } 
-      v=t(matrix(vt@x,1,m1*m2+m3a*m4a + m3b*m4b)); 
-      lam.stable.t=lam; 
-      
-      return(list(lam.stable = lam.stable, stable.dist = stable.dist, v=v))
+      return(list(lam.stable = lam.stable))
     }
-    
-    
     thing <- find_lambda(A)
-   results[i, j + 4 ]<- thing$lambda
-    cat("Bootstrap:", boots,"Site:", j,"\n");
-  }
-}
+    return(list(lam.stable = thing$lam.stable))
+}    
+    
+
 
 
 time_start <- proc.time()
-for(i in 1:10) {
-  cat("Param set: ", i, "of ", nrow(results), ": \n");
+for(jj in 2:6) {
+for(ii in 1:5) {
+  cat("Param set: ", ii, "of ", nrow(results),"Site:", jj, ": \n");
   p.vec_new_BC <- p.vec_BC
-  p.vec_new_CC <- p.vec_CC
-  p.vec_new_C  <- p.vec_C 
-  p.vec_new_FP <- p.vec_FP
-  p.vec_new_PG <- p.vec_PG
-  p.vec_new_WT <- p.vec_WT
+ p.vec_new_CC <- p.vec_CC
+   p.vec_new_C  <- p.vec_C 
+   p.vec_new_FP <- p.vec_FP
+   p.vec_new_PG <- p.vec_PG
+   p.vec_new_WT <- p.vec_WT
 
   
-  p.vec_new_BC[results$pos[i]] <- results$newparm[i] 
-  p.vec_new_CC[results$pos[i]] <- results$newparm[i]
-  p.vec_new_C[results$pos[i]] <- results$newparm[i]
-  p.vec_new_FP[results$pos[i]] <- results$newparm[i]
-  p.vec_new_PG[results$pos[i]] <- results$newparm[i]
-  p.vec_new_WT[results$pos[i]] <- results$newparm[i]
-
-  thing <- getLambda(c(p.vec_new_BC, p.vec_new_CC, p.vec_new_C,
-                       p.vec_new_FP, p.vec_new_PG, p.vec_new_WT))
-  results$lambda_BC[i] <- getLambda(p.vec_new_BC)
-  results$lambda_CC[i] <- getLambda(p.vec_new_CC)
-  results$lambda_C[i] <- getLambda(p.vec_new_C)
-  results$lambda_FP[i] <- getLambda(p.vec_new_FP)
-  results$lambda_PG[i] <- getLambda(p.vec_new_PG)
-  results$lambda_WT[i] <- getLambda(p.vec_new_WT)
+  if(jj==1){p.vec_new_BC[results$pos[ii]] <- results$newparm[ii]
+  thing <- getLambda(p.vec_new_BC)
+  results[ii, jj+2] <- thing$lam.stable}
+   
+  if(jj==2){p.vec_new_CC[results$pos[ii]] <- results$newparm[ii]
+  thing <- getLambda(p.vec_new_CC)
+  results[ii, jj+2] <- thing$lam.stable}
+   
+  if(jj==3){ p.vec_new_C[results$pos[ii]] <- results$newparm[ii]
+  thing <- getLambda(p.vec_new_C)
+  results[ii, jj+2] <- thing$lam.stable}
+   
+  if(jj==4){ p.vec_new_FP[results$pos[ii]] <- results$newparm[ii]
+  thing <- getLambda(p.vec_new_FP)
+  results[ii, jj+2] <- thing$lam.stable}
+   
+  if(jj==5){p.vec_new_PG[results$pos[ii]] <- results$newparm[ii]
+  thing <- getLambda(p.vec_new_PG)
+  results[ii, jj+2] <- thing$lam.stable}
+   
+  if(jj==6){p.vec_new_WT[results$pos[ii]] <- results$newparm[ii]
+  thing <- getLambda(p.vec_new_WT)
+  results[ii, jj+2] <- thing$lam.stable}
+}
 }
 time_end <- proc.time() - time_start 
+
+results$delta_BC <- results$lambda_BC - lam.stable_BC
+results$delta_CC <- results$lambda_CC - lam.stable_CC
+results$delta_C <- results$lambda_C - lam.stable_C
+results$delta_FP <- results$lambda_FP - lam.stable_FP
+results$delta_PG <- results$lambda_PG - lam.stable_PG
+results$delta_WT <- results$lambda_WT - lam.stable_WT
+setEPS(horizontal=F, onefile=F, paper="special")
+postscript("./Figures/tau.eps", width=width.cm/2.54, 
+           height=width.cm/(2.54), pointsize=pointsize,  encoding = "TeXtext.enc")
+plot(log10(results$newparm), results$lambda_BC, ylim=c(0.98, 1.75),
+     col=cols[1], pch=19, xlab = expression(paste("log(", tau[1], ")")),
+     ylab = expression(paste(lambda)))
+points(log10(0.002), lam.stable_BC, col=cols[1], pch=4)
+points(log10(results$newparm), results$lambda_CC, col=cols[2], pch=19)
+points(log10(0.002), lam.stable_CC, col=cols[2], pch=4)
+points(log10(results$newparm), results$lambda_C, col=cols[3],  pch=19)
+points(log10(0.002), lam.stable_C, col=cols[3], pch=4)
+
+points(log10(results$newparm), results$lambda_FP, col=cols[4],  pch=19)
+points(log10(0.002), lam.stable_FP, col=cols[4], pch=4)
+points(log10(results$newparm), results$lambda_PG, col=cols[5],  pch=19)
+points(log10(0.002), lam.stable_PG, col=cols[5], pch=4)
+points(log10(results$newparm), results$lambda_WT, col=cols[6],  pch=19)
+points(log10(0.002), lam.stable_WT, col=cols[6], pch=4)
+legend("topleft", col=cols, pch=19, 
+       c("BC", "CC", "C", "FP", "PG", "WT"))
+dev.off()
+
+
 
 
 lam.stable_overall <- readRDS("./Overall/lam.stable_overall.rds")
