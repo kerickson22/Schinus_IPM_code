@@ -138,7 +138,7 @@ plot_BCs<- ggplot() + xlim(0, 1.6) + ylim(0, 16) +
   xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
   theme(text = element_text(size=10), plot.margin = margin(c(10,2,2,2))) + 
   labs(fill = "Predicted \n survival \n at time \n t + 1") +
-  labs(shape = "Measured \n survival \n at time \n t + 1 (mm)") +
+  labs(shape = "Measured \n survival \n at time \n t + 1") +
   theme(legend.title.align=0.5) +
   theme(legend.box.margin = margin (20, -5, 20, -11)) +
   guides(shape = guide_legend(title.position = "right", order =1)) +
@@ -256,7 +256,7 @@ plot_BCm<- ggplot() + xlim(0, 1.6) + ylim(0, 16) +
   xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
   theme(text = element_text(size=10), plot.margin = margin(c(10,2,2,2))) + 
   labs(fill = "Predicted \n maturation \n at time \n t + 1") +
-  labs(shape = "Measured \n maturation \n at time \n t + 1 (mm)") +
+  labs(shape = "Measured \n maturation \n at time \n t + 1") +
   theme(legend.title.align=0.5) +
   theme(legend.box.margin = margin (20, -5, 20, -11)) +
   guides(shape = guide_legend(title.position = "right", order =1)) +
@@ -1152,12 +1152,28 @@ b1 <- p.vec_BC[20]
 b2 <- p.vec_BC[21]
 df2$BC_s2 <- invlogit(b0 + b1*df2$Var1 + b2*df2$Var2)
 
+#WT
+b0 <- p.vec_WT[19]
+b1 <- p.vec_WT[20]
+b2 <- p.vec_WT[21]
+df2$WT_s2 <- invlogit(b0 + b1*df2$Var1 + b2*df2$Var2)
+
+#C
+b0 <- p.vec_C[19]
+b1 <- p.vec_C[20]
+b2 <- p.vec_C[21]
+df2$C_s2 <- invlogit(b0 + b1*df2$Var1 + b2*df2$Var2)
+
+#FP
+b0 <- p.vec_FP[19]
+b1 <- p.vec_FP[20]
+b2 <- p.vec_FP[21]
+df2$FP_s2 <- invlogit(b0 + b1*df2$Var1 + b2*df2$Var2)
+
 plot_BCs2_pred<- ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
   geom_tile(data = df2, aes(x=Var1, y = Var2, fill= BC_s2)) + 
   scale_fill_gradientn(colors=my.palette, limits=c(0.6,1)) + 
-<<<<<<< HEAD
   ggtitle("(a) PG, BC, CC") + 
-=======
   ggtitle("(a) BC, CC, PG") + 
   xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
   theme(text = element_text(size=10), plot.margin = margin(c(10,2,2,2))) + 
@@ -1177,7 +1193,7 @@ geom_point(data=subset(larges,
   scale_color_manual(values=c("red", "black")) +
   xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
   theme(text = element_text(size=10), plot.margin = margin(c(10,2,2,2))) + 
-  labs(col = "Measured \n survival \n at time \n t + 1 (mm)") +
+  labs(col = "Measured \n survival \n at time \n t + 1") +
   theme(legend.title.align=0.5) +
   theme(legend.box.margin = margin (20, -5, 20, -11)) +
   guides(col = guide_legend(title.position = "right", order =1)) 
@@ -1242,15 +1258,13 @@ plot_WTs2_pred<- ggplot() + xlim(1.6, 800) + ylim(16, 800) +
   geom_tile(data = df2, aes(x=Var1, y = Var2, fill= WT_s2)) + 
   scale_fill_gradientn(colors=my.palette, limits=c(0.6,1)) + 
   ggtitle("(d) WT") + 
->>>>>>> 3e0678db558215c0c2ffe614aa1e814956e9ac49
   xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
   theme(text = element_text(size=10), plot.margin = margin(c(10,2,2,2))) + 
   labs(fill = "Predicted \n survival \n at time \n t + 1") +
   theme(legend.title.align=0.5) +
   theme(legend.box.margin = margin (20, -5, 20, -11)) +
   guides(fill = guide_colorbar(title.position = "right", order =2))
-<<<<<<< HEAD
-=======
+
 
 plot_WTs2_meas <- ggplot()  + xlim(1.6, 800) + ylim(16, 800) + 
   geom_point(data=subset(larges,
@@ -1327,8 +1341,11 @@ grid.arrange(plot_BCs2_pred,
 dev.off()
 
 postscript("./Figures/D2_survival_measured.eps", width=width.cm/2.54, 
-           height=(2*height.cm)/2.54, pointsize=pointsize, 
+          height=(2*height.cm)/2.54, pointsize=pointsize, 
            encoding = "TeXtext.enc")
+pdf("./Figures/D2_survival_measured.pdf", width=width.cm/2.54,
+    height=(2*height.cm)/2.54, pointsize=pointsize,
+    encoding="TeXtext.enc")
 lay <- rbind(c(1, 1, 2, 2, 5, 5),
              c(1, 1, 2, 2, 5, 5),
              c(3, 3, 4, 4, 5, 5),

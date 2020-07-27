@@ -945,5 +945,7 @@ save(p.vec_overall, file="./Overall/p.vec_overall.RData")
 
 
 
+save(seedlings, file="seedlings.RData")
+save(larges, file="larges.RData")
 
 #save.image(file="demography_models.RData")

@@ -1,0 +1,348 @@
+---
+title: "Schinus Adult Growth"
+output: html_document
+---
+
+```{r setup, include=FALSE, warnings=F}
+knitr::opts_chunk$set(echo = TRUE)
+library(RColorBrewer)
+library(viridis)
+library(ggplot2)
+library(arm)
+library(gridExtra)
+library(grid)
+setwd("~/Documents/GitHub/Schinus_IPM_code")
+load("/Users/curculion/Documents/GitHub/Schinus_IPM_code/seedlings.RData")
+load("/Users/curculion/Documents/GitHub/Schinus_IPM_code/larges.RData")
+
+width.cm <- 12.9
+width.cm_onepanel<-8.4
+width.cm_onepanel_small<-3.9
+height.cm <- 6.45
+pointsize <- 8
+
+par(mar = c(3, 3, 2, 1), # Margins
+    mgp = c(1.5, 0.5, 0), # Distance of axis tickmark labels (second value)
+    tcl = -0.3, # Length of axis tickmarks
+    xpd=NA,
+    mai=c(0.3,0.3,0.1,0.1))
+
+cols <- viridis(6)
+m1=10
+m2=m1+1
+m3=100
+m4=m3+1
+
+h1=1.6/m1; 
+y1=(h1/2)*((0:(m1-1))+(1:m1)); #for diameter in D1
+h2=16/m2
+y2=(h2/2)*((0:(m2-1))+(1:m2)); #for height in D1
+h3=(700-1.6)/m3;
+y3=(h3/2)*((0:(m3-1))+(1:m3))+1.6; #for diameter in D2
+h4=(800-16)/m4
+y4=(h4/2)*((0:(m4-1))+(1:m4))+16; #for height in D2
+
+my.palette <- brewer.pal(11, "RdYlBu")
+my.palette2 <- brewer.pal(9, "YlGnBu")
+
+x1seq_seedlings<-seq(0, 1.6, length.out=50)
+
+x2seq_seedlings<-seq(0, 16, length.out=50)
+x1seq_larges <- seq(1.6, 800, length.out = 50 )
+x2seq_larges <- seq (16, 800, length.out = 50)
+load("./BC/p.vec_BC.RData")
+load("./CC/p.vec_CC.RData")
+load("./C/p.vec_C.RData")
+load("./FP/p.vec_FP.RData")
+load("./PG/p.vec_PG.RData")
+load("./WT/p.vec_WT.RData")
+
+df <- expand.grid(x1seq_seedlings, x2seq_seedlings)
+df2 <- expand.grid(x1seq_larges, x2seq_larges)
+#Grab parameters associated with future diameter
+b0<-p.vec_BC[22]
+b1<-p.vec_BC[23]
+b2<- p.vec_BC[24]
+
+#Grab parameters associated with future height
+b3<-p.vec_BC[26]
+b4<-p.vec_BC[27]
+b5<-p.vec_BC[28]
+
+df2$diam2_BC <- b0 + b1*df2$Var1 + b2*df2$Var2
+df2$height2_BC <- b3 + b4*df2$Var1 + b5*df2$Var2
+
+##Cape Canaveral
+#Grab parameters associated with future diameter
+b0 <- p.vec_CC[22]
+b1 <- p.vec_CC[23]
+b2 <- p.vec_CC[24]
+
+#Grab parameters associated with future height
+b3<- p.vec_CC[26]
+b4<- p.vec_CC[27]
+b5<- p.vec_CC[28]
+
+df2$diam2_CC <- b0 + b1*df2$Var1 + b2*df2$Var2
+df2$height2_CC <- b3 + b4*df2$Var1 + b5*df2$Var2
+##Chekika
+#Grab parameters associated with future diameter
+b0<-p.vec_C[22]
+b1<-p.vec_C[23]
+b2<-p.vec_C[24]
+#Grab parameters associated with future height
+b3<-p.vec_C[26]
+b4<-p.vec_C[27]
+b5<-p.vec_C[28]
+
+df2$diam2_C <- b0 + b1*df2$Var1 + b2*df2$Var2
+df2$height2_C <- b3 + b4*df2$Var1 + b5*df2$Var2
+
+##Fort Pierce
+#Grab parameters associated with future diameter
+b0<-p.vec_FP[22]
+b1<-p.vec_FP[23]
+b2<-p.vec_FP[24]
+#Grab parameters associated with future height
+b3<-p.vec_FP[26]
+b4<-p.vec_FP[27]
+b5<-p.vec_FP[28]
+df2$diam2_FP <- b0 + b1*df2$Var1 + b2*df2$Var2
+df2$height2_FP <- b3 + b4*df2$Var1 + b5*df2$Var2
+
+##Punta Gorda
+#Grab parameters associated with future diameter
+b0<-p.vec_PG[22]
+b1<-p.vec_PG[23]
+b2<-p.vec_PG[24]
+
+#Grab parameters associated with future height
+b3<-p.vec_PG[26]
+b4<-p.vec_PG[27]
+b5<-p.vec_PG[28]
+
+df2$diam2_PG <- b0 + b1*df2$Var1 + b2*df2$Var2
+df2$height2_PG <- b3 + b4*df2$Var1 + b5*df2$Var2
+
+##Wild Turkey
+#Grab parameters associated with future diameter
+b0<-p.vec_WT[22]
+b1<-p.vec_WT[23]
+b2<-p.vec_WT[24]
+
+#Grab parameters associated with future height
+b3<-p.vec_WT[26]
+b4<-p.vec_WT[27]
+b5<-p.vec_WT[28]
+
+df2$diam_WT <- b0 + b1*df2$Var1 + b2*df2$Var2
+df2$height_WT <- b3 + b4*df2$Var1 + b5*df2$Var2
+
+```
+
+## Big Cypress
+```{r Big Cypress, fig.show="hold", out.width="50%", warning=F, echo=F, message=F}
+
+
+#Big Cypress
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= diam2_BC)) +
+  scale_fill_viridis_c(limits = c(1.6, 860)) +
+  geom_point(data=subset(larges, larges$Site == "Big Cypress" &
+                           !is.na(larges$Diameter_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1), 
+             shape=1, show.legend=F)+
+  scale_color_viridis(limits=c(1, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=18), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= height2_BC)) + 
+  scale_fill_viridis_c(limits = c(16, 950)) +
+  geom_point(data=subset(larges,larges$Site == "Big Cypress"&
+                           !is.na(larges$Height_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1),
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(16, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=18), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+```
+
+
+## Cape Canaveral
+```{r Cape Canaveral, fig.show="hold", out.width="50%", warning=F, echo=F, message=F}
+ggplot() + xlim(1.6, 800) + ylim(1.6, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= diam2_CC)) + 
+  scale_fill_viridis_c(limits = c(1.6, 950)) +
+  geom_point(data=subset(larges, larges$Site == "Cape Canaveral"&
+                           !is.na(larges$Diameter_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1), 
+             shape=1, show.legend = F)+
+  scale_color_viridis(limits=c(1, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=18), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= height2_CC)) + 
+  scale_fill_viridis_c(limits = c(16, 950)) +
+  geom_point(data=subset(larges,larges$Site == "Cape Canaveral"&
+                           !is.na(larges$Height_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1), 
+             show.legend=F, shape=1 ) +
+  scale_color_viridis(limits=c(6.5, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=18), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+```
+
+## Chekika
+```{r Chekika, fig.show="hold", out.width="50%", warning=F, echo=F, message=F}
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= diam2_C)) + 
+  scale_fill_viridis_c(limits = c(1.6, 950)) +
+  geom_point(data=subset(larges, larges$Site == "Chekika"&
+                           !is.na(larges$Diameter_tplus1)),
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1), 
+             shape=1, show.legend=F)+
+  scale_color_viridis(limits=c(1.6, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=18), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= height2_C)) + 
+  scale_fill_viridis_c(limits = c(16, 950)) +
+  geom_point(data=subset(larges,larges$Site == "Chekika"&
+                           !is.na(larges$Height_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1), 
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(16, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=18), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+```
+
+## Fort Pierce
+
+```{r Fort Pierce, fig.show="hold", out.width="50%", warning=F, echo=F, message=F}
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= diam2_FP)) + 
+  scale_fill_viridis_c(limits = c(1.6, 950)) +
+  geom_point(data=subset(larges, larges$Site == "Fort Pierce"&
+                           !is.na(larges$Diameter_tplus1)),
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1), 
+             show.legend=F,shape=1)+
+  scale_color_viridis(limits=c(1.6, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=18), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= height2_FP)) + 
+  scale_fill_viridis_c(limits = c(16, 950)) +
+  geom_point(data=subset(larges,larges$Site == "Fort Pierce"&
+                           !is.na(larges$Height_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1),
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(16, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=18), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+```
+
+## Punta Gorda
+
+```{r Punta Gorda, fig.show="hold", out.width="50%", warning=F, echo=F, message=F}
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= diam2_PG)) + 
+  scale_fill_viridis_c(limits = c(1.6, 950)) +
+  geom_point(data=subset(larges, larges$Site == "Punta Gorda"&
+                           !is.na(larges$Diameter_tplus1)),
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1), 
+             show.legend=F,shape=1)+
+  scale_color_viridis(limits=c(1.6, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=18), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= height2_PG)) + 
+  scale_fill_viridis_c(limits = c(16, 950)) +
+  geom_point(data=subset(larges,larges$Site == "Punta Gorda"&
+                           !is.na(larges$Height_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1), 
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(16, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=18), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+```
+
+## Wild Turkey
+
+```{r Wild Turkey, fig.show="hold", out.width="50%", warning=F, echo=F, message=F}
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= diam_WT)) + 
+  scale_fill_viridis_c(limits = c(1.6, 950)) +
+  geom_point(data=subset(larges, larges$Site == "Wild Turkey"&
+                           !is.na(larges$Diameter_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Diameter_tplus1),
+             show.legend=F,shape=1)+
+  scale_color_viridis(limits=c(1.6, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=18), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Diameter \n at time \n t + 1 (mm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order =2))
+
+ggplot() + xlim(1.6, 800) + ylim(16, 800) + 
+  geom_tile(data = df2, aes(x=Var1, y = Var2, fill= height_WT)) + 
+  scale_fill_viridis_c(limits = c(16, 971)) +
+  geom_point(data=subset(larges,larges$Site == "Wild Turkey"&
+                           !is.na(larges$Height_tplus1)), 
+             aes(x=Diameter_t, y=Height_t, colour = Height_tplus1),
+             show.legend=F,shape=1 ) +
+  scale_color_viridis(limits=c(16, 800)) + 
+  xlab("Diameter at time t (mm)") + ylab("Height at time t (cm)") +
+  theme(text = element_text(size=18), plot.margin = margin(c(10,2,2,2))) + 
+  labs(fill = "Height \n at time \n t + 1 (cm)") +
+  theme(legend.title.align=0.5) +
+  theme(legend.box.margin = margin (20, -5, 20, -11)) +
+  guides(fill = guide_colorbar(title.position = "top", order = 2))
+
+```
